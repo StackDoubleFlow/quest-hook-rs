@@ -1,0 +1,18 @@
+[package]
+name = "quest_hook"
+version = "0.1.0"
+authors = ["StackDoubleFlow <ojaslandge@gmail.com>"]
+edition = "2018"
+
+[package.metadata.ndk]
+targets = ["arm64-v8a"]
+platform = 24
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+cc = "1.0"
+
+[dependencies]
+dlopen = "0.1.8"
+dlopen_derive = "0.1.4"
