@@ -16,3 +16,5 @@ cc = "1.0"
 [dependencies]
 dlopen = "0.1.8"
 dlopen_derive = "0.1.4"
+paste = "1.0.4"
+lazy_static = "1.4.0"
