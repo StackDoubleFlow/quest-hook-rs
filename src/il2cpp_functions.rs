@@ -1,5 +1,5 @@
 use crate::libil2cpp::{
-    Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, Il2CppObject, MethodInfo,
+    Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo,
 };
 use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
@@ -26,7 +26,6 @@ macro_rules! define_functions {
             $(
                 pub fn $name ( $( $arg_name : $arg_type ),* ) $( -> $return )* {
                     LIBIL2CPP.[<il2cpp_ $name>]( $( $arg_name ),* )
-
                 }
             )+
         }
