@@ -1,10 +1,8 @@
-use crate::libil2cpp::{
-    Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo,
-};
+use crate::libil2cpp::{Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo};
 use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
-use lazy_static::lazy_static;
 use paste::paste;
+use std::lazy::SyncOnceCell;
 
 macro_rules! define_functions {
     ( $( pub fn $name:ident ( $( $arg_name:ident : $arg_type:ty ),* ) $( -> $return:ty )* ; )+ ) => {
@@ -17,15 +15,13 @@ macro_rules! define_functions {
             }
         }
 
-        lazy_static! {
-            static ref LIBIL2CPP: Container<LibIl2Cpp> =
-                unsafe { Container::load("libil2cpp.so") }.unwrap();
-        }
+        static LIBIL2CPP: SyncOnceCell<Container<LibIl2Cpp>> = SyncOnceCell::new();
 
         paste! {
             $(
                 pub fn $name ( $( $arg_name : $arg_type ),* ) $( -> $return )* {
-                    LIBIL2CPP.[<il2cpp_ $name>]( $( $arg_name ),* )
+                    LIBIL2CPP.get_or_init(|| unsafe { Container::load("libil2cpp.so") }.unwrap())
+                        .[<il2cpp_ $name>]( $( $arg_name ),* )
                 }
             )+
         }
