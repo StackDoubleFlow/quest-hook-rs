@@ -3,6 +3,36 @@ use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::{parse_macro_input, Error, FnArg, ItemFn, LitStr, Pat, Token};
 
+/// Creates an inline hook at a C# method.
+///
+/// # Panics
+///
+/// * `install` will panic if the class or method was not found.
+/// * `original` will panic if the hook has not yet been installed.
+///
+/// # Examples
+///
+/// ```no_run
+/// use quest_hook::inline_hook::hook;
+/// use quest_hook::libil2cpp::Il2CppObject;
+/// use log::info;
+///
+/// #[hook("", "MainSettingsModelSO", "OnEnable")]
+/// fn on_enable(this: &Il2CppObject) {
+///     info!("MainSettingsModelSO.OnEnable was called!");
+///
+///     on_enable.original(this); // Call the original C# method
+/// }
+///
+/// #[no_mangle]
+/// pub extern "C" fn load() {
+///     info!("Installing hooks!");
+///
+///     on_enable.install(); // Install the hook
+///
+///     info!("Installed  hooks!");
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
     let punctuated_args =
@@ -86,7 +116,7 @@ fn create_hook(
                     );
 
                     self.original.store(
-                        ::std::mem::transmute::<*mut ::std::ffi::c_void, *mut ()>(temp), 
+                        ::std::mem::transmute::<*mut ::std::ffi::c_void, *mut ()>(temp),
                         ::std::sync::atomic::Ordering::Relaxed
                     );
                 }
