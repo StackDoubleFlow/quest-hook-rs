@@ -1,3 +1,8 @@
+[workspace]
+members = [
+    "proc_macros"
+]
+
 [package]
 name = "quest_hook"
 version = "0.1.0"
@@ -17,3 +22,4 @@ cc = "1.0"
 dlopen = "0.1.8"
 dlopen_derive = "0.1.4"
 paste = "1.0.4"
+quest_hook_proc_macros = { path = "./proc_macros" }

@@ -29,7 +29,7 @@ macro_rules! define_functions {
 }
 
 define_functions! {
-    pub fn class_get_method_from_name(class: &Il2CppClass, name: *const u8, args_count: u32) -> &'static MethodInfo;
+    pub fn class_get_method_from_name(class: &Il2CppClass, name: *const u8, args_count: u32) -> Option<&'static MethodInfo>;
     pub fn domain_get() -> &'static Il2CppDomain;
     pub fn domain_get_assemblies(domain: &Il2CppDomain, size: &mut usize) -> &'static [&'static Il2CppAssembly];
     pub fn assembly_get_image(assembly: &Il2CppAssembly) -> Option<&'static Il2CppImage>;
