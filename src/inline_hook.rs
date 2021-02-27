@@ -1,5 +1,5 @@
-pub use quest_hook_proc_macros::hook;
 pub use inline_hook::*;
+pub use quest_hook_proc_macros::hook;
 
 trait Hook {
     fn namespace(&self) -> &'static str;
