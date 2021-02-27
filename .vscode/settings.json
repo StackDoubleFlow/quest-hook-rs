@@ -1,0 +1,10 @@
+{
+    "rust-analyzer.cargo.target": "aarch64-linux-android",
+    "rust-analyzer.checkOnSave.overrideCommand": [
+        "cargo",
+        "ndk",
+        "clippy",
+        "--workspace",
+        "--message-format=json"
+    ]
+}

@@ -1,13 +1,13 @@
 //! libil2cpp.so functions.
 //!
-//! This module contains functions found in libil2cpp to perform various tasks such
-//! as finding a class or method.
+//! This module contains functions found in libil2cpp to perform various tasks
+//! such as finding a class or method.
 
 use crate::types::{Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo};
 use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
 use paste::paste;
-use std::lazy::SyncOnceCell;
+use std::lazy::SyncLazy;
 use std::os::raw::c_char;
 
 macro_rules! define_functions {
@@ -21,13 +21,12 @@ macro_rules! define_functions {
             }
         }
 
-        static LIBIL2CPP: SyncOnceCell<Container<LibIl2Cpp>> = SyncOnceCell::new();
+        static LIBIL2CPP: SyncLazy<Container<LibIl2Cpp>> = SyncLazy::new(|| unsafe { Container::load("libil2cpp.so") }.unwrap());
 
         paste! {
             $(
                 pub fn $name ( $( $arg_name : $arg_type ),* ) $( -> $return )* {
-                    LIBIL2CPP.get_or_init(|| unsafe { Container::load("libil2cpp.so") }.unwrap())
-                        .[<il2cpp_ $name>]( $( $arg_name ),* )
+                    LIBIL2CPP.[<il2cpp_ $name>]( $( $arg_name ),* )
                 }
             )+
         }
