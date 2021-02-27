@@ -10,8 +10,8 @@ jobs:
             - uses: actions/checkout@v2
             - uses: actions-rs/toolchain@v1
               with:
-                  toolchain: stable
-                  target: aarch64-android-linux
+                  toolchain: nightly
+                  target: aarch64-linux-android
                   profile: minimal
                   override: true
                   components: clippy, rustfmt
@@ -37,6 +37,8 @@ jobs:
               with:
                   command: ndk
                   args: clippy --all -- -D warnings
+              env:
+                  ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
             - name: Check formatting
               uses: actions-rs/cargo@v1

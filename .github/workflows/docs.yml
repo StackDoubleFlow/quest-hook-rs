@@ -14,7 +14,7 @@ jobs:
             - uses: actions-rs/toolchain@v1
               with:
                   toolchain: nightly
-                  target: aarch64-android-linux
+                  target: aarch64-linux-android
                   profile: minimal
                   override: true
                   components: rust-docs
@@ -40,6 +40,8 @@ jobs:
               with:
                   command: ndk
                   args: docs --no-deps
+              env:
+                  ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@v3
