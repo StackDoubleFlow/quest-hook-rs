@@ -1,5 +1,9 @@
-use crate::il2cpp_functions;
-use crate::libil2cpp::{Il2CppClass, MethodInfo};
+mod raw;
+
+// TODO: Safe wrappers around certain types
+pub use raw::*;
+
+use crate::functions;
 use std::ffi::CString;
 
 impl Il2CppClass {
@@ -10,6 +14,6 @@ impl Il2CppClass {
     ) -> Option<&'static MethodInfo> {
         let method_name = CString::new(method_name).unwrap();
 
-        il2cpp_functions::class_get_method_from_name(self, method_name.as_ptr(), method_args_count)
+        functions::class_get_method_from_name(self, method_name.as_ptr(), method_args_count)
     }
 }

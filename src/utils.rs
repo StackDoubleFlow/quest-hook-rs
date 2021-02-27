@@ -1,5 +1,5 @@
-use crate::il2cpp_functions;
-use crate::libil2cpp::Il2CppClass;
+use crate::libil2cpp::functions as il2cpp_functions;
+use crate::libil2cpp::types::Il2CppClass;
 use std::ffi::CString;
 
 pub fn find_class(namespace: &str, class_name: &str) -> Option<&'static Il2CppClass> {

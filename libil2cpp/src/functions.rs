@@ -1,4 +1,9 @@
-use crate::libil2cpp::{Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo};
+//! libil2cpp.so functions.
+//!
+//! This module contains functions found in libil2cpp to perform various tasks such
+//! as finding a class or method.
+
+use crate::types::{Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppImage, MethodInfo};
 use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
 use paste::paste;
