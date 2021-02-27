@@ -1,3 +1,5 @@
+#![cfg(all(target_arch = "aarch64", unix))]
+
 use std::ffi::c_void;
 
 extern "C" {

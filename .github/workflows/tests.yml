@@ -1,0 +1,47 @@
+name: Tests
+on: [push, pull_request]
+
+jobs:
+    checks:
+        name: Checks
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: nightly
+                  target: aarch64-linux-android
+                  profile: minimal
+                  override: true
+                  components: clippy, rustfmt
+            - uses: nttld/setup-ndk@v1
+              id: setup-ndk
+              with:
+                  ndk-version: r22
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: install
+                  args: cargo-ndk
+
+            - uses: actions/cache@v2
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      target
+                  key: checks-${{ hashFiles('**/Cargo.toml') }}
+
+            - name: Check for clippy warnings
+              uses: actions-rs/cargo@v1
+              with:
+                  command: ndk
+                  args: clippy --workspace --features=strict
+              env:
+                  ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+            - name: Check formatting
+              uses: actions-rs/cargo@v1
+              with:
+                  command: fmt
+                  args: --all -- --check

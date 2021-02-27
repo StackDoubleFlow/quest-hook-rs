@@ -11,9 +11,7 @@ pub fn find_class(namespace: &str, class_name: &str) -> Option<&'static Il2CppCl
     let mut assemblies_count = 0;
     let assemblies = il2cpp_functions::domain_get_assemblies(domain, &mut assemblies_count);
 
-    for i in 0..assemblies_count {
-        let assembly = assemblies[i];
-
+    for assembly in assemblies.iter().take(assemblies_count) {
         // For some reason, an assembly might not have an image
         let image = il2cpp_functions::assembly_get_image(assembly);
         if image.is_none() {
