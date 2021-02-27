@@ -15,3 +15,7 @@ platform = 24
 quest_hook_proc_macros = { path = "./proc_macros" }
 inline_hook = { path = "./inline_hook" }
 libil2cpp = { path = "./libil2cpp" }
+
+[features]
+default = []
+strict = ["quest_hook_proc_macros/strict", "libil2cpp/strict"]

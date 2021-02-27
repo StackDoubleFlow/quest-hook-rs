@@ -10,3 +10,7 @@ proc-macro = true
 [dependencies]
 syn = { version = "1", features = ["full", "extra-traits"] }
 quote = "1"
+
+[features]
+default = []
+strict = []

@@ -1,3 +1,6 @@
+#![warn(rust_2018_idioms)]
+#![cfg_attr(feature = "strict", deny(warnings))]
+
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;

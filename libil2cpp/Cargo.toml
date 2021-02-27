@@ -8,3 +8,7 @@ edition = "2018"
 dlopen = "0.1.8"
 dlopen_derive = "0.1.4"
 paste = "1"
+
+[features]
+default = []
+strict = []

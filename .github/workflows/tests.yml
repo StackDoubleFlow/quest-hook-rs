@@ -36,7 +36,7 @@ jobs:
               uses: actions-rs/cargo@v1
               with:
                   command: ndk
-                  args: clippy --all -- -D warnings
+                  args: clippy --workspace --features=strict
               env:
                   ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
