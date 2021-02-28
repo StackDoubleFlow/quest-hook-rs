@@ -107,13 +107,15 @@ fn create_hook(
 
         impl #hook_struct_name {
             fn install(&self) {
+                use ::quest_hook::libil2cpp::WrapRaw;
+
                 let class = ::quest_hook::libil2cpp::Il2CppClass::find(self.namespace, self.class_name).expect("Class not found");
                 let method = class.find_method(self.method_name, self.parameters_count).expect("Method not found");
                 let mut temp = ::std::ptr::null_mut();
 
                 unsafe {
                     ::quest_hook::inline_hook::A64HookFunction(
-                        ::std::mem::transmute::<unsafe extern "C" fn(), *mut ::std::ffi::c_void>(method.methodPointer.unwrap()),
+                        ::std::mem::transmute::<unsafe extern "C" fn(), *mut ::std::ffi::c_void>(method.raw()methodPointer.unwrap()),
                         ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ::std::ffi::c_void>( #hook_name ),
                         &mut temp,
                     );

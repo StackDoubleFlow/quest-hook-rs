@@ -33,6 +33,11 @@ impl<T> Il2CppArray<T> {
             None => raw.max_length,
         }
     }
+
+    /// Whether the array is empty
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 unsafe impl<T> WrapRaw for Il2CppArray<T> {

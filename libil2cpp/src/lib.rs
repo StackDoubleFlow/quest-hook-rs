@@ -11,6 +11,7 @@ pub mod raw;
 mod string;
 mod ty;
 
+pub use array::Il2CppArray;
 pub use class::Il2CppClass;
 pub use method_info::MethodInfo;
 pub use object::Il2CppObject;
