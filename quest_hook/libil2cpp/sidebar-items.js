@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["functions","libil2cpp.so functions."],["types",""]]});
+initSidebarItems({"mod":[["raw","Raw il2cpp types and functions"]],"struct":[["Il2CppArray","An il2cpp array"],["Il2CppClass","An il2cpp class"],["Il2CppObject","An il2cpp object"],["Il2CppString","An il2cpp string"],["Il2CppType","An il2cpp type"],["MethodInfo","Information about a C# method"],["ParameterInfo","Information about a C# method"]],"trait":[["WrapRaw","Safe wrapper around a raw il2cpp type which can be used in its place"]]});

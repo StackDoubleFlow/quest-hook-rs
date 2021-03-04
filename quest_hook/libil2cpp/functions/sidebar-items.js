@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["assembly_get_image",""],["class_from_name",""],["class_get_method_from_name",""],["domain_get",""],["domain_get_assemblies",""]]});
