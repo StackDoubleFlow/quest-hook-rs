@@ -102,18 +102,20 @@ fn create_hook(
             namespace: &'static str,
             class_name: &'static str,
             method_name: &'static str,
-            args_count: u32,
+            parameters_count: usize,
         }
 
         impl #hook_struct_name {
             fn install(&self) {
-                let class = ::quest_hook::utils::find_class(self.namespace, self.class_name).expect("Class not found");
-                let method = class.find_method(self.method_name, self.args_count).expect("Method not found");
+                use ::quest_hook::libil2cpp::WrapRaw;
+
+                let class = ::quest_hook::libil2cpp::Il2CppClass::find(self.namespace, self.class_name).expect("Class not found");
+                let method = class.find_method(self.method_name, self.parameters_count).expect("Method not found");
                 let mut temp = ::std::ptr::null_mut();
 
                 unsafe {
                     ::quest_hook::inline_hook::A64HookFunction(
-                        ::std::mem::transmute::<unsafe extern "C" fn(), *mut ::std::ffi::c_void>(method.methodPointer.unwrap()),
+                        ::std::mem::transmute::<unsafe extern "C" fn(), *mut ::std::ffi::c_void>(method.raw().methodPointer.unwrap()),
                         ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ::std::ffi::c_void>( #hook_name ),
                         &mut temp,
                     );
@@ -132,6 +134,40 @@ fn create_hook(
                 };
                 (original.expect("Hook is not installed"))( #hook_args_untyped )
             }
+
+            fn hook(&self, #hook_args ) #return_type {
+                #hook_name( #hook_args_untyped )
+            }
+        }
+
+        impl ::quest_hook::Hook for #hook_struct_name {
+            fn install(&self) {
+                self.install()
+            }
+
+            fn namespace(&self) -> &'static str {
+                self.namespace
+            }
+
+            fn class_name(&self) -> &'static str {
+                self.class_name
+            }
+
+            fn method_name(&self) -> &'static str {
+                self.method_name
+            }
+
+            fn parameters_count(&self) -> usize {
+                self.parameters_count
+            }
+
+            fn hook(&self) -> *mut () {
+                ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
+            }
+
+            fn original(&self) -> *mut () {
+                self.original.load(::std::sync::atomic::Ordering::Relaxed)
+            }
         }
 
         #[allow(non_upper_case_globals)]
@@ -140,7 +176,7 @@ fn create_hook(
             namespace: #namespace,
             class_name: #class,
             method_name: #method,
-            args_count: #num_hook_args as u32
+            parameters_count: #num_hook_args as usize
         };
     };
 
