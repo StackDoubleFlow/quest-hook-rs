@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::ptr;
 
 use crate::{Il2CppObject, Il2CppType, MethodInfo, Type, WrapRaw};
@@ -8,6 +9,9 @@ use crate::{Il2CppObject, Il2CppType, MethodInfo, Type, WrapRaw};
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait Parameter {
+    /// Normalized type of the parameter, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# parameter with the given
     /// [`Il2CppType`] in a method definition
     fn matches(ty: &Il2CppType) -> bool;
@@ -19,6 +23,9 @@ pub unsafe trait Parameter {
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait ThisParameter {
+    /// Normalized type of `this`, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# instance parameter for the
     /// given [`MethodInfo`]
     fn matches(method: &MethodInfo) -> bool;
@@ -31,6 +38,9 @@ pub unsafe trait ThisParameter {
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait Parameters<const N: usize> {
+    /// Normalized type of the parameters, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# parameter collection with
     /// the given [`Il2CppType`] in a method definition
     fn matches(params: &[&Il2CppType]) -> bool;
@@ -40,8 +50,10 @@ pub unsafe trait Parameters<const N: usize> {
 // can't impl Parameter for &T or &mut T
 unsafe impl<T> Parameter for Option<&T>
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     default fn matches(ty: &Il2CppType) -> bool {
         let self_ty = T::class().raw().this_arg;
         unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
@@ -49,8 +61,10 @@ where
 }
 unsafe impl<T> Parameter for Option<&mut T>
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(ty: &Il2CppType) -> bool {
         <Option<&T> as Parameter>::matches(ty)
     }
@@ -70,8 +84,10 @@ unsafe impl Parameter for Option<&Il2CppObject> {
 
 unsafe impl<T> ThisParameter for &T
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(method: &MethodInfo) -> bool {
         // When we are the callee it's fine to cast the received type to a less specific
         // one
@@ -81,20 +97,26 @@ where
 }
 unsafe impl<T> ThisParameter for &mut T
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(method: &MethodInfo) -> bool {
         <&T as ThisParameter>::matches(method)
     }
 }
 
 unsafe impl ThisParameter for () {
+    type Type = ();
+
     fn matches(method: &MethodInfo) -> bool {
         method.is_static()
     }
 }
 
 unsafe impl Parameters<0> for () {
+    type Type = ();
+
     fn matches(args: &[&Il2CppType]) -> bool {
         args.is_empty()
     }
@@ -104,6 +126,8 @@ unsafe impl<P> Parameters<1> for P
 where
     P: Parameter,
 {
+    type Type = (P::Type,);
+
     fn matches(params: &[&Il2CppType]) -> bool {
         params.len() == 1 && P::matches(params[0])
     }

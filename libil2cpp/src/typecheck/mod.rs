@@ -9,6 +9,8 @@ use super::{Argument, Arguments, Il2CppType, Parameter, Parameters, Type, WrapRa
 macro_rules! impl_argument_parameter_value {
     ($type:ty) => {
         unsafe impl Argument for $type {
+            type Type = $type;
+
             fn matches(ty: &Il2CppType) -> bool {
                 let self_ty = <$type as Type>::class().raw().byval_arg;
                 unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
@@ -20,6 +22,8 @@ macro_rules! impl_argument_parameter_value {
         }
 
         unsafe impl Parameter for $type {
+            type Type = $type;
+
             fn matches(ty: &Il2CppType) -> bool {
                 let self_ty = <$type as Type>::class().raw().byval_arg;
                 unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }

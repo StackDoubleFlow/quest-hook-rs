@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::ffi::c_void;
 use std::mem::transmute;
 use std::ptr::{self, null_mut};
@@ -10,6 +11,9 @@ use crate::{Il2CppType, MethodInfo, Type, WrapRaw};
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait Argument {
+    /// Normalized type of the argument, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# argument with the given
     /// [`Il2CppType`] to call a method
     fn matches(ty: &Il2CppType) -> bool;
@@ -24,6 +28,9 @@ pub unsafe trait Argument {
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait ThisArgument {
+    /// Normalized type of the `this`, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# instance argument for the
     /// given [`MethodInfo`]
     fn matches(method: &MethodInfo) -> bool;
@@ -38,6 +45,9 @@ pub unsafe trait ThisArgument {
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
 pub unsafe trait Arguments<const N: usize> {
+    /// Normalized type of the arguments, useful for caching
+    type Type: Any;
+
     /// Checks whether the type can be used as a C# argument collection with the
     /// given [`Il2CppType`] to call a method
     fn matches(args: &[&Il2CppType]) -> bool;
@@ -50,8 +60,10 @@ pub unsafe trait Arguments<const N: usize> {
 // can't impl Argument for &T or Option<&T>
 unsafe impl<T> Argument for &mut T
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(ty: &Il2CppType) -> bool {
         // When we are the caller it's fine to pass a type that is more specific than
         // the one expected
@@ -67,8 +79,10 @@ where
 }
 unsafe impl<T> Argument for Option<&mut T>
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(ty: &Il2CppType) -> bool {
         <&mut T as Argument>::matches(ty)
     }
@@ -81,8 +95,10 @@ where
 
 unsafe impl<T> ThisArgument for &mut T
 where
-    T: Type,
+    T: Type + Any,
 {
+    type Type = T;
+
     fn matches(method: &MethodInfo) -> bool {
         let method_class = method.class();
         T::class().hierarchy().any(|c| ptr::eq(c, method_class))
@@ -94,6 +110,8 @@ where
 }
 
 unsafe impl ThisArgument for () {
+    type Type = ();
+
     fn matches(method: &MethodInfo) -> bool {
         method.is_static()
     }
@@ -104,6 +122,8 @@ unsafe impl ThisArgument for () {
 }
 
 unsafe impl Arguments<0> for () {
+    type Type = ();
+
     fn matches(args: &[&Il2CppType]) -> bool {
         args.is_empty()
     }
@@ -117,6 +137,8 @@ unsafe impl<A> Arguments<1> for A
 where
     A: Argument,
 {
+    type Type = (A::Type,);
+
     fn matches(args: &[&Il2CppType]) -> bool {
         args.len() == 1 && A::matches(args[0])
     }

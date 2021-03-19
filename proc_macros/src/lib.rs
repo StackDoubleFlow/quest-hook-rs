@@ -240,15 +240,19 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
 
         let generic_params_argument_tuple = generic_params_argument.clone();
         let generic_params_argument_where = generic_params_argument.clone();
+        let generic_params_argument_type = generic_params_argument.clone();
 
         let generic_params_parameter_tuple = generic_params_parameter.clone();
         let generic_params_parameter_where = generic_params_parameter.clone();
+        let generic_params_parameter_type = generic_params_parameter.clone();
 
         let impl_ts = quote! {
             unsafe impl<#(#generic_params_argument),*> Arguments<#n> for (#(#generic_params_argument_tuple,)*)
             where
                 #(#generic_params_argument_where: Argument),*
             {
+                type Type = (#(#generic_params_argument_type::Type,)*);
+
                 fn matches(args: &[&Il2CppType]) -> bool {
                     args.len() == #n #( && #matches_argument)*
                 }
@@ -262,6 +266,8 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
             where
                 #(#generic_params_parameter_where: Parameter),*
             {
+                type Type = (#(#generic_params_parameter_type::Type,)*);
+
                 fn matches(params: &[&Il2CppType]) -> bool {
                     params.len() == #n #( && #matches_parameter)*
                 }
