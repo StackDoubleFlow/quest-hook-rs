@@ -1,7 +1,10 @@
 [package]
 name = "quest_hook_proc_macros"
 version = "0.1.0"
-authors = ["StackDoubleFlow <ojaslandge@gmail.com>"]
+authors = [
+    "StackDoubleFlow <ojaslandge@gmail.com>",
+    "Raphaël Thériault <self@raftar.io>",
+]
 edition = "2018"
 
 [lib]
