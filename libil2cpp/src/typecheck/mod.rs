@@ -43,4 +43,3 @@ impl_argument_parameter_value!(f64);
 impl_argument_parameter_value!(bool);
 
 quest_hook_proc_macros::impl_arguments_parameters!(1..=16);
-quest_hook_proc_macros::impl_arguments_parameters!(255..=255);
