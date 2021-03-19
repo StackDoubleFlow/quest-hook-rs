@@ -1,7 +1,6 @@
 use std::any::Any;
-use std::ptr;
 
-use crate::{Il2CppObject, Il2CppType, MethodInfo, Type, WrapRaw};
+use crate::{Builtin, Il2CppType, MethodInfo, Type};
 
 /// Trait implemented by types that can be used as C# method parameters
 ///
@@ -46,6 +45,21 @@ pub unsafe trait Parameters<const N: usize> {
     fn matches(params: &[&Il2CppType]) -> bool;
 }
 
+/// Trait implemented by types that can be used as callee return types for C#
+/// methods
+///
+/// # Safety
+/// Interfaces depending on this trait assume that all of its methods are
+/// correct in an il2cpp context
+pub unsafe trait CalleeReturn {
+    /// Normalized type of the return type, useful for caching
+    type Type: Any;
+
+    /// Checks whether the type can be used as a C# return type with the given
+    /// [`Il2CppType`] in a method definition
+    fn matches(ty: &Il2CppType) -> bool;
+}
+
 // When we are the callee, we can't know if the parameters will be null, so we
 // can't impl Parameter for &T or &mut T
 unsafe impl<T> Parameter for Option<&T>
@@ -55,8 +69,7 @@ where
     type Type = T;
 
     default fn matches(ty: &Il2CppType) -> bool {
-        let self_ty = T::class().raw().this_arg;
-        unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+        T::class().is_assignable_from(ty.class())
     }
 }
 unsafe impl<T> Parameter for Option<&mut T>
@@ -70,18 +83,6 @@ where
     }
 }
 
-// Il2CppObject can be used as a parameter wildcard for all reference types (as
-// they all inherit from it). This is necessary cause we can't get the class
-// hierarchy from an Il2CppType, but using a type that is more generic is fine
-// as a callee. We use specialization to make this work even with the generic
-// impl for Option<&T> where T: Type, and repetition isn't needed since the impl
-// for Option<&mut T> defers to it.
-unsafe impl Parameter for Option<&Il2CppObject> {
-    fn matches(ty: &Il2CppType) -> bool {
-        ty.is_reference_type()
-    }
-}
-
 unsafe impl<T> ThisParameter for &T
 where
     T: Type + Any,
@@ -89,10 +90,7 @@ where
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
-        // When we are the callee it's fine to cast the received type to a less specific
-        // one
-        let class = T::class();
-        method.class().hierarchy().any(|mc| ptr::eq(mc, class))
+        T::class().is_assignable_from(method.class())
     }
 }
 unsafe impl<T> ThisParameter for &mut T
@@ -132,3 +130,81 @@ where
         params.len() == 1 && P::matches(params[0])
     }
 }
+
+unsafe impl<T> CalleeReturn for &T
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    default fn matches(ty: &Il2CppType) -> bool {
+        ty.class().is_assignable_from(T::class())
+    }
+}
+unsafe impl<T> CalleeReturn for &mut T
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <&T as CalleeReturn>::matches(ty)
+    }
+}
+unsafe impl<T> CalleeReturn for Option<&T>
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <&T as CalleeReturn>::matches(ty)
+    }
+}
+unsafe impl<T> CalleeReturn for Option<&mut T>
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <&T as CalleeReturn>::matches(ty)
+    }
+}
+
+unsafe impl CalleeReturn for () {
+    type Type = ();
+
+    fn matches(ty: &Il2CppType) -> bool {
+        ty.is_builtin(Builtin::Void)
+    }
+}
+
+macro_rules! impl_return_value {
+    ($type:ty, $($builtin:ident),+) => {
+        unsafe impl CalleeReturn for $type {
+            type Type = $type;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                $(ty.is_builtin(Builtin::$builtin))||+
+            }
+        }
+        unsafe impl CalleeReturn for &$type {
+            fn matches(_: &Il2CppType) -> bool {
+                false
+            }
+        }
+    }
+}
+
+impl_return_value!(u8, Byte);
+impl_return_value!(i8, SByte);
+impl_return_value!(u16, UShort, Char);
+impl_return_value!(i16, Short);
+impl_return_value!(u32, UInt);
+impl_return_value!(i32, Int);
+impl_return_value!(u64, ULong);
+impl_return_value!(i64, Long);
+impl_return_value!(f32, Single);
+impl_return_value!(f64, Double);
+impl_return_value!(bool, Bool);

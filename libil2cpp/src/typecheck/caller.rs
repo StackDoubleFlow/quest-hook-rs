@@ -1,9 +1,9 @@
 use std::any::Any;
 use std::ffi::c_void;
 use std::mem::transmute;
-use std::ptr::{self, null_mut};
+use std::ptr::null_mut;
 
-use crate::{Il2CppType, MethodInfo, Type, WrapRaw};
+use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, Type};
 
 /// Trait implemented by types that can be used as C# method arguments
 ///
@@ -56,6 +56,24 @@ pub unsafe trait Arguments<const N: usize> {
     fn invokable(&self) -> [*mut c_void; N];
 }
 
+/// Trait implemented by types that can be used as caller return types for C#
+/// methods
+///
+/// # Safety
+/// Interfaces depending on this trait assume that all of its methods are
+/// correct in an il2cpp context
+pub unsafe trait CallerReturn {
+    /// Normalized type of the return type, useful for caching
+    type Type: Any;
+
+    /// Checks whether the type can be used as a C# return type with the given
+    /// [`Il2CppType`] in a method definition
+    fn matches(ty: &Il2CppType) -> bool;
+    /// Converts the [`Il2CppObject`] returned by
+    /// [`runtime_invoke`](crate::raw::runtime_invoke) into self
+    fn from_object(object: Option<&Il2CppObject>) -> Self;
+}
+
 // When we are the caller, we can't know if the arguments will be mutated, so we
 // can't impl Argument for &T or Option<&T>
 unsafe impl<T> Argument for &mut T
@@ -64,13 +82,8 @@ where
 {
     type Type = T;
 
-    fn matches(ty: &Il2CppType) -> bool {
-        // When we are the caller it's fine to pass a type that is more specific than
-        // the one expected
-        T::class().hierarchy().any(|c| {
-            let self_ty = c.raw().this_arg;
-            unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
-        })
+    default fn matches(ty: &Il2CppType) -> bool {
+        ty.class().is_assignable_from(T::class())
     }
 
     fn invokable(&self) -> *mut c_void {
@@ -100,8 +113,7 @@ where
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
-        let method_class = method.class();
-        T::class().hierarchy().any(|c| ptr::eq(c, method_class))
+        method.class().is_assignable_from(T::class())
     }
 
     fn invokable(&self) -> *mut c_void {
@@ -146,4 +158,29 @@ where
     fn invokable(&self) -> [*mut c_void; 1] {
         [Argument::invokable(self)]
     }
+}
+
+unsafe impl<T> CallerReturn for Option<&T>
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::class().is_assignable_from(ty.class())
+    }
+
+    fn from_object(object: Option<&Il2CppObject>) -> Self {
+        unsafe { transmute(object) }
+    }
+}
+
+unsafe impl CallerReturn for () {
+    type Type = ();
+
+    fn matches(ty: &Il2CppType) -> bool {
+        ty.is_builtin(Builtin::Void)
+    }
+
+    fn from_object(_: Option<&Il2CppObject>) -> Self {}
 }

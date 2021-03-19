@@ -1,7 +1,8 @@
+use std::borrow::Cow;
 use std::ffi::{CStr, CString};
-use std::{fmt, slice};
+use std::{fmt, ptr, slice};
 
-use super::{raw, MethodInfo, WrapRaw};
+use crate::{raw, Il2CppType, MethodInfo, WrapRaw};
 
 /// An il2cpp class
 #[repr(transparent)]
@@ -41,25 +42,40 @@ impl Il2CppClass {
         name: &str,
         parameters_count: usize,
     ) -> Option<&MethodInfo> {
-        self.hierarchy()
-            .flat_map(|c| c.methods().iter().copied())
-            .find(|mi| {
-                mi.name().to_string_lossy() == name && mi.parameters_count() == parameters_count
-            })
+        for c in self.hierarchy() {
+            let mut matching = c
+                .methods()
+                .iter()
+                .filter(|mi| mi.name() == name && mi.parameters().len() == parameters_count)
+                .copied();
+
+            match match matching.next() {
+                // If we have no matches, we continue to the parent
+                None => continue,
+                Some(mi) => (mi, matching.next()),
+            } {
+                // If we have one match, we return it
+                (mi, None) => return Some(mi),
+                // If we have two matches, we return None to avoid conflicts
+                _ => return None,
+            }
+        }
+
+        None
     }
 
     /// Name of the class
-    pub fn name(&self) -> &CStr {
+    pub fn name(&self) -> Cow<'_, str> {
         let name = self.raw().name;
         assert!(!name.is_null());
-        unsafe { CStr::from_ptr(name) }
+        unsafe { CStr::from_ptr(name) }.to_string_lossy()
     }
 
     /// Namespace containing the class
-    pub fn namespace(&self) -> &CStr {
+    pub fn namespace(&self) -> Cow<'_, str> {
         let namespace = self.raw().namespaze;
         assert!(!namespace.is_null());
-        unsafe { CStr::from_ptr(namespace) }
+        unsafe { CStr::from_ptr(namespace) }.to_string_lossy()
     }
 
     /// Methods of the class
@@ -85,10 +101,26 @@ impl Il2CppClass {
         }
     }
 
+    /// Interfaces this class implements
+    pub fn implemented_interfaces(&self) -> &[&Il2CppClass] {
+        let raw = self.raw();
+        let interfaces = raw.implementedInterfaces;
+        if !interfaces.is_null() {
+            unsafe { slice::from_raw_parts(interfaces as _, raw.interfaces_count as _) }
+        } else {
+            &[]
+        }
+    }
+
     /// Nested types of the class
     pub fn nested_types(&self) -> &[&Il2CppClass] {
         let raw = self.raw();
         unsafe { slice::from_raw_parts(raw.nestedTypes as _, raw.nested_type_count as _) }
+    }
+
+    /// Whether the class is assignable from `other`
+    pub fn is_assignable_from(&self, other: &Il2CppClass) -> bool {
+        raw::class_is_assignable_from(self.raw(), other.raw())
     }
 }
 
@@ -115,13 +147,25 @@ impl<'a> Iterator for Hierarchy<'a> {
     }
 }
 
-impl fmt::Debug for Il2CppClass {
+impl fmt::Display for Il2CppClass {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let namespace = &*self.namespace().to_string_lossy();
-        let name = &*self.name().to_string_lossy();
+        let namespace = &*self.namespace();
+        let name = &*self.name();
         match namespace {
             "" => f.write_str(name),
             _ => write!(f, "{}.{}", namespace, name),
         }
+    }
+}
+
+impl PartialEq for Il2CppClass {
+    fn eq(&self, other: &Self) -> bool {
+        ptr::eq(self, other)
+    }
+}
+
+impl<'a> From<&'a Il2CppType> for &'a Il2CppClass {
+    fn from(ty: &'a Il2CppType) -> Self {
+        ty.class()
     }
 }

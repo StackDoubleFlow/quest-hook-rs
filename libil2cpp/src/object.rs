@@ -1,4 +1,4 @@
-use super::{raw, Il2CppClass, WrapRaw};
+use crate::{raw, Il2CppClass, WrapRaw};
 
 /// An il2cpp object
 #[repr(transparent)]

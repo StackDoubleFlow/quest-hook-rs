@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::string::FromUtf16Error;
 
-use super::{raw, Il2CppObject, WrapRaw};
+use crate::{raw, Il2CppObject, WrapRaw};
 
 /// An il2cpp string
 #[repr(transparent)]

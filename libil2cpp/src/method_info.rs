@@ -1,9 +1,11 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::{ffi::CStr, slice};
 
-use crate::raw::{METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL};
-
-use super::{raw, Il2CppClass, Il2CppType, ParameterInfo, WrapRaw};
+use crate::raw::{
+    self, METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL,
+};
+use crate::{Il2CppClass, Il2CppType, ParameterInfo, WrapRaw};
 
 /// Information about a C# method
 #[repr(transparent)]
@@ -11,10 +13,10 @@ pub struct MethodInfo(raw::MethodInfo);
 
 impl MethodInfo {
     /// Name of the method
-    pub fn name(&self) -> &CStr {
+    pub fn name(&self) -> Cow<'_, str> {
         let name = self.raw().name;
         assert!(!name.is_null());
-        unsafe { CStr::from_ptr(name) }
+        unsafe { CStr::from_ptr(name) }.to_string_lossy()
     }
 
     /// Class the method is from
@@ -23,23 +25,18 @@ impl MethodInfo {
     }
 
     /// Return type of the method
-    pub fn return_type(&self) -> Option<&Il2CppType> {
-        unsafe { Il2CppType::wrap_ptr(self.raw().return_type) }
+    pub fn return_ty(&self) -> &Il2CppType {
+        unsafe { Il2CppType::wrap_ptr(self.raw().return_type).unwrap() }
     }
 
     /// Parameters the method takes
     pub fn parameters(&self) -> &[&ParameterInfo] {
         let parameters = self.raw().parameters;
         if !parameters.is_null() {
-            unsafe { slice::from_raw_parts(parameters as _, self.parameters_count()) }
+            unsafe { slice::from_raw_parts(parameters as _, self.raw().parameters_count as _) }
         } else {
             &[]
         }
-    }
-
-    /// Number of parameters the method takes
-    pub fn parameters_count(&self) -> usize {
-        self.raw().parameters_count as _
     }
 
     /// Whether the method is static
@@ -67,10 +64,20 @@ impl fmt::Debug for MethodInfo {
         let params = self.parameters();
         let n = params.len() - 1;
 
-        write!(f, "{:?}.{}(", self.class(), self.name().to_string_lossy())?;
-        for p in &params[..n] {
-            write!(f, "{}, ", p.name().to_string_lossy())?;
+        if self.is_static() {
+            f.write_str("static ")?;
         }
-        write!(f, "{})", params[n].name().to_string_lossy())
+        if self.is_abstract() {
+            f.write_str("abstract ")?;
+        }
+        if self.is_virtual() {
+            f.write_str("virtual ")?;
+        }
+
+        write!(f, "{} {}(", self.return_ty(), self.name())?;
+        for p in &params[..n] {
+            write!(f, "{}, ", p)?;
+        }
+        write!(f, "{})", params[n])
     }
 }

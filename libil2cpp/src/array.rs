@@ -3,7 +3,7 @@ use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
 use std::slice;
 
-use super::{raw, Il2CppObject, WrapRaw};
+use crate::{raw, Il2CppObject, WrapRaw};
 
 /// An il2cpp array
 #[repr(C)]
