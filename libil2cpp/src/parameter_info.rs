@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use super::{raw, Il2CppType, WrapRaw};
 
-/// Information about a C# method
+/// Information about a C# parameter
 #[repr(transparent)]
 pub struct ParameterInfo(raw::ParameterInfo);
 

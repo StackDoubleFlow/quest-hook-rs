@@ -1,10 +1,15 @@
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
+use std::num::NonZeroUsize;
+
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, Error, FnArg, ItemFn, LitStr, Pat, Token};
+use syn::{
+    parse_macro_input, spanned::Spanned, Error, Expr, ExprLit, FnArg, Index, ItemFn, Lit, LitStr,
+    Pat, RangeLimits, Token,
+};
+use syn::{punctuated::Punctuated, ExprRange};
 
 /// Creates an inline hook at a C# method.
 ///
@@ -181,4 +186,104 @@ fn create_hook(
     };
 
     Ok(tokens.into())
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn impl_arguments_parameters(input: TokenStream) -> TokenStream {
+    let range = parse_macro_input!(input as ExprRange);
+    match create_impl_arguments_parameters(range) {
+        Ok(ts) => ts,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Error> {
+    let span = range.span();
+
+    let start = range
+        .from
+        .ok_or_else(|| Error::new(span, "Tuple length range must have a lower bound"))?;
+    let start = parse_range_bound(*start)?;
+
+    let end = range
+        .to
+        .ok_or_else(|| Error::new(span, "Tuple length range must have an upper bound"))?;
+    let end = parse_range_bound(*end)?;
+
+    let range = match range.limits {
+        RangeLimits::HalfOpen(_) if end <= start => {
+            return Err(Error::new(span, "Tuple length range must be valid"))
+        }
+        RangeLimits::HalfOpen(_) => start..end,
+
+        RangeLimits::Closed(_) if end < start => {
+            return Err(Error::new(span, "Tuple length range must be valid"))
+        }
+        RangeLimits::Closed(_) => start..(end + 1),
+    };
+
+    let mut ts = TokenStream::new();
+    for n in range {
+        let generic_params_argument = (1..=n).map(|n| format_ident!("A{}", n));
+        let matches_argument = generic_params_argument
+            .clone()
+            .enumerate()
+            .map(|(n, gp)| quote!(<#gp>::matches(args[#n])));
+        let invokables = (0..n).map(Index::from).map(|n| quote!(self.#n.invokable()));
+
+        let generic_params_parameter = (1..=n).map(|n| format_ident!("P{}", n));
+        let matches_parameter = generic_params_parameter
+            .clone()
+            .enumerate()
+            .map(|(n, gp)| quote!(<#gp>::matches(params[#n])));
+
+        let generic_params_argument_tuple = generic_params_argument.clone();
+        let generic_params_argument_where = generic_params_argument.clone();
+
+        let generic_params_parameter_tuple = generic_params_parameter.clone();
+        let generic_params_parameter_where = generic_params_parameter.clone();
+
+        let impl_ts = quote! {
+            unsafe impl<#(#generic_params_argument),*> Arguments<#n> for (#(#generic_params_argument_tuple,)*)
+            where
+                #(#generic_params_argument_where: Argument),*
+            {
+                fn matches(args: &[&Il2CppType]) -> bool {
+                    args.len() == #n #( && #matches_argument)*
+                }
+
+                fn invokable(&self) -> [*mut c_void; #n] {
+                    [#(#invokables),*]
+                }
+            }
+
+            unsafe impl<#(#generic_params_parameter),*> Parameters<#n> for (#(#generic_params_parameter_tuple,)*)
+            where
+                #(#generic_params_parameter_where: Parameter),*
+            {
+                fn matches(params: &[&Il2CppType]) -> bool {
+                    params.len() == #n #( && #matches_parameter)*
+                }
+            }
+        };
+        ts.extend(TokenStream::from(impl_ts));
+    }
+
+    Ok(ts)
+}
+
+fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
+    let bound: NonZeroUsize = match bound {
+        syn::Expr::Lit(ExprLit {
+            lit: Lit::Int(n), ..
+        }) => n.base10_parse()?,
+        _ => {
+            return Err(Error::new(
+                bound.span(),
+                "Tuple length bound must be an integer",
+            ))
+        }
+    };
+    Ok(bound.get())
 }

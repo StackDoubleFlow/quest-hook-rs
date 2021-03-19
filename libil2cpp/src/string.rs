@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::string::FromUtf16Error;
 
@@ -61,5 +62,17 @@ impl AsRef<[u16]> for Il2CppString {
 impl AsMut<[u16]> for Il2CppString {
     fn as_mut(&mut self) -> &mut [u16] {
         self.as_utf16_mut()
+    }
+}
+
+impl fmt::Debug for Il2CppString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.to_string_lossy(), f)
+    }
+}
+
+impl fmt::Display for Il2CppString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.to_string_lossy(), f)
     }
 }

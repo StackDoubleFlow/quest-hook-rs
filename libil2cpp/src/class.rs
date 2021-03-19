@@ -1,6 +1,7 @@
-use super::{raw, MethodInfo, WrapRaw};
 use std::ffi::{CStr, CString};
-use std::slice;
+use std::{fmt, slice};
+
+use super::{raw, MethodInfo, WrapRaw};
 
 /// An il2cpp class
 #[repr(transparent)]
@@ -33,11 +34,18 @@ impl Il2CppClass {
         None
     }
 
-    /// Find a method belonging to the class by name and parameter count
-    pub fn find_method(&self, name: &str, parameters_count: usize) -> Option<&MethodInfo> {
-        self.methods().iter().copied().find(|mi| {
-            mi.name().to_string_lossy() == name && mi.parameters_count() == parameters_count
-        })
+    /// Find a method belonging to the class or its parents by name and
+    /// parameter count, without type checking
+    pub fn find_method_unchecked(
+        &self,
+        name: &str,
+        parameters_count: usize,
+    ) -> Option<&MethodInfo> {
+        self.hierarchy()
+            .flat_map(|c| c.methods().iter().copied())
+            .find(|mi| {
+                mi.name().to_string_lossy() == name && mi.parameters_count() == parameters_count
+            })
     }
 
     /// Name of the class
@@ -65,9 +73,16 @@ impl Il2CppClass {
         }
     }
 
-    /// Class the class inherits from, if it inherits from any
+    /// Parent of the class, if it inherits from any
     pub fn parent(&self) -> Option<&Il2CppClass> {
         unsafe { Il2CppClass::wrap_ptr(self.raw().parent) }
+    }
+
+    /// Iterator over the class hierarchy, starting with the class itself
+    pub fn hierarchy(&self) -> Hierarchy<'_> {
+        Hierarchy {
+            current: Some(self),
+        }
     }
 
     /// Nested types of the class
@@ -77,6 +92,36 @@ impl Il2CppClass {
     }
 }
 
+/// Iterator over the parents of a class
+pub struct Hierarchy<'a> {
+    current: Option<&'a Il2CppClass>,
+}
+
 unsafe impl WrapRaw for Il2CppClass {
     type Raw = raw::Il2CppClass;
+}
+
+impl<'a> Iterator for Hierarchy<'a> {
+    type Item = &'a Il2CppClass;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.current {
+            Some(c) => {
+                self.current = c.parent();
+                Some(c)
+            }
+            None => None,
+        }
+    }
+}
+
+impl fmt::Debug for Il2CppClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let namespace = &*self.namespace().to_string_lossy();
+        let name = &*self.name().to_string_lossy();
+        match namespace {
+            "" => f.write_str(name),
+            _ => write!(f, "{}.{}", namespace, name),
+        }
+    }
 }
