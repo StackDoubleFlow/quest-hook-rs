@@ -229,14 +229,14 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
         let matches_argument = generic_params_argument
             .clone()
             .enumerate()
-            .map(|(n, gp)| quote!(<#gp>::matches(args[#n])));
+            .map(|(n, gp)| quote!(<#gp>::matches(args[#n].ty())));
         let invokables = (0..n).map(Index::from).map(|n| quote!(self.#n.invokable()));
 
         let generic_params_parameter = (1..=n).map(|n| format_ident!("P{}", n));
         let matches_parameter = generic_params_parameter
             .clone()
             .enumerate()
-            .map(|(n, gp)| quote!(<#gp>::matches(params[#n])));
+            .map(|(n, gp)| quote!(<#gp>::matches(params[#n].ty())));
 
         let generic_params_argument_tuple = generic_params_argument.clone();
         let generic_params_argument_where = generic_params_argument.clone();
@@ -253,7 +253,7 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
             {
                 type Type = (#(#generic_params_argument_type::Type,)*);
 
-                fn matches(args: &[&Il2CppType]) -> bool {
+                fn matches(args: &[&ParameterInfo]) -> bool {
                     args.len() == #n #( && #matches_argument)*
                 }
 
@@ -268,7 +268,7 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
             {
                 type Type = (#(#generic_params_parameter_type::Type,)*);
 
-                fn matches(params: &[&Il2CppType]) -> bool {
+                fn matches(params: &[&ParameterInfo]) -> bool {
                     params.len() == #n #( && #matches_parameter)*
                 }
             }

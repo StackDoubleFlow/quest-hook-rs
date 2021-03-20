@@ -20,6 +20,10 @@ pub use parameter_info::ParameterInfo;
 pub use raw::WrapRaw;
 pub use string::Il2CppString;
 pub use ty::{Builtin, Il2CppType};
-pub use typecheck::callee::{CalleeReturn, Parameter, Parameters, ThisParameter};
-pub use typecheck::caller::{Argument, Arguments, CallerReturn, ThisArgument};
+pub use typecheck::callee::{Parameter, Parameters, Return as CalleeReturn, This as CalleeThis};
+pub use typecheck::caller::{Argument, Arguments, Return, This};
 pub use typecheck::ty::Type;
+
+// Maybe I have OCD
+pub use Parameter as CalleeArgument;
+pub use Parameters as CalleeArguments;

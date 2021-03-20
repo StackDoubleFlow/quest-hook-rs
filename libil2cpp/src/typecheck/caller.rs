@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use std::mem::transmute;
 use std::ptr::null_mut;
 
-use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, Type};
+use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, ParameterInfo, Type};
 
 /// Trait implemented by types that can be used as C# method arguments
 ///
@@ -27,7 +27,7 @@ pub unsafe trait Argument {
 /// # Safety
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
-pub unsafe trait ThisArgument {
+pub unsafe trait This {
     /// Normalized type of the `this`, useful for caching
     type Type: Any;
 
@@ -49,8 +49,8 @@ pub unsafe trait Arguments<const N: usize> {
     type Type: Any;
 
     /// Checks whether the type can be used as a C# argument collection with the
-    /// given [`Il2CppType`] to call a method
-    fn matches(args: &[&Il2CppType]) -> bool;
+    /// given [`ParameterInfo`]s to call a method
+    fn matches(args: &[&ParameterInfo]) -> bool;
     /// Returns an array of untyped pointer which can be used to invoke C#
     /// methods
     fn invokable(&self) -> [*mut c_void; N];
@@ -62,7 +62,7 @@ pub unsafe trait Arguments<const N: usize> {
 /// # Safety
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
-pub unsafe trait CallerReturn {
+pub unsafe trait Return {
     /// Normalized type of the return type, useful for caching
     type Type: Any;
 
@@ -106,7 +106,7 @@ where
     }
 }
 
-unsafe impl<T> ThisArgument for &mut T
+unsafe impl<T> This for &mut T
 where
     T: Type + Any,
 {
@@ -121,7 +121,7 @@ where
     }
 }
 
-unsafe impl ThisArgument for () {
+unsafe impl This for () {
     type Type = ();
 
     fn matches(method: &MethodInfo) -> bool {
@@ -136,7 +136,7 @@ unsafe impl ThisArgument for () {
 unsafe impl Arguments<0> for () {
     type Type = ();
 
-    fn matches(args: &[&Il2CppType]) -> bool {
+    fn matches(args: &[&ParameterInfo]) -> bool {
         args.is_empty()
     }
 
@@ -151,8 +151,8 @@ where
 {
     type Type = (A::Type,);
 
-    fn matches(args: &[&Il2CppType]) -> bool {
-        args.len() == 1 && A::matches(args[0])
+    fn matches(args: &[&ParameterInfo]) -> bool {
+        args.len() == 1 && A::matches(args[0].ty())
     }
 
     fn invokable(&self) -> [*mut c_void; 1] {
@@ -160,7 +160,7 @@ where
     }
 }
 
-unsafe impl<T> CallerReturn for Option<&T>
+unsafe impl<T> Return for Option<&T>
 where
     T: Type + Any,
 {
@@ -175,7 +175,7 @@ where
     }
 }
 
-unsafe impl CallerReturn for () {
+unsafe impl Return for () {
     type Type = ();
 
     fn matches(ty: &Il2CppType) -> bool {

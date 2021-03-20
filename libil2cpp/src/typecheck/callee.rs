@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use crate::{Builtin, Il2CppType, MethodInfo, Type};
+use crate::{Builtin, Il2CppType, MethodInfo, ParameterInfo, Type};
 
 /// Trait implemented by types that can be used as C# method parameters
 ///
@@ -21,7 +21,7 @@ pub unsafe trait Parameter {
 /// # Safety
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
-pub unsafe trait ThisParameter {
+pub unsafe trait This {
     /// Normalized type of `this`, useful for caching
     type Type: Any;
 
@@ -41,8 +41,8 @@ pub unsafe trait Parameters<const N: usize> {
     type Type: Any;
 
     /// Checks whether the type can be used as a C# parameter collection with
-    /// the given [`Il2CppType`] in a method definition
-    fn matches(params: &[&Il2CppType]) -> bool;
+    /// the given [`ParameterInfo`]s in a method definition
+    fn matches(params: &[&ParameterInfo]) -> bool;
 }
 
 /// Trait implemented by types that can be used as callee return types for C#
@@ -51,7 +51,7 @@ pub unsafe trait Parameters<const N: usize> {
 /// # Safety
 /// Interfaces depending on this trait assume that all of its methods are
 /// correct in an il2cpp context
-pub unsafe trait CalleeReturn {
+pub unsafe trait Return {
     /// Normalized type of the return type, useful for caching
     type Type: Any;
 
@@ -83,7 +83,7 @@ where
     }
 }
 
-unsafe impl<T> ThisParameter for &T
+unsafe impl<T> This for &T
 where
     T: Type + Any,
 {
@@ -93,18 +93,18 @@ where
         T::class().is_assignable_from(method.class())
     }
 }
-unsafe impl<T> ThisParameter for &mut T
+unsafe impl<T> This for &mut T
 where
     T: Type + Any,
 {
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
-        <&T as ThisParameter>::matches(method)
+        <&T as This>::matches(method)
     }
 }
 
-unsafe impl ThisParameter for () {
+unsafe impl This for () {
     type Type = ();
 
     fn matches(method: &MethodInfo) -> bool {
@@ -115,7 +115,7 @@ unsafe impl ThisParameter for () {
 unsafe impl Parameters<0> for () {
     type Type = ();
 
-    fn matches(args: &[&Il2CppType]) -> bool {
+    fn matches(args: &[&ParameterInfo]) -> bool {
         args.is_empty()
     }
 }
@@ -126,12 +126,12 @@ where
 {
     type Type = (P::Type,);
 
-    fn matches(params: &[&Il2CppType]) -> bool {
-        params.len() == 1 && P::matches(params[0])
+    fn matches(params: &[&ParameterInfo]) -> bool {
+        params.len() == 1 && P::matches(params[0].ty())
     }
 }
 
-unsafe impl<T> CalleeReturn for &T
+unsafe impl<T> Return for &T
 where
     T: Type + Any,
 {
@@ -141,38 +141,38 @@ where
         ty.class().is_assignable_from(T::class())
     }
 }
-unsafe impl<T> CalleeReturn for &mut T
+unsafe impl<T> Return for &mut T
 where
     T: Type + Any,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        <&T as CalleeReturn>::matches(ty)
+        <&T as Return>::matches(ty)
     }
 }
-unsafe impl<T> CalleeReturn for Option<&T>
+unsafe impl<T> Return for Option<&T>
 where
     T: Type + Any,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        <&T as CalleeReturn>::matches(ty)
+        <&T as Return>::matches(ty)
     }
 }
-unsafe impl<T> CalleeReturn for Option<&mut T>
+unsafe impl<T> Return for Option<&mut T>
 where
     T: Type + Any,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        <&T as CalleeReturn>::matches(ty)
+        <&T as Return>::matches(ty)
     }
 }
 
-unsafe impl CalleeReturn for () {
+unsafe impl Return for () {
     type Type = ();
 
     fn matches(ty: &Il2CppType) -> bool {
@@ -182,14 +182,14 @@ unsafe impl CalleeReturn for () {
 
 macro_rules! impl_return_value {
     ($type:ty, $($builtin:ident),+) => {
-        unsafe impl CalleeReturn for $type {
+        unsafe impl Return for $type {
             type Type = $type;
 
             fn matches(ty: &Il2CppType) -> bool {
                 $(ty.is_builtin(Builtin::$builtin))||+
             }
         }
-        unsafe impl CalleeReturn for &$type {
+        unsafe impl Return for &$type {
             fn matches(_: &Il2CppType) -> bool {
                 false
             }

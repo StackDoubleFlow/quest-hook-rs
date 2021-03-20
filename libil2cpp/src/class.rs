@@ -2,7 +2,10 @@ use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
 
-use crate::{raw, Il2CppType, MethodInfo, WrapRaw};
+use crate::{
+    raw, Arguments, CalleeReturn, CalleeThis, Il2CppType, MethodInfo, Parameters, Return, This,
+    WrapRaw,
+};
 
 /// An il2cpp class
 #[repr(transparent)]
@@ -29,6 +32,76 @@ impl Il2CppClass {
             let class = raw::class_from_name(image, namespace.as_ptr(), name.as_ptr());
             if let Some(class) = class {
                 return Some(unsafe { Self::wrap(class) });
+            }
+        }
+
+        None
+    }
+
+    /// Find a method belonging to the class or its parents by name with type
+    /// checking
+    pub fn find_method<T, A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    where
+        T: This,
+        A: Arguments<N>,
+        R: Return,
+    {
+        for c in self.hierarchy() {
+            let mut matching = c
+                .methods()
+                .iter()
+                .filter(|mi| {
+                    mi.name() == name
+                        && T::matches(mi)
+                        && A::matches(mi.parameters())
+                        && R::matches(mi.return_ty())
+                })
+                .copied();
+
+            match match matching.next() {
+                // If we have no matches, we continue to the parent
+                None => continue,
+                Some(mi) => (mi, matching.next()),
+            } {
+                // If we have one match, we return it
+                (mi, None) => return Some(mi),
+                // If we have two matches, we return None to avoid conflicts
+                _ => return None,
+            }
+        }
+
+        None
+    }
+
+    /// Find a method belonging to the class or its parents by name with type
+    /// checking from a callee perspective
+    pub fn find_method_callee<T, P, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    where
+        T: CalleeThis,
+        P: Parameters<N>,
+        R: CalleeReturn,
+    {
+        for c in self.hierarchy() {
+            let mut matching = c
+                .methods()
+                .iter()
+                .filter(|mi| {
+                    mi.name() == name
+                        && T::matches(mi)
+                        && P::matches(mi.parameters())
+                        && R::matches(mi.return_ty())
+                })
+                .copied();
+
+            match match matching.next() {
+                // If we have no matches, we continue to the parent
+                None => continue,
+                Some(mi) => (mi, matching.next()),
+            } {
+                // If we have one match, we return it
+                (mi, None) => return Some(mi),
+                // If we have two matches, we return None to avoid conflicts
+                _ => return None,
             }
         }
 

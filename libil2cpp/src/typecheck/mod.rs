@@ -4,7 +4,9 @@ pub mod ty;
 
 use std::ffi::c_void;
 
-use crate::{Argument, Arguments, Builtin, Il2CppType, Parameter, Parameters, Type, WrapRaw};
+use crate::{
+    Argument, Arguments, Builtin, Il2CppType, Parameter, ParameterInfo, Parameters, Type, WrapRaw,
+};
 
 macro_rules! impl_argument_parameter_value {
     ($type:ty, $($builtin:ident),+) => {
