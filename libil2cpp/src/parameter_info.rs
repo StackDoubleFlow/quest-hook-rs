@@ -27,6 +27,16 @@ impl ParameterInfo {
     }
 }
 
+impl fmt::Debug for ParameterInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ParameterInfo")
+            .field("name", &self.name())
+            .field("position", &self.position())
+            .field("ty", &self.ty())
+            .finish()
+    }
+}
+
 impl fmt::Display for ParameterInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.ty(), self.name())

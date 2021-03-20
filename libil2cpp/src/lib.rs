@@ -1,9 +1,10 @@
-#![feature(once_cell, debug_non_exhaustive, min_specialization)]
+#![feature(once_cell, min_specialization, extended_key_value_attributes)]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
 mod array;
 mod class;
+mod exception;
 mod method_info;
 mod object;
 mod parameter_info;
@@ -14,6 +15,7 @@ mod typecheck;
 
 pub use array::Il2CppArray;
 pub use class::Il2CppClass;
+pub use exception::Il2CppException;
 pub use method_info::MethodInfo;
 pub use object::Il2CppObject;
 pub use parameter_info::ParameterInfo;

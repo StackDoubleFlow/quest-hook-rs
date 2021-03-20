@@ -1,3 +1,4 @@
+use paste::paste;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::fmt;
@@ -25,14 +26,13 @@ impl Il2CppType {
 
     /// Name of the type
     pub fn name(&self) -> Cow<'_, str> {
-        let name = raw::type_get_name(self.raw());
+        if let Some(name) = self.as_builtin().map(Builtin::name) {
+            return name.into();
+        }
+
+        let name = unsafe { raw::type_get_name(self.raw()) };
         assert!(!name.is_null());
         unsafe { CStr::from_ptr(name) }.to_string_lossy()
-    }
-
-    /// Whether the type represents the given builtin
-    pub fn is_builtin(&self, builtin: Builtin) -> bool {
-        self.raw().type_() == builtin as i32
     }
 }
 
@@ -47,51 +47,85 @@ impl PartialEq for Il2CppType {
 }
 impl Eq for Il2CppType {}
 
+impl fmt::Debug for Il2CppType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Il2CppType")
+            .field("name", &self.name())
+            .finish()
+    }
+}
+
 impl fmt::Display for Il2CppType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&*self.name())
     }
 }
 
-/// Builtin C# types
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-#[repr(i32)]
-pub enum Builtin {
-    Void = Il2CppTypeEnum_IL2CPP_TYPE_VOID,
-    Object = Il2CppTypeEnum_IL2CPP_TYPE_OBJECT,
-    Bool = Il2CppTypeEnum_IL2CPP_TYPE_BOOLEAN,
-    Char = Il2CppTypeEnum_IL2CPP_TYPE_CHAR,
-    Byte = Il2CppTypeEnum_IL2CPP_TYPE_U1,
-    SByte = Il2CppTypeEnum_IL2CPP_TYPE_I1,
-    Short = Il2CppTypeEnum_IL2CPP_TYPE_I2,
-    UShort = Il2CppTypeEnum_IL2CPP_TYPE_U2,
-    Int = Il2CppTypeEnum_IL2CPP_TYPE_I4,
-    UInt = Il2CppTypeEnum_IL2CPP_TYPE_U4,
-    Long = Il2CppTypeEnum_IL2CPP_TYPE_I8,
-    ULong = Il2CppTypeEnum_IL2CPP_TYPE_U8,
-    Single = Il2CppTypeEnum_IL2CPP_TYPE_R4,
-    Double = Il2CppTypeEnum_IL2CPP_TYPE_R8,
-    String = Il2CppTypeEnum_IL2CPP_TYPE_STRING,
+macro_rules! builtins {
+    ($($const:ident => ($variant:ident, $id:ident, $name:literal),)*) => {
+        #[derive(Clone, Copy, PartialEq, Eq, Hash)]
+        #[repr(i32)]
+        pub enum Builtin {
+            $($variant = $const,)*
+        }
+
+        impl Il2CppType {
+            /// Whether the type represents the given [`Builtin`]
+            #[inline]
+            pub fn is_builtin(&self, builtin: Builtin) -> bool {
+                self.raw().type_() == builtin as i32
+            }
+
+            paste! {
+                $(
+                    #[doc = concat!("Whether the type represents a `", $name , "`")]
+                    pub fn [<is_ $id>](&self) -> bool {
+                        self.is_builtin(Builtin::$variant)
+                    }
+                )*
+            }
+
+            /// [`Builtin`} the type represents, if any
+            pub fn as_builtin(&self) -> Option<Builtin> {
+                #[allow(non_upper_case_globals)]
+                match self.raw().type_() {
+                    $($const => Some(Builtin::$variant),)*
+                    _ => None
+                }
+            }
+        }
+
+        impl Builtin {
+            /// Name of the builtin
+            pub fn name(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $name,)*
+                }
+            }
+        }
+    }
+}
+
+builtins! {
+    Il2CppTypeEnum_IL2CPP_TYPE_VOID => (Void, void, "void"),
+    Il2CppTypeEnum_IL2CPP_TYPE_OBJECT => (Object, object, "object"),
+    Il2CppTypeEnum_IL2CPP_TYPE_BOOLEAN => (Bool, bool, "bool"),
+    Il2CppTypeEnum_IL2CPP_TYPE_CHAR => (Char, char, "char"),
+    Il2CppTypeEnum_IL2CPP_TYPE_U1 => (Byte, byte, "byte"),
+    Il2CppTypeEnum_IL2CPP_TYPE_I1 => (SByte, sbyte, "sbyte"),
+    Il2CppTypeEnum_IL2CPP_TYPE_I2 => (Short, short, "short"),
+    Il2CppTypeEnum_IL2CPP_TYPE_U2 => (UShort, ushort, "ushort"),
+    Il2CppTypeEnum_IL2CPP_TYPE_I4 => (Int, int, "int"),
+    Il2CppTypeEnum_IL2CPP_TYPE_U4 => (UInt, uint, "uint"),
+    Il2CppTypeEnum_IL2CPP_TYPE_I8 => (Long, long, "long"),
+    Il2CppTypeEnum_IL2CPP_TYPE_U8 => (ULong, ulong, "ulong"),
+    Il2CppTypeEnum_IL2CPP_TYPE_R4 => (Single, single, "single"),
+    Il2CppTypeEnum_IL2CPP_TYPE_R8 => (Double, double, "double"),
+    Il2CppTypeEnum_IL2CPP_TYPE_STRING => (String, string, "string"),
 }
 
 impl fmt::Display for Builtin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(match self {
-            Builtin::Void => "void",
-            Builtin::Object => "object",
-            Builtin::Bool => "bool",
-            Builtin::Char => "char",
-            Builtin::Byte => "byte",
-            Builtin::SByte => "sbyte",
-            Builtin::Short => "short",
-            Builtin::UShort => "ushort",
-            Builtin::Int => "int",
-            Builtin::UInt => "uint",
-            Builtin::Long => "long",
-            Builtin::ULong => "ulong",
-            Builtin::Single => "single",
-            Builtin::Double => "double",
-            Builtin::String => "string",
-        })
+        f.write_str(self.name())
     }
 }

@@ -3,8 +3,8 @@ use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
 
 use crate::{
-    raw, Arguments, CalleeReturn, CalleeThis, Il2CppType, MethodInfo, Parameters, Return, This,
-    WrapRaw,
+    raw, Arguments, CalleeReturn, CalleeThis, Il2CppException, Il2CppType, MethodInfo, Parameters,
+    Return, WrapRaw,
 };
 
 /// An il2cpp class
@@ -17,19 +17,19 @@ impl Il2CppClass {
         let namespace = CString::new(namespace).unwrap();
         let name = CString::new(name).unwrap();
 
-        let domain = raw::domain_get();
+        let domain = unsafe { raw::domain_get() };
 
         let mut assemblies_count = 0;
-        let assemblies = raw::domain_get_assemblies(domain, &mut assemblies_count);
+        let assemblies = unsafe { raw::domain_get_assemblies(domain, &mut assemblies_count) };
 
         for assembly in assemblies.iter().take(assemblies_count) {
             // For some reason, an assembly might not have an image
-            let image = match raw::assembly_get_image(assembly) {
+            let image = match unsafe { raw::assembly_get_image(assembly) } {
                 Some(image) => image,
                 None => continue,
             };
 
-            let class = raw::class_from_name(image, namespace.as_ptr(), name.as_ptr());
+            let class = unsafe { raw::class_from_name(image, namespace.as_ptr(), name.as_ptr()) };
             if let Some(class) = class {
                 return Some(unsafe { Self::wrap(class) });
             }
@@ -40,9 +40,8 @@ impl Il2CppClass {
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking
-    pub fn find_method<T, A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    pub fn find_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
     where
-        T: This,
         A: Arguments<N>,
         R: Return,
     {
@@ -51,10 +50,7 @@ impl Il2CppClass {
                 .methods()
                 .iter()
                 .filter(|mi| {
-                    mi.name() == name
-                        && T::matches(mi)
-                        && A::matches(mi.parameters())
-                        && R::matches(mi.return_ty())
+                    mi.name() == name && A::matches(mi.parameters()) && R::matches(mi.return_ty())
                 })
                 .copied();
 
@@ -65,12 +61,37 @@ impl Il2CppClass {
             } {
                 // If we have one match, we return it
                 (mi, None) => return Some(mi),
-                // If we have two matches, we return None to avoid conflicts
+                // If we have 2+ matches, we return None to avoid conflicts
                 _ => return None,
             }
         }
 
         None
+    }
+
+    /// Find a static method belonging to the class by name with type checking
+    pub fn find_method_static<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    where
+        A: Arguments<N>,
+        R: Return,
+    {
+        let mut matching = self
+            .methods()
+            .iter()
+            .filter(|mi| {
+                mi.name() == name
+                    && mi.is_static()
+                    && A::matches(mi.parameters())
+                    && R::matches(mi.return_ty())
+            })
+            .copied();
+
+        match (matching.next(), matching.next()) {
+            // If we have one match, we return it
+            (Some(mi), None) | (None, Some(mi)) => Some(mi),
+            // If we have 2+ or zero matches, we return None
+            _ => None,
+        }
     }
 
     /// Find a method belonging to the class or its parents by name with type
@@ -100,7 +121,7 @@ impl Il2CppClass {
             } {
                 // If we have one match, we return it
                 (mi, None) => return Some(mi),
-                // If we have two matches, we return None to avoid conflicts
+                // If we have 2+ matches, we return None to avoid conflicts
                 _ => return None,
             }
         }
@@ -129,12 +150,23 @@ impl Il2CppClass {
             } {
                 // If we have one match, we return it
                 (mi, None) => return Some(mi),
-                // If we have two matches, we return None to avoid conflicts
+                // If we have 2+ matches, we return None to avoid conflicts
                 _ => return None,
             }
         }
 
         None
+    }
+
+    /// Invokes the static method with the given name using the given arguments,
+    /// with type checking
+    pub fn invoke<A, R, const N: usize>(&self, name: &str, args: A) -> Result<R, &Il2CppException>
+    where
+        A: Arguments<N>,
+        R: Return,
+    {
+        let method = self.find_method_static::<A, R, N>(name).unwrap();
+        unsafe { method.invoke_unchecked((), args) }
     }
 
     /// Name of the class
@@ -193,7 +225,17 @@ impl Il2CppClass {
 
     /// Whether the class is assignable from `other`
     pub fn is_assignable_from(&self, other: &Il2CppClass) -> bool {
-        raw::class_is_assignable_from(self.raw(), other.raw())
+        unsafe { raw::class_is_assignable_from(self.raw(), other.raw()) }
+    }
+
+    /// [`Il2CppType`] of `this` for the class
+    pub fn this_arg_ty(&self) -> &Il2CppType {
+        unsafe { Il2CppType::wrap(&self.raw().this_arg) }
+    }
+
+    /// [`Il2CppType`] of byval arguments for the class
+    pub fn byval_arg_ty(&self) -> &Il2CppType {
+        unsafe { Il2CppType::wrap(&self.raw().byval_arg) }
     }
 }
 
@@ -217,6 +259,17 @@ impl<'a> Iterator for Hierarchy<'a> {
             }
             None => None,
         }
+    }
+}
+
+impl fmt::Debug for Il2CppClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let namespace = self.namespace();
+        let name = self.name();
+        f.debug_struct("Il2CppClass")
+            .field("namespace", &namespace)
+            .field("name", &name)
+            .finish()
     }
 }
 

@@ -71,7 +71,7 @@ pub unsafe trait Return {
     fn matches(ty: &Il2CppType) -> bool;
     /// Converts the [`Il2CppObject`] returned by
     /// [`runtime_invoke`](crate::raw::runtime_invoke) into self
-    fn from_object(object: Option<&Il2CppObject>) -> Self;
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self;
 }
 
 // When we are the caller, we can't know if the arguments will be mutated, so we
@@ -170,8 +170,50 @@ where
         T::class().is_assignable_from(ty.class())
     }
 
-    fn from_object(object: Option<&Il2CppObject>) -> Self {
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
         unsafe { transmute(object) }
+    }
+}
+unsafe impl<T> Return for Option<&mut T>
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <Option<&T> as Return>::matches(ty)
+    }
+
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+        unsafe { transmute(object) }
+    }
+}
+unsafe impl<T> Return for &T
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <Option<&T> as Return>::matches(ty)
+    }
+
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+        unsafe { &*(object.unwrap() as *mut Il2CppObject as *const T) }
+    }
+}
+unsafe impl<T> Return for &mut T
+where
+    T: Type + Any,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        <Option<&T> as Return>::matches(ty)
+    }
+
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+        unsafe { &mut *(object.unwrap() as *mut Il2CppObject as *mut T) }
     }
 }
 
@@ -182,5 +224,5 @@ unsafe impl Return for () {
         ty.is_builtin(Builtin::Void)
     }
 
-    fn from_object(_: Option<&Il2CppObject>) -> Self {}
+    fn from_object(_: Option<&mut Il2CppObject>) -> Self {}
 }

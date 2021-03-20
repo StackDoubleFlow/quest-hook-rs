@@ -1,4 +1,4 @@
-use crate::{raw, Il2CppClass, WrapRaw};
+use crate::{raw, Arguments, Il2CppClass, Il2CppException, Return, WrapRaw};
 
 /// An il2cpp object
 #[repr(transparent)]
@@ -6,8 +6,23 @@ pub struct Il2CppObject(raw::Il2CppObject);
 
 impl Il2CppObject {
     /// [`Il2CppClass`] of the object
-    pub fn class(&self) -> &Il2CppClass {
+    pub fn class(&self) -> &'static Il2CppClass {
         unsafe { Il2CppClass::wrap_ptr(self.raw().__bindgen_anon_1.klass) }.unwrap()
+    }
+
+    /// Invokes the method with the given name on `self` using the given
+    /// arguments, with type checking
+    pub fn invoke<A, R, const N: usize>(
+        &mut self,
+        name: &str,
+        args: A,
+    ) -> Result<R, &Il2CppException>
+    where
+        A: Arguments<N>,
+        R: Return,
+    {
+        let method = self.class().find_method::<A, R, N>(name).unwrap();
+        unsafe { method.invoke_unchecked(self, args) }
     }
 }
 
