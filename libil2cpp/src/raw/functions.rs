@@ -6,8 +6,8 @@ use std::lazy::SyncLazy;
 use std::os::raw::{c_char, c_int};
 
 use super::{
-    Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException, Il2CppImage, Il2CppObject,
-    Il2CppString, Il2CppType, MethodInfo,
+    FieldInfo, Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException, Il2CppImage,
+    Il2CppObject, Il2CppString, Il2CppType, MethodInfo,
 };
 
 macro_rules! define_functions {
@@ -43,6 +43,8 @@ define_functions! {
     fn class_from_il2cpp_type(ty: &Il2CppType) -> &'static Il2CppClass;
     fn class_is_assignable_from(class: &Il2CppClass, other_class: &Il2CppClass) -> bool;
     fn class_get_method_from_name(class: &Il2CppClass, name: *const c_char, args_count: u32) -> Option<&'static MethodInfo>;
+    fn field_set_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
+    fn field_get_value_object(obj: &mut Il2CppObject, field: &FieldInfo) -> Option<&'static mut Il2CppObject>;
     fn type_get_name(ty: &Il2CppType) -> *const c_char;
     fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&Il2CppException>) -> Option<&'static mut Il2CppObject>;
     fn format_exception(exception: &Il2CppException, message: *mut c_char, message_size: c_int);
