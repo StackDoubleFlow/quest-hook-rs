@@ -6,5 +6,6 @@
         "clippy",
         "--workspace",
         "--message-format=json"
-    ]
+    ],
+    "rust-analyzer.assist.importMergeBehavior": "last"
 }

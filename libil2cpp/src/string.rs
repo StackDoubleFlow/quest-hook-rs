@@ -1,13 +1,21 @@
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::string::FromUtf16Error;
 
-use super::{raw, Il2CppObject, WrapRaw};
+use crate::{raw, Il2CppObject, WrapRaw};
 
 /// An il2cpp string
 #[repr(transparent)]
 pub struct Il2CppString(raw::Il2CppString);
 
 impl Il2CppString {
+    /// Creates a new string from a Rust string
+    pub fn new(s: impl AsRef<str>) -> Option<&'static Self> {
+        let b = s.as_ref().as_bytes();
+        let s = unsafe { raw::string_new_len(b.as_ptr() as _, b.len() as _) };
+        s.map(|s| unsafe { Self::wrap(s) })
+    }
+
     /// Converts the string to a Rust string, returning an error if its utf-16
     /// data is invalid
     pub fn to_string(&self) -> Result<String, FromUtf16Error> {
@@ -61,5 +69,26 @@ impl AsRef<[u16]> for Il2CppString {
 impl AsMut<[u16]> for Il2CppString {
     fn as_mut(&mut self) -> &mut [u16] {
         self.as_utf16_mut()
+    }
+}
+
+impl<T> From<T> for &'static Il2CppString
+where
+    T: AsRef<str>,
+{
+    fn from(s: T) -> Self {
+        Il2CppString::new(s).unwrap()
+    }
+}
+
+impl fmt::Debug for Il2CppString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.to_string_lossy(), f)
+    }
+}
+
+impl fmt::Display for Il2CppString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.to_string_lossy(), f)
     }
 }

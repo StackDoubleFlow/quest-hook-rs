@@ -1,10 +1,16 @@
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 
+use std::num::NonZeroUsize;
+
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, Error, FnArg, ItemFn, LitStr, Pat, Token};
+use syn::spanned::Spanned;
+use syn::{
+    parse_macro_input, Error, Expr, ExprLit, ExprRange, FnArg, Index, ItemFn, Lit, LitStr, Pat,
+    RangeLimits, ReturnType, Token, Type,
+};
 
 /// Creates an inline hook at a C# method.
 ///
@@ -65,21 +71,39 @@ fn create_hook(
 
     let name = sig.ident;
     let return_type = sig.output;
+    let typecheck_return_type = match &return_type {
+        ReturnType::Default => quote! { () },
+        ReturnType::Type(_, ty) => quote! { #ty },
+    };
 
     let hook_name = format_ident!("{}_hook", name);
     let hook_args = sig.inputs;
 
-    let mut num_hook_args = 0;
-    for hook_arg in hook_args.iter() {
-        match match hook_arg {
-            FnArg::Typed(arg_type) => &*arg_type.pat,
+    let mut this_arg_type = None;
+
+    let mut num_hook_args: usize = 0;
+    for hook_arg in &hook_args {
+        let arg_type = match hook_arg {
+            FnArg::Typed(arg_type) => arg_type,
             FnArg::Receiver(_) => {
                 let msg = "Hook argument cannot be `self`";
                 return Err(Error::new_spanned(hook_arg, msg));
             }
-        } {
+        };
+
+        match &*arg_type.pat {
             // `il2cpp_class_get_method_from_name` does not count `this` in its argument count
-            Pat::Ident(pat_ident) if pat_ident.ident == "this" => {}
+            Pat::Ident(pat_ident) if pat_ident.ident == "this" => {
+                if this_arg_type.is_some() {
+                    let msg = "There cannot be more than one `this` argument.";
+                    return Err(Error::new_spanned(hook_arg, msg));
+                }
+                if num_hook_args > 0 {
+                    let msg = "`this` must be the first argument.";
+                    return Err(Error::new_spanned(hook_arg, msg));
+                }
+                this_arg_type = Some(arg_type.ty.clone());
+            }
             _ => num_hook_args += 1,
         }
     }
@@ -87,11 +111,21 @@ fn create_hook(
     let hook_struct_name = format_ident!("{}_Struct", name);
 
     let mut hook_args_untyped: Punctuated<Pat, Token![,]> = Punctuated::new();
+    let mut typecheck_arg_types: Punctuated<Type, Token![,]> = Punctuated::new();
     for arg in &hook_args {
         if let FnArg::Typed(arg) = arg {
             hook_args_untyped.push((*arg.pat).clone());
+            match &*arg.pat {
+                Pat::Ident(pat_ident) if pat_ident.ident == "this" => continue,
+                _ => typecheck_arg_types.push((*arg.ty).clone()),
+            }
         }
     }
+
+    let typecheck_this_type = match &this_arg_type {
+        None => quote! { () },
+        Some(ty) => quote! { #ty },
+    };
 
     let tokens = quote! {
         pub extern "C" fn #hook_name ( #hook_args ) #return_type #block
@@ -110,7 +144,12 @@ fn create_hook(
                 use ::quest_hook::libil2cpp::WrapRaw;
 
                 let class = ::quest_hook::libil2cpp::Il2CppClass::find(self.namespace, self.class_name).expect("Class not found");
-                let method = class.find_method(self.method_name, self.parameters_count).expect("Method not found");
+                let method = class.find_method_callee::<
+                    #typecheck_this_type,
+                    ( #typecheck_arg_types ),
+                    #typecheck_return_type,
+                    #num_hook_args
+                >(self.method_name).expect("Method not found");
                 let mut temp = ::std::ptr::null_mut();
 
                 unsafe {
@@ -162,7 +201,9 @@ fn create_hook(
             }
 
             fn hook(&self) -> *mut () {
-                ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
+                unsafe {
+                    ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
+                }
             }
 
             fn original(&self) -> *mut () {
@@ -181,4 +222,110 @@ fn create_hook(
     };
 
     Ok(tokens.into())
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn impl_arguments_parameters(input: TokenStream) -> TokenStream {
+    let range = parse_macro_input!(input as ExprRange);
+    match create_impl_arguments_parameters(range) {
+        Ok(ts) => ts,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Error> {
+    let span = range.span();
+
+    let start = range
+        .from
+        .ok_or_else(|| Error::new(span, "Tuple length range must have a lower bound"))?;
+    let start = parse_range_bound(*start)?;
+
+    let end = range
+        .to
+        .ok_or_else(|| Error::new(span, "Tuple length range must have an upper bound"))?;
+    let end = parse_range_bound(*end)?;
+
+    let range = match range.limits {
+        RangeLimits::HalfOpen(_) if end <= start => {
+            return Err(Error::new(span, "Tuple length range must be valid"))
+        }
+        RangeLimits::HalfOpen(_) => start..end,
+
+        RangeLimits::Closed(_) if end < start => {
+            return Err(Error::new(span, "Tuple length range must be valid"))
+        }
+        RangeLimits::Closed(_) => start..(end + 1),
+    };
+
+    let mut ts = TokenStream::new();
+    for n in range {
+        let generic_params_argument = (1..=n).map(|n| format_ident!("A{}", n));
+        let matches_argument = generic_params_argument
+            .clone()
+            .enumerate()
+            .map(|(n, gp)| quote!(<#gp>::matches(args[#n].ty())));
+        let invokables = (0..n).map(Index::from).map(|n| quote!(self.#n.invokable()));
+
+        let generic_params_parameter = (1..=n).map(|n| format_ident!("P{}", n));
+        let matches_parameter = generic_params_parameter
+            .clone()
+            .enumerate()
+            .map(|(n, gp)| quote!(<#gp>::matches(params[#n].ty())));
+
+        let generic_params_argument_tuple = generic_params_argument.clone();
+        let generic_params_argument_where = generic_params_argument.clone();
+        let generic_params_argument_type = generic_params_argument.clone();
+
+        let generic_params_parameter_tuple = generic_params_parameter.clone();
+        let generic_params_parameter_where = generic_params_parameter.clone();
+        let generic_params_parameter_type = generic_params_parameter.clone();
+
+        let impl_ts = quote! {
+            unsafe impl<#(#generic_params_argument),*> Arguments<#n> for (#(#generic_params_argument_tuple,)*)
+            where
+                #(#generic_params_argument_where: Argument),*
+            {
+                type Type = (#(#generic_params_argument_type::Type,)*);
+
+                fn matches(args: &[&ParameterInfo]) -> bool {
+                    args.len() == #n #( && #matches_argument)*
+                }
+
+                fn invokable(&self) -> [*mut c_void; #n] {
+                    [#(#invokables),*]
+                }
+            }
+
+            unsafe impl<#(#generic_params_parameter),*> Parameters<#n> for (#(#generic_params_parameter_tuple,)*)
+            where
+                #(#generic_params_parameter_where: Parameter),*
+            {
+                type Type = (#(#generic_params_parameter_type::Type,)*);
+
+                fn matches(params: &[&ParameterInfo]) -> bool {
+                    params.len() == #n #( && #matches_parameter)*
+                }
+            }
+        };
+        ts.extend(TokenStream::from(impl_ts));
+    }
+
+    Ok(ts)
+}
+
+fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
+    let bound: NonZeroUsize = match bound {
+        syn::Expr::Lit(ExprLit {
+            lit: Lit::Int(n), ..
+        }) => n.base10_parse()?,
+        _ => {
+            return Err(Error::new(
+                bound.span(),
+                "Tuple length bound must be an integer",
+            ))
+        }
+    };
+    Ok(bound.get())
 }

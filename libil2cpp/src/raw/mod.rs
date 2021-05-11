@@ -21,6 +21,7 @@ pub unsafe trait WrapRaw: Sized {
     type Raw;
 
     /// Returns a reference to the underlying raw il2cpp type
+    #[inline]
     fn raw(&self) -> &Self::Raw {
         unsafe { &*(self as *const _ as *const _) }
     }
@@ -31,6 +32,7 @@ pub unsafe trait WrapRaw: Sized {
     /// This method is unsafe because it allows mutating the underlying type in
     /// ways that make it invalid. Avoid mutating raw il2cpp types unless you
     /// know exactly what you are doing.
+    #[inline]
     unsafe fn raw_mut(&mut self) -> &mut Self::Raw {
         &mut *(self as *mut _ as *mut _)
     }
@@ -39,6 +41,7 @@ pub unsafe trait WrapRaw: Sized {
     ///
     /// # Safety
     /// The wrapped type must be in a valid state.
+    #[inline]
     unsafe fn wrap(raw: &Self::Raw) -> &Self {
         &*(raw as *const _ as *const _)
     }
@@ -47,6 +50,7 @@ pub unsafe trait WrapRaw: Sized {
     ///
     /// # Safety
     /// The wrapped type must be in a valid state.
+    #[inline]
     unsafe fn wrap_mut(raw: &mut Self::Raw) -> &mut Self {
         &mut *(raw as *mut _ as *mut _)
     }
@@ -57,6 +61,7 @@ pub unsafe trait WrapRaw: Sized {
     /// The pointer must not be dangling and must stay valid for the lifetime of
     /// the returned reference if it is not null, and the wrapped type must be
     /// in a valid state.
+    #[inline]
     unsafe fn wrap_ptr<'a>(ptr: *const Self::Raw) -> Option<&'a Self> {
         transmute(ptr)
     }
@@ -67,6 +72,7 @@ pub unsafe trait WrapRaw: Sized {
     /// The pointer must not be dangling and must stay valid for the lifetime of
     /// the returned mutable reference if it is not null, and the wrapped type
     /// must be in a valid state.
+    #[inline]
     unsafe fn wrap_ptr_mut<'a>(ptr: *mut Self::Raw) -> Option<&'a mut Self> {
         transmute(ptr)
     }

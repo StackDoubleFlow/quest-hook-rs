@@ -1,17 +1,19 @@
+use std::borrow::Cow;
 use std::ffi::CStr;
+use std::fmt;
 
-use super::{raw, Il2CppType, WrapRaw};
+use crate::{raw, Il2CppType, WrapRaw};
 
-/// Information about a C# method
+/// Information about a C# parameter
 #[repr(transparent)]
 pub struct ParameterInfo(raw::ParameterInfo);
 
 impl ParameterInfo {
     /// Name of the parameter
-    pub fn name(&self) -> &CStr {
+    pub fn name(&self) -> Cow<'_, str> {
         let name = self.raw().name;
         assert!(!name.is_null());
-        unsafe { CStr::from_ptr(name) }
+        unsafe { CStr::from_ptr(name) }.to_string_lossy()
     }
 
     /// Position of the parameter
@@ -20,8 +22,24 @@ impl ParameterInfo {
     }
 
     /// Type of the parameter
-    pub fn parameter_type(&self) -> &Il2CppType {
+    pub fn ty(&self) -> &Il2CppType {
         unsafe { Il2CppType::wrap_ptr(self.raw().parameter_type) }.unwrap()
+    }
+}
+
+impl fmt::Debug for ParameterInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ParameterInfo")
+            .field("name", &self.name())
+            .field("position", &self.position())
+            .field("ty", &self.ty())
+            .finish()
+    }
+}
+
+impl fmt::Display for ParameterInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.ty(), self.name())
     }
 }
 
