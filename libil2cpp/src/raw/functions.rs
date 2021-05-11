@@ -7,7 +7,7 @@ use std::os::raw::{c_char, c_int};
 
 use super::{
     Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException, Il2CppImage, Il2CppObject,
-    Il2CppString, Il2CppType, MethodInfo
+    Il2CppString, Il2CppType, MethodInfo,
 };
 
 macro_rules! define_functions {
