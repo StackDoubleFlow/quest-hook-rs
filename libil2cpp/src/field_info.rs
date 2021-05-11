@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::ffi::CStr;
+use std::mem::transmute;
 
 use super::{Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
 use crate::raw;
@@ -9,6 +10,7 @@ use crate::raw;
 pub struct FieldInfo(raw::FieldInfo);
 
 impl FieldInfo {
+    /// Store a typechecked value into a field
     pub fn store<A>(&self, instance: &mut Il2CppObject, val: A)
     where
         A: Argument,
@@ -23,11 +25,15 @@ impl FieldInfo {
     /// Store a value into a field without type checking
     ///
     /// # Safety
-    /// To be safe, the provided types have to match the field signature
-    pub unsafe fn store_unchecked(&self, instance: &mut Il2CppObject, val: impl Argument) {
+    /// To be safe, the provided type has to match the field signature
+    pub unsafe fn store_unchecked<A>(&self, instance: &mut Il2CppObject, val: A)
+    where
+        A: Argument,
+    {
         raw::field_set_value(instance.raw_mut(), self.raw(), val.invokable());
     }
 
+    /// Load a typechecked value from a field
     pub fn load<R>(&self, instance: &mut Il2CppObject) -> R
     where
         R: Return,
@@ -40,14 +46,14 @@ impl FieldInfo {
     /// Store a value into a field without type checking
     ///
     /// # Safety
-    /// To be safe, the provided types have to match the field signature
+    /// To be safe, the provided type has to match the field signature
     pub unsafe fn load_unchecked<R>(&self, instance: &mut Il2CppObject) -> R
     where
         R: Return,
     {
-        // let value
-        // raw::field_set_value(instance.raw_mut(), self.raw(), val.invokable());
-        unimplemented!()
+        let r = raw::field_get_value_object(instance.raw_mut(), self.raw());
+        let r = transmute::<Option<&mut raw::Il2CppObject>, Option<&mut Il2CppObject>>(r);
+        R::from_object(r)
     }
 
     /// Name of the field
