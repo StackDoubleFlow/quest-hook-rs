@@ -1,7 +1,7 @@
 use std::borrow::Cow;
-use std::fmt;
+use std::ffi::CStr;
 use std::mem::transmute;
-use std::{ffi::CStr, slice};
+use std::{fmt, slice};
 
 use crate::raw::{
     self, METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL,

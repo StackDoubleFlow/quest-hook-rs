@@ -31,6 +31,10 @@ impl Il2CppClass {
 
             let class = unsafe { raw::class_from_name(image, namespace.as_ptr(), name.as_ptr()) };
             if let Some(class) = class {
+                // Ensure class is initialized
+                // TODO: Call Class::Init somehow
+                let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
+
                 return Some(unsafe { Self::wrap(class) });
             }
         }

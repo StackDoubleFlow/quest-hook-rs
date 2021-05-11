@@ -27,5 +27,4 @@ pub use typecheck::caller::{Argument, Arguments, Return, This};
 pub use typecheck::ty::Type;
 
 // Maybe I have OCD
-pub use Parameter as CalleeArgument;
-pub use Parameters as CalleeArguments;
+pub use {Parameter as CalleeArgument, Parameters as CalleeArguments};

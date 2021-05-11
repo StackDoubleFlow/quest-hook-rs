@@ -5,11 +5,12 @@ use std::num::NonZeroUsize;
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, spanned::Spanned, Error, Expr, ExprLit, FnArg, Index, ItemFn, Lit, LitStr,
-    Pat, RangeLimits, Token,
+    parse_macro_input, Error, Expr, ExprLit, ExprRange, FnArg, Index, ItemFn, Lit, LitStr, Pat,
+    RangeLimits, ReturnType, Token, Type,
 };
-use syn::{punctuated::Punctuated, ExprRange};
 
 /// Creates an inline hook at a C# method.
 ///
@@ -70,21 +71,39 @@ fn create_hook(
 
     let name = sig.ident;
     let return_type = sig.output;
+    let typecheck_return_type = match &return_type {
+        ReturnType::Default => quote! { () },
+        ReturnType::Type(_, ty) => quote! { #ty },
+    };
 
     let hook_name = format_ident!("{}_hook", name);
     let hook_args = sig.inputs;
 
-    let mut num_hook_args = 0;
-    for hook_arg in hook_args.iter() {
-        match match hook_arg {
-            FnArg::Typed(arg_type) => &*arg_type.pat,
+    let mut this_arg_type = None;
+
+    let mut num_hook_args: usize = 0;
+    for hook_arg in &hook_args {
+        let arg_type = match hook_arg {
+            FnArg::Typed(arg_type) => arg_type,
             FnArg::Receiver(_) => {
                 let msg = "Hook argument cannot be `self`";
                 return Err(Error::new_spanned(hook_arg, msg));
             }
-        } {
+        };
+
+        match &*arg_type.pat {
             // `il2cpp_class_get_method_from_name` does not count `this` in its argument count
-            Pat::Ident(pat_ident) if pat_ident.ident == "this" => {}
+            Pat::Ident(pat_ident) if pat_ident.ident == "this" => {
+                if this_arg_type.is_some() {
+                    let msg = "There cannot be more than one `this` argument.";
+                    return Err(Error::new_spanned(hook_arg, msg));
+                }
+                if num_hook_args > 0 {
+                    let msg = "`this` must be the first argument.";
+                    return Err(Error::new_spanned(hook_arg, msg));
+                }
+                this_arg_type = Some(arg_type.ty.clone());
+            }
             _ => num_hook_args += 1,
         }
     }
@@ -92,11 +111,21 @@ fn create_hook(
     let hook_struct_name = format_ident!("{}_Struct", name);
 
     let mut hook_args_untyped: Punctuated<Pat, Token![,]> = Punctuated::new();
+    let mut typecheck_arg_types: Punctuated<Type, Token![,]> = Punctuated::new();
     for arg in &hook_args {
         if let FnArg::Typed(arg) = arg {
             hook_args_untyped.push((*arg.pat).clone());
+            match &*arg.pat {
+                Pat::Ident(pat_ident) if pat_ident.ident == "this" => continue,
+                _ => typecheck_arg_types.push((*arg.ty).clone()),
+            }
         }
     }
+
+    let typecheck_this_type = match &this_arg_type {
+        None => quote! { () },
+        Some(ty) => quote! { #ty },
+    };
 
     let tokens = quote! {
         pub extern "C" fn #hook_name ( #hook_args ) #return_type #block
@@ -115,7 +144,12 @@ fn create_hook(
                 use ::quest_hook::libil2cpp::WrapRaw;
 
                 let class = ::quest_hook::libil2cpp::Il2CppClass::find(self.namespace, self.class_name).expect("Class not found");
-                let method = class.find_method(self.method_name, self.parameters_count).expect("Method not found");
+                let method = class.find_method_callee::<
+                    #typecheck_this_type,
+                    ( #typecheck_arg_types ),
+                    #typecheck_return_type,
+                    #num_hook_args
+                >(self.method_name).expect("Method not found");
                 let mut temp = ::std::ptr::null_mut();
 
                 unsafe {
@@ -167,7 +201,9 @@ fn create_hook(
             }
 
             fn hook(&self) -> *mut () {
-                ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
+                unsafe {
+                    ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
+                }
             }
 
             fn original(&self) -> *mut () {
