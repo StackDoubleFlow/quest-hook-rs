@@ -3,8 +3,8 @@ use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
 
 use crate::{
-    raw, Arguments, CalleeReturn, CalleeThis, Il2CppException, Il2CppType, MethodInfo, Parameters,
-    Return, WrapRaw,
+    raw, Arguments, CalleeReturn, CalleeThis, FieldInfo, Il2CppException, Il2CppType, MethodInfo,
+    Parameters, Return, WrapRaw,
 };
 
 /// An il2cpp class
@@ -162,6 +162,20 @@ impl Il2CppClass {
         None
     }
 
+    pub fn find_field_unchecked(&self, name: &str) -> Option<&FieldInfo> {
+        for c in self.hierarchy() {
+            let mut matching = c.fields().iter().filter(|fi| fi.name() == name).copied();
+
+            match matching.next() {
+                // If we have no matches, we continue to the parent
+                None => continue,
+                Some(fi) => return Some(fi),
+            }
+        }
+
+        None
+    }
+
     /// Invokes the static method with the given name using the given arguments,
     /// with type checking
     pub fn invoke<A, R, const N: usize>(&self, name: &str, args: A) -> Result<R, &Il2CppException>
@@ -193,6 +207,17 @@ impl Il2CppClass {
         let methods = raw.methods;
         if !methods.is_null() {
             unsafe { slice::from_raw_parts(methods as _, raw.method_count as _) }
+        } else {
+            &[]
+        }
+    }
+
+    /// Fields of the class
+    pub fn fields(&self) -> &[&FieldInfo] {
+        let raw = self.raw();
+        let fields = raw.fields;
+        if !fields.is_null() {
+            unsafe { slice::from_raw_parts(fields as _, raw.field_count as _) }
         } else {
             &[]
         }

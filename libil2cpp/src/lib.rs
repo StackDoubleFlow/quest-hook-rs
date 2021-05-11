@@ -5,6 +5,7 @@
 mod array;
 mod class;
 mod exception;
+mod field_info;
 mod method_info;
 mod object;
 mod parameter_info;
@@ -16,6 +17,7 @@ mod typecheck;
 pub use array::Il2CppArray;
 pub use class::Il2CppClass;
 pub use exception::Il2CppException;
+pub use field_info::FieldInfo;
 pub use method_info::MethodInfo;
 pub use object::Il2CppObject;
 pub use parameter_info::ParameterInfo;
