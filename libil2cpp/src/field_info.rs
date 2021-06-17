@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::ffi::CStr;
-use std::mem::transmute;
+use std::mem::MaybeUninit;
 
 use super::{Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
 use crate::raw;
@@ -51,9 +51,9 @@ impl FieldInfo {
     where
         R: Return,
     {
-        let r = raw::field_get_value_object(instance.raw_mut(), self.raw());
-        let r = transmute::<Option<&mut raw::Il2CppObject>, Option<&mut Il2CppObject>>(r);
-        R::from_object(r)
+        let val = MaybeUninit::uninit();
+        raw::field_get_value(instance.raw_mut(), self.raw(), &val as *const _ as *const _);
+        val.assume_init()
     }
 
     /// Name of the field
