@@ -64,7 +64,6 @@
 <span id="62">62</span>
 <span id="63">63</span>
 <span id="64">64</span>
-<span id="65">65</span>
 </pre><pre class="rust">
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">rust_2018_idioms</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;strict&quot;</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
@@ -75,9 +74,9 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">quest_hook_proc_macros::hook</span>;
 
+<span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
 <span class="kw">use</span> <span class="ident">std::panic</span>;
 <span class="kw">use</span> <span class="ident">tracing_android::tracing::error</span>;
-<span class="kw">use</span> <span class="ident">std::ops::Deref</span>;
 
 <span class="doccomment">/// Trait implemented by all hooks to facilitate generic programming</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Hook</span> {
@@ -102,7 +101,6 @@
     <span class="doccomment">/// Pointer to the hooked method</span>
     <span class="kw">fn</span> <span class="ident">original</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> ();
 }
-
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">setup</span>() {
     <span class="ident">tracing_android::subscriber</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>)).<span class="ident">init</span>();
@@ -130,5 +128,6 @@
 
         <span class="macro">error!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">std::backtrace::Backtrace::force_capture</span>());
     }));
-}</pre></div>
+}
+</pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="quest_hook" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>
