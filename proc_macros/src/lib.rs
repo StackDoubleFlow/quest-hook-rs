@@ -289,7 +289,7 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
             {
                 type Type = (#(#generic_params_argument_type::Type,)*);
 
-                fn matches(args: &[&ParameterInfo]) -> bool {
+                fn matches(args: &[ParameterInfo]) -> bool {
                     args.len() == #n #( && #matches_argument)*
                 }
 
@@ -304,7 +304,7 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
             {
                 type Type = (#(#generic_params_parameter_type::Type,)*);
 
-                fn matches(params: &[&ParameterInfo]) -> bool {
+                fn matches(params: &[ParameterInfo]) -> bool {
                     params.len() == #n #( && #matches_parameter)*
                 }
             }

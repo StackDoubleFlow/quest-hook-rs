@@ -78,7 +78,7 @@ impl MethodInfo {
     }
 
     /// Parameters the method takes
-    pub fn parameters(&self) -> &[&ParameterInfo] {
+    pub fn parameters(&self) -> &[ParameterInfo] {
         let parameters = self.raw().parameters;
         if !parameters.is_null() {
             unsafe { slice::from_raw_parts(parameters as _, self.raw().parameters_count as _) }

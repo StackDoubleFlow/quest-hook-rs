@@ -64,7 +64,7 @@ impl fmt::Display for Il2CppType {
 macro_rules! builtins {
     ($($const:ident => ($variant:ident, $id:ident, $name:literal),)*) => {
         #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-        #[repr(i32)]
+        #[repr(u32)]
         pub enum Builtin {
             $($variant = $const,)*
         }
@@ -73,7 +73,7 @@ macro_rules! builtins {
             /// Whether the type represents the given [`Builtin`]
             #[inline]
             pub fn is_builtin(&self, builtin: Builtin) -> bool {
-                self.raw().type_() == builtin as i32
+                self.raw().type_() == builtin as u32
             }
 
             paste! {

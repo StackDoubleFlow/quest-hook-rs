@@ -1,4 +1,4 @@
-#![feature(once_cell, min_specialization, extended_key_value_attributes)]
+#![feature(once_cell, min_specialization)]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 

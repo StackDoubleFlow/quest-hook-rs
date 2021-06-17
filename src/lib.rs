@@ -1,10 +1,15 @@
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![feature(backtrace)]
 
 pub mod inline_hook;
 pub mod libil2cpp;
 
 pub use quest_hook_proc_macros::hook;
+
+use std::panic;
+use tracing_android::tracing::error;
+use std::ops::Deref;
 
 /// Trait implemented by all hooks to facilitate generic programming
 pub trait Hook {
@@ -28,4 +33,33 @@ pub trait Hook {
 
     /// Pointer to the hooked method
     fn original(&self) -> *mut ();
+}
+
+
+pub fn setup() {
+    tracing_android::subscriber(env!("CARGO_PKG_NAME")).init();
+
+    panic::set_hook(Box::new(|panic_info| {
+        let (filename, line) = panic_info
+            .location()
+            .map(|loc| (loc.file(), loc.line()))
+            .unwrap_or(("<unknown>", 0));
+
+        let cause = panic_info
+            .payload()
+            .downcast_ref::<String>()
+            .map(String::deref);
+
+        let cause = cause.unwrap_or_else(|| {
+            panic_info
+                .payload()
+                .downcast_ref::<&str>()
+                .cloned()
+                .unwrap_or("<cause unknown>")
+        });
+
+        error!("A panic occurred at {}:{}: {}", filename, line, cause);
+
+        error!("{:?}", std::backtrace::Backtrace::force_capture());
+    }));
 }

@@ -42,7 +42,7 @@ pub unsafe trait Parameters<const N: usize> {
 
     /// Checks whether the type can be used as a C# parameter collection with
     /// the given [`ParameterInfo`]s in a method definition
-    fn matches(params: &[&ParameterInfo]) -> bool;
+    fn matches(params: &[ParameterInfo]) -> bool;
 }
 
 /// Trait implemented by types that can be used as callee return types for C#
@@ -115,7 +115,7 @@ unsafe impl This for () {
 unsafe impl Parameters<0> for () {
     type Type = ();
 
-    fn matches(args: &[&ParameterInfo]) -> bool {
+    fn matches(args: &[ParameterInfo]) -> bool {
         args.is_empty()
     }
 }
@@ -126,7 +126,7 @@ where
 {
     type Type = (P::Type,);
 
-    fn matches(params: &[&ParameterInfo]) -> bool {
+    fn matches(params: &[ParameterInfo]) -> bool {
         params.len() == 1 && P::matches(params[0].ty())
     }
 }

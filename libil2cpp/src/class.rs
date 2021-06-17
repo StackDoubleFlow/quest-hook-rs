@@ -164,7 +164,7 @@ impl Il2CppClass {
 
     pub fn find_field_unchecked(&self, name: &str) -> Option<&FieldInfo> {
         for c in self.hierarchy() {
-            let mut matching = c.fields().iter().filter(|fi| fi.name() == name).copied();
+            let mut matching = c.fields().iter().filter(|fi| fi.name() == name);
 
             match matching.next() {
                 // If we have no matches, we continue to the parent
@@ -213,7 +213,7 @@ impl Il2CppClass {
     }
 
     /// Fields of the class
-    pub fn fields(&self) -> &[&FieldInfo] {
+    pub fn fields(&self) -> &[FieldInfo] {
         let raw = self.raw();
         let fields = raw.fields;
         if !fields.is_null() {

@@ -50,7 +50,7 @@ pub unsafe trait Arguments<const N: usize> {
 
     /// Checks whether the type can be used as a C# argument collection with the
     /// given [`ParameterInfo`]s to call a method
-    fn matches(args: &[&ParameterInfo]) -> bool;
+    fn matches(args: &[ParameterInfo]) -> bool;
     /// Returns an array of untyped pointer which can be used to invoke C#
     /// methods
     fn invokable(&self) -> [*mut c_void; N];
@@ -136,7 +136,7 @@ unsafe impl This for () {
 unsafe impl Arguments<0> for () {
     type Type = ();
 
-    fn matches(args: &[&ParameterInfo]) -> bool {
+    fn matches(args: &[ParameterInfo]) -> bool {
         args.is_empty()
     }
 
@@ -151,7 +151,7 @@ where
 {
     type Type = (A::Type,);
 
-    fn matches(args: &[&ParameterInfo]) -> bool {
+    fn matches(args: &[ParameterInfo]) -> bool {
         args.len() == 1 && A::matches(args[0].ty())
     }
 
