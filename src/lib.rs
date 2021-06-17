@@ -7,9 +7,9 @@ pub mod libil2cpp;
 
 pub use quest_hook_proc_macros::hook;
 
+use std::ops::Deref;
 use std::panic;
 use tracing_android::tracing::error;
-use std::ops::Deref;
 
 /// Trait implemented by all hooks to facilitate generic programming
 pub trait Hook {
@@ -34,7 +34,6 @@ pub trait Hook {
     /// Pointer to the hooked method
     fn original(&self) -> *mut ();
 }
-
 
 pub fn setup() {
     tracing_android::subscriber(env!("CARGO_PKG_NAME")).init();
