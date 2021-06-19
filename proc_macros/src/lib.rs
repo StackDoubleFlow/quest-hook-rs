@@ -154,16 +154,16 @@ fn create_hook(
 
                 unsafe {
                     ::quest_hook::inline_hook::A64HookFunction(
-                        ::std::mem::transmute::<unsafe extern "C" fn(), *mut ::std::ffi::c_void>(method.raw().methodPointer.unwrap()),
-                        ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ::std::ffi::c_void>( #hook_name ),
+                        method.raw().methodPointer.unwrap() as *mut _,
+                        #hook_name as *mut _,
                         &mut temp,
                     );
-
-                    self.original.store(
-                        ::std::mem::transmute::<*mut ::std::ffi::c_void, *mut ()>(temp),
-                        ::std::sync::atomic::Ordering::Relaxed
-                    );
                 }
+
+                self.original.store(
+                    temp as *mut _,
+                    ::std::sync::atomic::Ordering::Relaxed
+                );
             }
 
             fn original(&self, #hook_args ) #return_type {
@@ -201,9 +201,7 @@ fn create_hook(
             }
 
             fn hook(&self) -> *mut () {
-                unsafe {
-                    ::std::mem::transmute::<extern "C" fn( #hook_args ) #return_type, *mut ()>( #hook_name )
-                }
+                #hook_name as *mut _
             }
 
             fn original(&self) -> *mut () {
