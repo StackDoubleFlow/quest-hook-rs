@@ -63,6 +63,7 @@ impl fmt::Display for Il2CppType {
 
 macro_rules! builtins {
     ($($const:ident => ($variant:ident, $id:ident, $name:literal),)*) => {
+        // Builtin C# types
         #[derive(Clone, Copy, PartialEq, Eq, Hash)]
         #[repr(u32)]
         pub enum Builtin {
