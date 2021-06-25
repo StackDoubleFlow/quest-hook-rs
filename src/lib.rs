@@ -1,16 +1,18 @@
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 #![feature(backtrace)]
+#![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/quest_hook")]
 
-#[doc(hidden)]
-pub mod backtrace;
-#[doc(hidden)]
-pub mod inline_hook;
 pub mod libil2cpp;
-#[doc(hidden)]
-pub mod tracing_android;
 
 pub use quest_hook_proc_macros::hook;
+
+#[doc(hidden)]
+pub use inline_hook;
+#[doc(hidden)]
+pub use std::backtrace::Backtrace as StdBacktrace;
+#[doc(hidden)]
+pub use tracing_android;
 
 /// Trait implemented by all hooks to facilitate generic programming
 pub trait Hook {
@@ -68,10 +70,7 @@ macro_rules! setup {
                 cause
             );
 
-            $crate::tracing_android::tracing::error!(
-                "{:?}",
-                $crate::backtrace::Backtrace::force_capture()
-            );
+            $crate::tracing_android::tracing::error!("{:?}", $crate::StdBacktrace::force_capture());
         }));
     };
 }

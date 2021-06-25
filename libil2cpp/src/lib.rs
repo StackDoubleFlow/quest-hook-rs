@@ -1,6 +1,7 @@
 #![feature(once_cell, min_specialization)]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/quest_hook/libil2cpp")]
 
 mod array;
 mod class;

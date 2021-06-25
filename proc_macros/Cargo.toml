@@ -5,13 +5,14 @@ authors = [
     "StackDoubleFlow <ojaslandge@gmail.com>",
     "Raphaël Thériault <self@raftar.io>",
 ]
+repository = "https://github.com/StackDoubleFlow/quest-hook-rs.git"
 edition = "2018"
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = { version = "1", features = ["full", "extra-traits"] }
+syn = { version="1", features=["full", "extra-traits"] }
 quote = "1"
 
 [features]
