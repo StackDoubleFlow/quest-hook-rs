@@ -3,14 +3,14 @@
 #![feature(backtrace)]
 
 #[doc(hidden)]
+pub mod backtrace;
+#[doc(hidden)]
 pub mod inline_hook;
 pub mod libil2cpp;
+#[doc(hidden)]
+pub mod tracing_android;
 
 pub use quest_hook_proc_macros::hook;
-
-use std::ops::Deref;
-use std::panic;
-use tracing_android::tracing::error;
 
 /// Trait implemented by all hooks to facilitate generic programming
 pub trait Hook {
@@ -36,30 +36,42 @@ pub trait Hook {
     fn original(&self) -> *mut ();
 }
 
-pub fn setup() {
-    tracing_android::subscriber(env!("CARGO_PKG_NAME")).init();
+/// Properly sets up logging and panic handling using [`tracing_android`]
+#[macro_export]
+macro_rules! setup {
+    () => {
+        $crate::tracing_android::subscriber(env!("CARGO_PKG_NAME")).init();
 
-    panic::set_hook(Box::new(|panic_info| {
-        let (filename, line) = panic_info
-            .location()
-            .map(|loc| (loc.file(), loc.line()))
-            .unwrap_or(("<unknown>", 0));
+        ::std::panic::set_hook(Box::new(|panic_info| {
+            let (filename, line) = panic_info
+                .location()
+                .map(|loc| (loc.file(), loc.line()))
+                .unwrap_or(("<unknown>", 0));
 
-        let cause = panic_info
-            .payload()
-            .downcast_ref::<String>()
-            .map(String::deref);
-
-        let cause = cause.unwrap_or_else(|| {
-            panic_info
+            let cause = panic_info
                 .payload()
-                .downcast_ref::<&str>()
-                .cloned()
-                .unwrap_or("<cause unknown>")
-        });
+                .downcast_ref::<String>()
+                .map(::std::ops::Deref::deref);
 
-        error!("A panic occurred at {}:{}: {}", filename, line, cause);
+            let cause = cause.unwrap_or_else(|| {
+                panic_info
+                    .payload()
+                    .downcast_ref::<&str>()
+                    .cloned()
+                    .unwrap_or("<cause unknown>")
+            });
 
-        error!("{:?}", std::backtrace::Backtrace::force_capture());
-    }));
+            $crate::tracing_android::tracing::error!(
+                "A panic occurred at {}:{}: {}",
+                filename,
+                line,
+                cause
+            );
+
+            $crate::tracing_android::tracing::error!(
+                "{:?}",
+                $crate::backtrace::Backtrace::force_capture()
+            );
+        }));
+    };
 }

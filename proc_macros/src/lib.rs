@@ -24,7 +24,7 @@ use syn::{
 /// ```no_run
 /// use quest_hook::inline_hook::hook;
 /// use quest_hook::libil2cpp::Il2CppObject;
-/// use log::info;
+/// use tracing_android::tracing::info;
 ///
 /// #[hook("", "MainSettingsModelSO", "OnEnable")]
 /// fn on_enable(this: &Il2CppObject) {

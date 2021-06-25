@@ -13,7 +13,7 @@ use tracing_android::tracing::info;
 
 #[no_mangle]
 pub extern "C" fn setup() {
-    quest_hook::setup();
+    quest_hook::setup!();
 }
 
 #[hook("", "MainSettingsModelSO", "Load")]
