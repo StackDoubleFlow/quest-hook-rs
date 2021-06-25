@@ -76,14 +76,12 @@
 <span id="76">76</span>
 <span id="77">77</span>
 <span id="78">78</span>
-<span id="79">79</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::ffi::CStr</span>;
 <span class="kw">use</span> <span class="ident">std::mem::MaybeUninit</span>;
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Argument</span>, <span class="ident">Il2CppClass</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppType</span>, <span class="ident">Return</span>, <span class="ident">WrapRaw</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::raw</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">raw</span>, <span class="ident">Argument</span>, <span class="ident">Il2CppClass</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppType</span>, <span class="ident">Return</span>, <span class="ident">WrapRaw</span>};
 
 <span class="doccomment">/// Information about a C# field</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
