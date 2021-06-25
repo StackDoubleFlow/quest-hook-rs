@@ -1,3 +1,3 @@
 var N = null;var sourcesIndex = {};
-sourcesIndex["quest_hook"] = {"name":"","files":["backtrace.rs","inline_hook.rs","lib.rs","libil2cpp.rs","tracing_android.rs"]};
+sourcesIndex["quest_hook"] = {"name":"","files":["lib.rs","libil2cpp.rs"]};
 createSourceSidebar();
