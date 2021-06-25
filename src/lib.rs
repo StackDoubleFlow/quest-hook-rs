@@ -2,6 +2,7 @@
 #![cfg_attr(feature = "strict", deny(warnings))]
 #![feature(backtrace)]
 
+#[doc(hidden)]
 pub mod inline_hook;
 pub mod libil2cpp;
 

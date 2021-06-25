@@ -85,7 +85,7 @@ macro_rules! builtins {
                 )*
             }
 
-            /// [`Builtin`} the type represents, if any
+            /// [`Builtin`] the type represents, if any
             pub fn as_builtin(&self) -> Option<Builtin> {
                 #[allow(non_upper_case_globals)]
                 match self.raw().type_() {
