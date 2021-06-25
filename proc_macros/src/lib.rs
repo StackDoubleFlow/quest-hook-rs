@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms)]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/quest_hook_proc_macros")]
 
 use std::num::NonZeroUsize;
 

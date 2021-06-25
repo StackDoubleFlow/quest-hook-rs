@@ -3,8 +3,7 @@
 #![feature(backtrace)]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/quest_hook")]
 
-pub mod libil2cpp;
-
+pub use libil2cpp;
 pub use quest_hook_proc_macros::hook;
 
 #[doc(hidden)]

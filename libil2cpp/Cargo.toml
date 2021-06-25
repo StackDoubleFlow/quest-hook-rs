@@ -6,6 +6,7 @@ authors = [
     "Raphaël Thériault <self@raftar.io>",
 ]
 repository = "https://github.com/StackDoubleFlow/quest-hook-rs.git"
+license = "MIT"
 edition = "2018"
 
 [dependencies]
