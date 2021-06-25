@@ -1,1 +1,1 @@
-initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]],"macro":[["setup","Properly sets up logging and panic handling using [`tracing_android`]"]],"mod":[["libil2cpp",""]],"trait":[["Hook","Trait implemented by all hooks to facilitate generic programming"]]});
+initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]],"macro":[["setup","Properly sets up logging and panic handling using [`tracing_android`]"]],"trait":[["Hook","Trait implemented by all hooks to facilitate generic programming"]]});
