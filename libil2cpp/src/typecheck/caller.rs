@@ -166,7 +166,7 @@ where
 {
     type Type = T;
 
-    fn matches(ty: &Il2CppType) -> bool {
+    default fn matches(ty: &Il2CppType) -> bool {
         T::class().is_assignable_from(ty.class())
     }
 

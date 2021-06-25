@@ -9,7 +9,7 @@ use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
     parse_macro_input, Error, Expr, ExprLit, ExprRange, FnArg, Index, ItemFn, Lit, LitStr, Pat,
-    RangeLimits, ReturnType, Token, Type,
+    PathArguments, RangeLimits, ReturnType, Token, Type,
 };
 
 /// Creates an inline hook at a C# method.
@@ -326,4 +326,94 @@ fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
         }
     };
     Ok(bound.get())
+}
+
+#[proc_macro]
+pub fn unsafe_type_impl(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as Type);
+
+    match create_unsafe_type_impl(input) {
+        Ok(ts) => ts,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+fn create_unsafe_type_impl(input: Type) -> Result<TokenStream, Error> {
+    let ty = match input {
+        Type::Path(ty) => ty,
+        _ => return Err(Error::new(input.span(), "Invalid type")),
+    };
+    let generics = ty
+        .path
+        .segments
+        .last()
+        .map(|seg| match &seg.arguments {
+            PathArguments::AngleBracketed(args) => Some(&args.args),
+            _ => None,
+        })
+        .flatten()
+        .map(|args| args.iter())
+        .map(|args| quote! { < #( #args: 'static ),* > });
+
+    let ts = quote! {
+        unsafe impl #generics quest_hook::libil2cpp::Argument for #ty {
+            type Type = #ty;
+
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() == 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+
+            fn invokable(&self) -> *mut std::ffi::c_void {
+                self as *const #ty as *mut std::ffi::c_void
+            }
+        }
+        unsafe impl #generics quest_hook::libil2cpp::Argument for &mut #ty {
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() != 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+        }
+
+        unsafe impl #generics quest_hook::libil2cpp::Parameter for #ty {
+            type Type = #ty;
+
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() == 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+        }
+        unsafe impl #generics quest_hook::libil2cpp::Parameter for Option<&#ty> {
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() != 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+        }
+
+        unsafe impl #generics quest_hook::libil2cpp::Return for #ty {
+            type Type = #ty;
+
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() == 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+
+            fn from_object(object: Option<&mut quest_hook::libil2cpp::Il2CppObject>) -> Self {
+                unsafe { *(object.unwrap() as *mut quest_hook::libil2cpp::Il2CppObject as *const #ty) }
+            }
+        }
+        unsafe impl #generics quest_hook::libil2cpp::Return for Option<&#ty> {
+            fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
+                let self_ty = <#ty as quest_hook::libil2cpp::Type>::class().raw().byval_arg;
+                ty.raw().byref() != 0
+                    && unsafe { self_ty.data.klassIndex == ty.raw().data.klassIndex }
+            }
+        }
+    };
+    Ok(ts.into())
 }

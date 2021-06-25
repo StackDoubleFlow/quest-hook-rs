@@ -1,4 +1,4 @@
-use crate::{Il2CppClass, Il2CppObject, Il2CppString};
+use crate::{Il2CppArray, Il2CppClass, Il2CppObject, Il2CppString};
 
 /// Trait implemented by Rust types that are also C# types
 ///
@@ -40,3 +40,8 @@ impl_type!(f64, "System", "Double");
 impl_type!(bool, "System", "Boolean");
 impl_type!(Il2CppObject, "System", "Object");
 impl_type!(Il2CppString, "System", "String");
+
+unsafe impl<T> Type for Il2CppArray<T> {
+    const NAMESPACE: &'static str = "System";
+    const CLASS_NAME: &'static str = "Array";
+}
