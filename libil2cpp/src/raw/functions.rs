@@ -3,7 +3,7 @@ use dlopen_derive::WrapperApi;
 use paste::paste;
 use std::ffi::c_void;
 use std::lazy::SyncLazy;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::c_char;
 
 use super::{
     FieldInfo, Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException, Il2CppImage,
@@ -47,6 +47,5 @@ define_functions! {
     fn field_get_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
     fn type_get_name(ty: &Il2CppType) -> *const c_char;
     fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&Il2CppException>) -> Option<&'static mut Il2CppObject>;
-    fn format_exception(exception: &Il2CppException, message: *mut c_char, message_size: c_int);
     fn string_new_len(s: *const char, len: u32) -> Option<&'static Il2CppString>;
 }

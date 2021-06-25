@@ -2,8 +2,7 @@ use std::borrow::Cow;
 use std::ffi::CStr;
 use std::mem::MaybeUninit;
 
-use super::{Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
-use crate::raw;
+use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
 
 /// Information about a C# field
 #[repr(transparent)]
