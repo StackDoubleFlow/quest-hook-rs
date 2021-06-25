@@ -1,1 +1,1 @@
-initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]],"fn":[["setup",""]],"mod":[["inline_hook",""],["libil2cpp",""]],"trait":[["Hook","Trait implemented by all hooks to facilitate generic programming"]]});
+initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]],"fn":[["setup",""]],"mod":[["libil2cpp",""]],"trait":[["Hook","Trait implemented by all hooks to facilitate generic programming"]]});
