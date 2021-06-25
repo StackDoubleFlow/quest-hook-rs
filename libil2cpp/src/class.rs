@@ -268,7 +268,7 @@ impl Il2CppClass {
     }
 }
 
-/// Iterator over the parents of a class
+/// Iterator over a class hierarchy
 pub struct Hierarchy<'a> {
     current: Option<&'a Il2CppClass>,
 }
