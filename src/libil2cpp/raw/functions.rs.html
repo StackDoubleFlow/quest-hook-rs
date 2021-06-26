@@ -79,7 +79,7 @@
 
         <span class="macro">paste!</span> {
             $(
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::missing_safety_doc</span>)]</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>, <span class="ident">clippy::missing_safety_doc</span>)]</span>
                 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> ( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg_type</span> ),<span class="op">*</span> ) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span> )<span class="question-mark">?</span> {
                     <span class="macro-nonterminal">LIBIL2CPP</span>.[<span class="op">&lt;</span><span class="ident">il2cpp_</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&gt;</span>]( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg_name</span> ),<span class="op">*</span> )
                 }
