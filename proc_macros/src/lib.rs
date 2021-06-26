@@ -329,21 +329,21 @@ fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
 }
 
 #[proc_macro]
-pub fn unsafe_type_impl(input: TokenStream) -> TokenStream {
+pub fn unsafe_value_type_impl(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Type);
 
-    match create_unsafe_type_impl(input) {
+    match crate_unsafe_value_type_impl(input) {
         Ok(ts) => ts,
         Err(err) => err.to_compile_error().into(),
     }
 }
 
-fn create_unsafe_type_impl(input: Type) -> Result<TokenStream, Error> {
+fn crate_unsafe_value_type_impl(input: Type) -> Result<TokenStream, Error> {
     let ty = match input {
         Type::Path(ty) => ty,
         _ => return Err(Error::new(input.span(), "Invalid type")),
     };
-    let generics = ty
+    let args = ty
         .path
         .segments
         .last()
@@ -352,11 +352,12 @@ fn create_unsafe_type_impl(input: Type) -> Result<TokenStream, Error> {
             _ => None,
         })
         .flatten()
-        .map(|args| args.iter())
-        .map(|args| quote! { < #( #args: 'static ),* > });
+        .map(|args| args.iter());
+    let generics = args.clone().map(|args| quote! { < #( #args ),* > });
+    let static_generics = args.map(|args| quote! { < #( #args: 'static ),* > });
 
     let ts = quote! {
-        unsafe impl #generics quest_hook::libil2cpp::Argument for #ty {
+        unsafe impl #static_generics quest_hook::libil2cpp::Argument for #ty {
             type Type = #ty;
 
             fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
@@ -377,7 +378,7 @@ fn create_unsafe_type_impl(input: Type) -> Result<TokenStream, Error> {
             }
         }
 
-        unsafe impl #generics quest_hook::libil2cpp::Parameter for #ty {
+        unsafe impl #static_generics quest_hook::libil2cpp::Parameter for #ty {
             type Type = #ty;
 
             fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
@@ -394,7 +395,7 @@ fn create_unsafe_type_impl(input: Type) -> Result<TokenStream, Error> {
             }
         }
 
-        unsafe impl #generics quest_hook::libil2cpp::Return for #ty {
+        unsafe impl #static_generics quest_hook::libil2cpp::Return for #ty {
             type Type = #ty;
 
             fn matches(ty: &quest_hook::libil2cpp::Il2CppType) -> bool {
