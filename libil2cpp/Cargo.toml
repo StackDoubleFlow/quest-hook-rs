@@ -5,14 +5,15 @@ authors = [
     "StackDoubleFlow <ojaslandge@gmail.com>",
     "Raphaël Thériault <self@raftar.io>",
 ]
+repository = "https://github.com/StackDoubleFlow/quest-hook-rs.git"
+license = "MIT"
 edition = "2018"
 
 [dependencies]
 dlopen = "0.1.8"
 dlopen_derive = "0.1.4"
 paste = "1"
-tracing-android = { git = "https://github.com/raftario/tracing-android.git" }
-quest_hook_proc_macros = { path = "../proc_macros" }
+quest_hook_proc_macros = { path="../proc_macros" }
 
 [features]
 default = []

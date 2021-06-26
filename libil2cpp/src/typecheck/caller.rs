@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use std::mem::transmute;
 use std::ptr::null_mut;
 
-use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, ParameterInfo, Type};
+use crate::{raw, Builtin, Il2CppObject, Il2CppType, MethodInfo, ParameterInfo, Type, WrapRaw};
 
 /// Trait implemented by types that can be used as C# method arguments
 ///
@@ -170,7 +170,7 @@ where
         T::class().is_assignable_from(ty.class())
     }
 
-    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+    default fn from_object(object: Option<&mut Il2CppObject>) -> Self {
         unsafe { transmute(object) }
     }
 }
@@ -185,35 +185,7 @@ where
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { transmute(object) }
-    }
-}
-unsafe impl<T> Return for &T
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        <Option<&T> as Return>::matches(ty)
-    }
-
-    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { &*(object.unwrap() as *mut Il2CppObject as *const T) }
-    }
-}
-unsafe impl<T> Return for &mut T
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        <Option<&T> as Return>::matches(ty)
-    }
-
-    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { &mut *(object.unwrap() as *mut Il2CppObject as *mut T) }
+        unsafe { transmute(<Option<&T> as Return>::from_object(object)) }
     }
 }
 
@@ -226,3 +198,41 @@ unsafe impl Return for () {
 
     fn from_object(_: Option<&mut Il2CppObject>) -> Self {}
 }
+
+macro_rules! impl_return_value {
+    ($type:ty, $($builtin:ident),+) => {
+        unsafe impl Return for $type {
+            type Type = $type;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                $(ty.is_builtin(Builtin::$builtin))||+
+            }
+
+            fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+                unsafe { *(raw::object_unbox(object.unwrap().raw_mut()) as *mut Self) }
+            }
+        }
+
+        unsafe impl Return for Option<&$type> {
+            fn matches(_: &Il2CppType) -> bool {
+                false
+            }
+
+            fn from_object(_: Option<&mut Il2CppObject>) -> Self {
+                panic!("value types can't be returned by reference")
+            }
+        }
+    }
+}
+
+impl_return_value!(u8, Byte);
+impl_return_value!(i8, SByte);
+impl_return_value!(u16, UShort, Char);
+impl_return_value!(i16, Short);
+impl_return_value!(u32, UInt);
+impl_return_value!(i32, Int);
+impl_return_value!(u64, ULong);
+impl_return_value!(i64, Long);
+impl_return_value!(f32, Single);
+impl_return_value!(f64, Double);
+impl_return_value!(bool, Bool);

@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 use std::ffi::CStr;
+use std::fmt;
 use std::mem::MaybeUninit;
 
-use super::{Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
-use crate::raw;
+use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
 
 /// Information about a C# field
 #[repr(transparent)]
@@ -76,4 +76,13 @@ impl FieldInfo {
 
 unsafe impl WrapRaw for FieldInfo {
     type Raw = raw::FieldInfo;
+}
+
+impl fmt::Debug for FieldInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FieldInfo")
+            .field("name", &self.name())
+            .field("type", self.ty())
+            .finish()
+    }
 }

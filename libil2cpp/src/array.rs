@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
-use std::slice;
+use std::{fmt, slice};
 
 use crate::{raw, Il2CppObject, WrapRaw};
 
 /// An il2cpp array
-#[repr(C)]
+#[repr(transparent)]
 pub struct Il2CppArray<T>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T> Il2CppArray<T> {
@@ -42,6 +42,12 @@ impl<T> Il2CppArray<T> {
 
 unsafe impl<T> WrapRaw for Il2CppArray<T> {
     type Raw = raw::Il2CppArray;
+}
+
+impl<T: fmt::Debug> fmt::Debug for Il2CppArray<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Il2CppArray").field(&self.as_ref()).finish()
+    }
 }
 
 impl<T> Deref for Il2CppArray<T> {

@@ -1,5 +1,8 @@
-#![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms, missing_debug_implementations, missing_docs)]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/quest_hook_proc_macros")]
+
+//! Procedural macros for the quest_hook crate
 
 use std::num::NonZeroUsize;
 
@@ -24,7 +27,7 @@ use syn::{
 /// ```no_run
 /// use quest_hook::inline_hook::hook;
 /// use quest_hook::libil2cpp::Il2CppObject;
-/// use log::info;
+/// use tracing_android::tracing::info;
 ///
 /// #[hook("", "MainSettingsModelSO", "OnEnable")]
 /// fn on_enable(this: &Il2CppObject) {

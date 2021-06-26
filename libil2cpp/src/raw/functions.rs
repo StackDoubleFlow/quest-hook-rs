@@ -3,7 +3,7 @@ use dlopen_derive::WrapperApi;
 use paste::paste;
 use std::ffi::c_void;
 use std::lazy::SyncLazy;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::c_char;
 
 use super::{
     FieldInfo, Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException, Il2CppImage,
@@ -26,7 +26,7 @@ macro_rules! define_functions {
 
         paste! {
             $(
-                #[allow(clippy::missing_safety_doc)]
+                #[allow(missing_docs, clippy::missing_safety_doc)]
                 pub unsafe fn $name ( $( $arg_name : $arg_type ),* ) $( -> $return )? {
                     LIBIL2CPP.[<il2cpp_ $name>]( $( $arg_name ),* )
                 }
@@ -46,7 +46,8 @@ define_functions! {
     fn field_set_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
     fn field_get_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
     fn type_get_name(ty: &Il2CppType) -> *const c_char;
-    fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&Il2CppException>) -> Option<&'static mut Il2CppObject>;
-    fn format_exception(exception: &Il2CppException, message: *mut c_char, message_size: c_int);
+    fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&mut Il2CppException>) -> Option<&'static mut Il2CppObject>;
     fn string_new_len(s: *const char, len: u32) -> Option<&'static Il2CppString>;
+    fn raise_exception(exc: &Il2CppException) -> !;
+    fn object_unbox(obj: &mut Il2CppObject) -> *mut c_void;
 }
