@@ -9,7 +9,7 @@ A library used for writing mods for Oculus Quest Unity il2cpp games. Mods using 
 ```rust
 use quest_hook::hook;
 use quest_hook::libil2cpp::Il2CppObject;
-use tracing_android::tracing::info;
+use quest_hook::tracing::info;
 
 #[no_mangle]
 pub extern "C" fn setup() {

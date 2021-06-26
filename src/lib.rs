@@ -7,6 +7,7 @@
 
 pub use libil2cpp;
 pub use quest_hook_proc_macros::hook;
+pub use tracing_android::tracing;
 
 #[doc(hidden)]
 pub use inline_hook;
@@ -39,7 +40,7 @@ pub trait Hook {
     fn original(&self) -> *mut ();
 }
 
-/// Properly sets up logging and panic handling using [`tracing_android`]
+/// Properly sets up logging and panic handling using [`tracing`]
 #[macro_export]
 macro_rules! setup {
     () => {
@@ -64,14 +65,8 @@ macro_rules! setup {
                     .unwrap_or("<cause unknown>")
             });
 
-            $crate::tracing_android::tracing::error!(
-                "A panic occurred at {}:{}: {}",
-                filename,
-                line,
-                cause
-            );
-
-            $crate::tracing_android::tracing::error!("{:?}", $crate::StdBacktrace::force_capture());
+            $crate::tracing::error!("A panic occurred at {}:{}: {}", filename, line, cause);
+            $crate::tracing::error!("{:?}", $crate::StdBacktrace::force_capture());
         }));
     };
 }
