@@ -219,7 +219,7 @@ macro_rules! impl_return_value {
             }
 
             fn from_object(_: Option<&mut Il2CppObject>) -> Self {
-                unreachable!()
+                panic!("value types can't be returned by reference")
             }
         }
     }
