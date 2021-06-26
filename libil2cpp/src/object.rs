@@ -31,6 +31,24 @@ impl Il2CppObject {
         unsafe { method.invoke_unchecked(self, args) }
     }
 
+    /// Invokes the `void` method with the given name on `self` using the
+    /// given arguments, with type checking
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if a matching method can't be found.
+    pub fn invoke_void<A, const N: usize>(
+        &mut self,
+        name: &str,
+        args: A,
+    ) -> Result<(), &Il2CppException>
+    where
+        A: Arguments<N>,
+    {
+        let method = self.class().find_method::<A, (), N>(name).unwrap();
+        unsafe { method.invoke_unchecked(self, args) }
+    }
+
     /// Loads a value from a field of `self` with the given name, with type
     /// checking
     ///

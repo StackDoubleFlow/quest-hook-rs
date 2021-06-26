@@ -73,8 +73,8 @@ impl Il2CppClass {
         None
     }
 
-    /// Find a static method belonging to the class by name with type checking
-    pub fn find_method_static<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    /// Find a `static` method belonging to the class by name with type checking
+    pub fn find_static_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
     where
         A: Arguments<N>,
         R: Return,
@@ -177,14 +177,28 @@ impl Il2CppClass {
         None
     }
 
-    /// Invokes the static method with the given name using the given arguments,
-    /// with type checking
+    /// Invokes the `static` method with the given name using the given
+    /// arguments, with type checking
     pub fn invoke<A, R, const N: usize>(&self, name: &str, args: A) -> Result<R, &Il2CppException>
     where
         A: Arguments<N>,
         R: Return,
     {
-        let method = self.find_method_static::<A, R, N>(name).unwrap();
+        let method = self.find_static_method::<A, R, N>(name).unwrap();
+        unsafe { method.invoke_unchecked((), args) }
+    }
+
+    /// Invokes the `static void` method with the given name using the given
+    /// arguments, with type checking
+    pub fn invoke_void<A, const N: usize>(
+        &self,
+        name: &str,
+        args: A,
+    ) -> Result<(), &Il2CppException>
+    where
+        A: Arguments<N>,
+    {
+        let method = self.find_static_method::<A, (), N>(name).unwrap();
         unsafe { method.invoke_unchecked((), args) }
     }
 

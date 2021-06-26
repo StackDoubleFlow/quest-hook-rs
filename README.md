@@ -21,7 +21,7 @@ fn on_enable(this: &mut Il2CppObject, forced: bool) {
     on_enable.original(this, forced);
 
     let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled").unwrap();
-    let _: () = burn_mark_trails_enabled.invoke("set_value", true).unwrap();
+    burn_mark_trails_enabled.invoke_void("set_value", true).unwrap();
 }
 
 #[no_mangle]
