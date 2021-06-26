@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::{raw, Arguments, Il2CppClass, Il2CppException, Return, WrapRaw};
 
 /// An il2cpp object
@@ -28,4 +30,12 @@ impl Il2CppObject {
 
 unsafe impl WrapRaw for Il2CppObject {
     type Raw = raw::Il2CppObject;
+}
+
+impl fmt::Debug for Il2CppObject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Il2CppObject")
+            .field("class", self.class())
+            .finish()
+    }
 }

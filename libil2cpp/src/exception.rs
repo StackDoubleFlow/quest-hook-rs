@@ -42,6 +42,7 @@ impl Il2CppException {
 }
 
 /// Iterator over inner exceptions
+#[derive(Debug)]
 pub struct Trace<'a> {
     current: Option<&'a Il2CppException>,
 }

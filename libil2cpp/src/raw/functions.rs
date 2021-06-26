@@ -26,7 +26,7 @@ macro_rules! define_functions {
 
         paste! {
             $(
-                #[allow(clippy::missing_safety_doc)]
+                #[allow(missing_docs, clippy::missing_safety_doc)]
                 pub unsafe fn $name ( $( $arg_name : $arg_type ),* ) $( -> $return )? {
                     LIBIL2CPP.[<il2cpp_ $name>]( $( $arg_name ),* )
                 }

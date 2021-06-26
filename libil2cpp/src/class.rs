@@ -162,6 +162,8 @@ impl Il2CppClass {
         None
     }
 
+    /// Find a field belonging to the class or its parents by name, without type
+    /// checking
     pub fn find_field_unchecked(&self, name: &str) -> Option<&FieldInfo> {
         for c in self.hierarchy() {
             let mut matching = c.fields().iter().filter(|fi| fi.name() == name);
@@ -269,6 +271,7 @@ impl Il2CppClass {
 }
 
 /// Iterator over a class hierarchy
+#[derive(Debug)]
 pub struct Hierarchy<'a> {
     current: Option<&'a Il2CppClass>,
 }
