@@ -20,9 +20,8 @@ pub extern "C" fn setup() {
 fn on_enable(this: &mut Il2CppObject, forced: bool) {
     on_enable.original(this, forced);
 
-    let field = this.class().find_field_unchecked("burnMarkTrailsEnabled").unwrap();
-    let val: &mut Il2CppObject = field.load(this);
-    let _: () = val.invoke("set_value", true).unwrap();
+    let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled");
+    let _: () = burn_mark_trails_enabled.invoke("set_value", true).unwrap();
 }
 
 #[no_mangle]

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{raw, Arguments, Il2CppClass, Il2CppException, Return, WrapRaw};
+use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Return, WrapRaw};
 
 /// An il2cpp object
 #[repr(transparent)]
@@ -14,6 +14,10 @@ impl Il2CppObject {
 
     /// Invokes the method with the given name on `self` using the given
     /// arguments, with type checking
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if a matching method can't be found.
     pub fn invoke<A, R, const N: usize>(
         &mut self,
         name: &str,
@@ -25,6 +29,34 @@ impl Il2CppObject {
     {
         let method = self.class().find_method::<A, R, N>(name).unwrap();
         unsafe { method.invoke_unchecked(self, args) }
+    }
+
+    /// Loads a value from a field of `self` with the given name, with type
+    /// checking
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the given field can't be found
+    pub fn load<R>(&mut self, field: &str) -> R
+    where
+        R: Return,
+    {
+        let field = self.class().find_field(field).unwrap();
+        field.load(self)
+    }
+
+    /// Stores a given value into a field of `self` with the given name, with
+    /// type checking
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the given field can't be found
+    pub fn store<A>(&mut self, field: &str, value: A)
+    where
+        A: Argument,
+    {
+        let field = self.class().find_field(field).unwrap();
+        field.store(self, value)
     }
 }
 
