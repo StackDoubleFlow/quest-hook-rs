@@ -40,8 +40,13 @@
 <span id="40">40</span>
 <span id="41">41</span>
 <span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
 </pre><pre class="rust">
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Il2CppClass</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppString</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Il2CppArray</span>, <span class="ident">Il2CppClass</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppString</span>};
 
 <span class="doccomment">/// Trait implemented by Rust types that are also C# types</span>
 <span class="doccomment">///</span>
@@ -83,6 +88,11 @@
 <span class="macro">impl_type!</span>(<span class="ident">bool</span>, <span class="string">&quot;System&quot;</span>, <span class="string">&quot;Boolean&quot;</span>);
 <span class="macro">impl_type!</span>(<span class="ident">Il2CppObject</span>, <span class="string">&quot;System&quot;</span>, <span class="string">&quot;Object&quot;</span>);
 <span class="macro">impl_type!</span>(<span class="ident">Il2CppString</span>, <span class="string">&quot;System&quot;</span>, <span class="string">&quot;String&quot;</span>);
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Type</span> <span class="kw">for</span> <span class="ident">Il2CppArray</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">const</span> <span class="ident">NAMESPACE</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;System&quot;</span>;
+    <span class="kw">const</span> <span class="ident">CLASS_NAME</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;Array&quot;</span>;
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="libil2cpp" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
