@@ -179,7 +179,11 @@ impl Il2CppClass {
 
     /// Invokes the `static` method with the given name using the given
     /// arguments, with type checking
-    pub fn invoke<A, R, const N: usize>(&self, name: &str, args: A) -> Result<R, &Il2CppException>
+    pub fn invoke<A, R, const N: usize>(
+        &self,
+        name: &str,
+        args: A,
+    ) -> Result<R, &mut Il2CppException>
     where
         A: Arguments<N>,
         R: Return,
@@ -194,7 +198,7 @@ impl Il2CppClass {
         &self,
         name: &str,
         args: A,
-    ) -> Result<(), &Il2CppException>
+    ) -> Result<(), &mut Il2CppException>
     where
         A: Arguments<N>,
     {

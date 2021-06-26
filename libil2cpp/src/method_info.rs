@@ -18,7 +18,11 @@ pub struct MethodInfo(raw::MethodInfo);
 impl MethodInfo {
     /// Invoke this method, type checking against its signature with the
     /// provided instance, arguments and return type
-    pub fn invoke<T, A, R, const N: usize>(&self, this: T, args: A) -> Result<R, &Il2CppException>
+    pub fn invoke<T, A, R, const N: usize>(
+        &self,
+        this: T,
+        args: A,
+    ) -> Result<R, &mut Il2CppException>
     where
         T: This,
         A: Arguments<N>,
@@ -40,7 +44,7 @@ impl MethodInfo {
         &self,
         this: T,
         args: A,
-    ) -> Result<R, &Il2CppException>
+    ) -> Result<R, &mut Il2CppException>
     where
         T: This,
         A: Arguments<N>,
@@ -56,7 +60,7 @@ impl MethodInfo {
         let r = transmute::<Option<&mut raw::Il2CppObject>, Option<&mut Il2CppObject>>(r);
         match exception {
             None => Ok(R::from_object(r)),
-            Some(e) => Err(Il2CppException::wrap(e)),
+            Some(e) => Err(Il2CppException::wrap_mut(e)),
         }
     }
 
