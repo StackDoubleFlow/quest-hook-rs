@@ -331,6 +331,7 @@ fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
     Ok(bound.get())
 }
 
+/// Implements typechecking traits for a value type
 #[proc_macro]
 pub fn unsafe_value_type_impl(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Type);

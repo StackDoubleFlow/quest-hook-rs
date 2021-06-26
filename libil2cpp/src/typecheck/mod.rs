@@ -5,8 +5,7 @@ pub mod ty;
 use std::ffi::c_void;
 
 use crate::{
-    Argument, Arguments, Builtin, Il2CppObject, Il2CppType, Parameter, ParameterInfo, Parameters,
-    Return, WrapRaw,
+    Argument, Arguments, Builtin, Il2CppType, Parameter, ParameterInfo, Parameters, WrapRaw,
 };
 
 macro_rules! impl_builtin_value {
@@ -36,23 +35,6 @@ macro_rules! impl_builtin_value {
             }
         }
         unsafe impl Parameter for Option<&$type> {
-            fn matches(ty: &Il2CppType) -> bool {
-                ty.raw().byref() != 0 && ($(ty.is_builtin(Builtin::$builtin))||+)
-            }
-        }
-
-        unsafe impl Return for $type {
-            type Type = $type;
-
-            fn matches(ty: &Il2CppType) -> bool {
-                ty.raw().byref() == 0 && ($(ty.is_builtin(Builtin::$builtin))||+)
-            }
-
-            fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-                unsafe { *(object.unwrap() as *mut Il2CppObject as *const $type) }
-            }
-        }
-        unsafe impl Return for Option<&$type> {
             fn matches(ty: &Il2CppType) -> bool {
                 ty.raw().byref() != 0 && ($(ty.is_builtin(Builtin::$builtin))||+)
             }
