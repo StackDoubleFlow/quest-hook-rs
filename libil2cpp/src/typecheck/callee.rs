@@ -131,7 +131,7 @@ where
     }
 }
 
-unsafe impl<T> Return for &T
+unsafe impl<T> Return for &mut T
 where
     T: Type + Any,
 {
@@ -141,26 +141,6 @@ where
         ty.class().is_assignable_from(T::class())
     }
 }
-unsafe impl<T> Return for &mut T
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        <&T as Return>::matches(ty)
-    }
-}
-unsafe impl<T> Return for Option<&T>
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        <&T as Return>::matches(ty)
-    }
-}
 unsafe impl<T> Return for Option<&mut T>
 where
     T: Type + Any,
@@ -168,7 +148,7 @@ where
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        <&T as Return>::matches(ty)
+        <&mut T as Return>::matches(ty)
     }
 }
 
@@ -189,7 +169,8 @@ macro_rules! impl_return_value {
                 $(ty.is_builtin(Builtin::$builtin))||+
             }
         }
-        unsafe impl Return for &$type {
+
+        unsafe impl Return for &mut $type {
             fn matches(_: &Il2CppType) -> bool {
                 false
             }

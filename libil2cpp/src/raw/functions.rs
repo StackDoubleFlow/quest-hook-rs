@@ -48,5 +48,6 @@ define_functions! {
     fn type_get_name(ty: &Il2CppType) -> *const c_char;
     fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&Il2CppException>) -> Option<&'static mut Il2CppObject>;
     fn string_new_len(s: *const char, len: u32) -> Option<&'static Il2CppString>;
-    fn raise_exception(exc: *const Il2CppException) -> !;
+    fn raise_exception(exc: &Il2CppException) -> !;
+    fn object_unbox(obj: &mut Il2CppObject) -> *mut c_void;
 }

@@ -20,7 +20,7 @@ pub extern "C" fn setup() {
 fn on_enable(this: &mut Il2CppObject, forced: bool) {
     on_enable.original(this, forced);
 
-    let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled");
+    let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled").unwrap();
     let _: () = burn_mark_trails_enabled.invoke("set_value", true).unwrap();
 }
 
