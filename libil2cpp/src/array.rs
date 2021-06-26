@@ -6,7 +6,7 @@ use std::{fmt, slice};
 use crate::{raw, Il2CppObject, WrapRaw};
 
 /// An il2cpp array
-#[repr(C)]
+#[repr(transparent)]
 pub struct Il2CppArray<T>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T> Il2CppArray<T> {
