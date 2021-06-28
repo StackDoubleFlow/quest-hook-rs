@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["libil2cpp"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for &amp;'static <a class=\"struct\" href=\"libil2cpp/struct.Il2CppString.html\" title=\"struct libil2cpp::Il2CppString\">Il2CppString</a>","synthetic":false,"types":["libil2cpp::string::Il2CppString"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
