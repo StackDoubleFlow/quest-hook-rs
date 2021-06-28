@@ -13,33 +13,62 @@ pub struct Il2CppClass(raw::Il2CppClass);
 
 impl Il2CppClass {
     /// Find a class by namespace and name
-    pub fn find(namespace: &str, name: &str) -> Option<&'static Self> {
-        let namespace = CString::new(namespace).unwrap();
-        let name = CString::new(name).unwrap();
-
-        let domain = unsafe { raw::domain_get() };
-
-        let mut assemblies_count = 0;
-        let assemblies = unsafe { raw::domain_get_assemblies(domain, &mut assemblies_count) };
-
-        for assembly in assemblies.iter().take(assemblies_count) {
-            // For some reason, an assembly might not have an image
-            let image = match unsafe { raw::assembly_get_image(assembly) } {
-                Some(image) => image,
-                None => continue,
+    pub fn find(
+        namespace: impl Into<Cow<'static, str>>,
+        name: impl Into<Cow<'static, str>>,
+    ) -> Option<&'static Self> {
+        // Reduce the amount of generated code by removing the generics
+        fn inner(
+            namespace: Cow<'static, str>,
+            name: Cow<'static, str>,
+        ) -> Option<&'static Il2CppClass> {
+            #[cfg(feature = "cache")]
+            let cache::ClassCacheKey { namespace, name } = {
+                let key = cache::ClassCacheKey { namespace, name };
+                if let Some(class) = cache::CLASS_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                    return Some(class);
+                }
+                key
             };
 
-            let class = unsafe { raw::class_from_name(image, namespace.as_ptr(), name.as_ptr()) };
-            if let Some(class) = class {
-                // Ensure class is initialized
-                // TODO: Call Class::Init somehow
-                let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
+            let c_namespace = CString::new(namespace.as_ref()).unwrap();
+            let c_name = CString::new(name.as_ref()).unwrap();
 
-                return Some(unsafe { Self::wrap(class) });
+            let domain = unsafe { raw::domain_get() };
+
+            let mut assemblies_count = 0;
+            let assemblies = unsafe { raw::domain_get_assemblies(domain, &mut assemblies_count) };
+
+            for assembly in assemblies.iter().take(assemblies_count) {
+                // For some reason, an assembly might not have an image
+                let image = match unsafe { raw::assembly_get_image(assembly) } {
+                    Some(image) => image,
+                    None => continue,
+                };
+
+                let class =
+                    unsafe { raw::class_from_name(image, c_namespace.as_ptr(), c_name.as_ptr()) };
+                if let Some(class) = class {
+                    // Ensure class is initialized
+                    // TODO: Call Class::Init somehow
+                    let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
+
+                    let class = unsafe { Il2CppClass::wrap(class) };
+
+                    #[cfg(feature = "cache")]
+                    cache::CLASS_CACHE.with(move |c| {
+                        c.borrow_mut()
+                            .insert(cache::ClassCacheKey { namespace, name }, class)
+                    });
+
+                    return Some(class);
+                }
             }
+
+            None
         }
 
-        None
+        inner(namespace.into(), name.into())
     }
 
     /// Find a method belonging to the class or its parents by name with type
@@ -342,5 +371,22 @@ impl PartialEq for Il2CppClass {
 impl<'a> From<&'a Il2CppType> for &'a Il2CppClass {
     fn from(ty: &'a Il2CppType) -> Self {
         ty.class()
+    }
+}
+
+#[cfg(feature = "cache")]
+mod cache {
+    use std::borrow::Cow;
+    use std::cell::RefCell;
+    use std::collections::HashMap;
+
+    #[derive(PartialEq, Eq, Hash)]
+    pub(super) struct ClassCacheKey {
+        pub(super) namespace: Cow<'static, str>,
+        pub(super) name: Cow<'static, str>,
+    }
+
+    thread_local! {
+        pub(super) static CLASS_CACHE: RefCell<HashMap<ClassCacheKey, &'static super::Il2CppClass>> = Default::default();
     }
 }

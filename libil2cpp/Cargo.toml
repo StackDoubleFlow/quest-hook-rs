@@ -16,5 +16,6 @@ paste = "1"
 quest_hook_proc_macros = { path="../proc_macros" }
 
 [features]
-default = []
+default = ["cache"]
 strict = []
+cache = []
