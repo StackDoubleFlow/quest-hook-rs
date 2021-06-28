@@ -1,5 +1,7 @@
+use std::convert::Infallible;
 use std::fmt;
 use std::ops::{Deref, DerefMut};
+use std::str::FromStr;
 use std::string::FromUtf16Error;
 
 use crate::{raw, Il2CppObject, WrapRaw};
@@ -78,6 +80,14 @@ where
 {
     fn from(s: T) -> Self {
         Il2CppString::new(s)
+    }
+}
+
+impl FromStr for &'static Il2CppString {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Il2CppString::new(s))
     }
 }
 
