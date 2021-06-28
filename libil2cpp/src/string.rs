@@ -1,4 +1,5 @@
 use std::convert::Infallible;
+use std::convert::TryFrom;
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -88,6 +89,14 @@ impl FromStr for &'static Il2CppString {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Il2CppString::new(s))
+    }
+}
+
+impl TryFrom<&Il2CppString> for String {
+    type Error = FromUtf16Error;
+
+    fn try_from(value: &Il2CppString) -> Result<Self, Self::Error> {
+        value.to_string()
     }
 }
 
