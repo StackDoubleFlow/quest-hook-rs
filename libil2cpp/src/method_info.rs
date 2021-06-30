@@ -64,6 +64,20 @@ impl MethodInfo {
         }
     }
 
+    // pub fn make_generic(&self, types: Vec<&Il2CppClass>) -> &'static MethodInfo {
+    //     assert!(self.is_generic());
+    //     let types = types.iter().map(|class| class.t )
+    //     let types_ptrs = unsafe { transmute::<_, &[*mut Il2CppClass]>(types.as_slice()) };
+    //     let method_obj = self.reflection_object();
+    //     let generic_obj = method_obj.object().invoke("MakeGenericMethod", types_arr).unwrap();
+
+    // }
+
+    /// [`Il2CppReflectionMethod`] which represents the method
+    pub fn reflection_object(&self) -> &Il2CppReflectionMethod {
+        unsafe { Il2CppReflectionMethod::wrap(raw::method_get_object(self.raw(), None)) }
+    }
+
     /// Name of the method
     pub fn name(&self) -> Cow<'_, str> {
         let name = self.raw().name;
@@ -105,6 +119,11 @@ impl MethodInfo {
     pub fn is_virtual(&self) -> bool {
         self.raw().flags as u32 & METHOD_ATTRIBUTE_VIRTUAL != 0
     }
+
+    /// Whether the method is generic
+    pub fn is_generic(&self) -> bool {
+        unsafe { raw::method_is_generic(self.raw()) }
+    }
 }
 
 unsafe impl WrapRaw for MethodInfo {
@@ -145,4 +164,32 @@ impl fmt::Display for MethodInfo {
         }
         write!(f, "{})", params[n])
     }
+}
+
+/// Object used for reflection of methods
+pub struct Il2CppReflectionMethod(raw::Il2CppReflectionMethod);
+
+impl Il2CppReflectionMethod {
+    /// [`MethodInfo`] which this object represents
+    pub fn method_info(&self) -> &MethodInfo {
+        unsafe { MethodInfo::wrap(raw::method_get_from_reflection(self.raw())) }
+    }
+
+    /// Inner [`Il2CppObject`] of this object
+    pub fn object(&self) -> &Il2CppObject {
+        unsafe { Il2CppObject::wrap(&self.raw().object) }
+    }
+}
+
+impl fmt::Debug for Il2CppReflectionMethod {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Il2CppReflectionMethod")
+            .field("object", self.object())
+            .field("method_info", self.method_info())
+            .finish()
+    }
+}
+
+unsafe impl WrapRaw for Il2CppReflectionMethod {
+    type Raw = raw::Il2CppReflectionMethod;
 }

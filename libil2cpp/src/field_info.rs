@@ -43,7 +43,7 @@ impl FieldInfo {
         unsafe { self.load_unchecked(instance) }
     }
 
-    /// Store a value into a field without type checking
+    /// Load a value from a field without type checking
     ///
     /// # Safety
     /// To be safe, the provided type has to match the field signature

@@ -1,5 +1,4 @@
-use std::convert::Infallible;
-use std::convert::TryFrom;
+use std::convert::{Infallible, TryFrom};
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;

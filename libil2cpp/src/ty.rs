@@ -12,7 +12,7 @@ use crate::raw::{
     Il2CppTypeEnum_IL2CPP_TYPE_U2, Il2CppTypeEnum_IL2CPP_TYPE_U4, Il2CppTypeEnum_IL2CPP_TYPE_U8,
     Il2CppTypeEnum_IL2CPP_TYPE_VOID,
 };
-use crate::{Il2CppClass, WrapRaw};
+use crate::{Il2CppClass, Il2CppObject, WrapRaw};
 
 /// An il2cpp type
 #[repr(transparent)]
@@ -33,6 +33,11 @@ impl Il2CppType {
         let name = unsafe { raw::type_get_name(self.raw()) };
         assert!(!name.is_null());
         unsafe { CStr::from_ptr(name) }.to_string_lossy()
+    }
+
+    /// [`Il2CppReflectionType`] which represents the type
+    pub fn reflection_object(&self) -> &Il2CppReflectionType {
+        unsafe { Il2CppReflectionType::wrap(raw::type_get_object(self.raw())) }
     }
 }
 
@@ -131,5 +136,27 @@ builtins! {
 impl fmt::Display for Builtin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.name())
+    }
+}
+
+/// Object used for reflection of types
+pub struct Il2CppReflectionType(raw::Il2CppReflectionType);
+
+impl fmt::Debug for Il2CppReflectionType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Il2CppReflectionType")
+            .field("object", self.object())
+            .finish()
+    }
+}
+
+unsafe impl WrapRaw for Il2CppReflectionType {
+    type Raw = raw::Il2CppReflectionType;
+}
+
+impl Il2CppReflectionType {
+    /// Inner [`Il2CppObject`] of this object
+    pub fn object(&self) -> &Il2CppObject {
+        unsafe { Il2CppObject::wrap(&self.raw().object) }
     }
 }

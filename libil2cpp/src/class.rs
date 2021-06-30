@@ -314,6 +314,11 @@ impl Il2CppClass {
     pub fn byval_arg_ty(&self) -> &Il2CppType {
         unsafe { Il2CppType::wrap(&self.raw().byval_arg) }
     }
+
+    /// [`Il2CppType`] of the class
+    pub fn ty(&self) -> &Il2CppType {
+        unsafe { Il2CppType::wrap(raw::class_get_type(self.raw())) }
+    }
 }
 
 /// Iterator over a class hierarchy

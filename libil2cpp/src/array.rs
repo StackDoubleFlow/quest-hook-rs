@@ -3,13 +3,30 @@ use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
 use std::{fmt, slice};
 
-use crate::{raw, Il2CppObject, WrapRaw};
+use crate::{raw, Il2CppObject, Type, WrapRaw};
 
 /// An il2cpp array
 #[repr(transparent)]
 pub struct Il2CppArray<T>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T> Il2CppArray<T> {
+    /// Creates an array from a slice
+    pub fn from_slice(slice: &[T]) -> &Il2CppArray<T>
+    where
+        T: Clone + Type,
+    {
+        let len = slice.len();
+        let arr = unsafe { raw::array_new(T::class().raw(), len) };
+        let data_ptr = ((arr as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T;
+        for (i, elem) in slice.iter().enumerate() {
+            unsafe {
+                let ptr = data_ptr.add(i);
+                *ptr = elem.clone();
+            }
+        }
+        unsafe { Il2CppArray::wrap_ptr_mut(arr) }.unwrap()
+    }
+
     /// Slice of values in the array
     pub fn as_slice(&self) -> &[T] {
         let ptr = ((self as *const _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *const T;
