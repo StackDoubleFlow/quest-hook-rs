@@ -92,11 +92,13 @@
 <span id="92">92</span>
 <span id="93">93</span>
 <span id="94">94</span>
+<span id="95">95</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">std::mem::transmute</span>;
 <span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">slice</span>};
+<span class="kw">use</span> <span class="ident">std::ptr</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">raw</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Type</span>, <span class="ident">WrapRaw</span>};
 
@@ -116,7 +118,7 @@
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">elem</span>) <span class="kw">in</span> <span class="ident">slice</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
             <span class="kw">unsafe</span> {
                 <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">data_ptr</span>.<span class="ident">add</span>(<span class="ident">i</span>);
-                <span class="kw-2">*</span><span class="ident">ptr</span> <span class="op">=</span> <span class="ident">elem</span>.<span class="ident">clone</span>();
+                <span class="ident">ptr::write_unaligned</span>(<span class="ident">ptr</span>, <span class="ident">elem</span>.<span class="ident">clone</span>());
             }
         }
         <span class="kw">unsafe</span> { <span class="ident">Il2CppArray::wrap_ptr_mut</span>(<span class="ident">arr</span>) }.<span class="ident">unwrap</span>()
