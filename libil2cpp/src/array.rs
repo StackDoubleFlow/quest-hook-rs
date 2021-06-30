@@ -1,8 +1,7 @@
 use std::marker::PhantomData;
 use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
-use std::{fmt, slice};
-use std::ptr;
+use std::{fmt, ptr, slice};
 
 use crate::{raw, Il2CppObject, Type, WrapRaw};
 
