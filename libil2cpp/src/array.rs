@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
 use std::{fmt, slice};
+use std::ptr;
 
 use crate::{raw, Il2CppObject, Type, WrapRaw};
 
@@ -21,7 +22,7 @@ impl<T> Il2CppArray<T> {
         for (i, elem) in slice.iter().enumerate() {
             unsafe {
                 let ptr = data_ptr.add(i);
-                *ptr = elem.clone();
+                ptr::write_unaligned(ptr, elem.clone());
             }
         }
         unsafe { Il2CppArray::wrap_ptr_mut(arr) }.unwrap()
