@@ -12,10 +12,10 @@ pub struct Il2CppString(raw::Il2CppString);
 
 impl Il2CppString {
     /// Creates a new string from a Rust string
-    pub fn new(s: impl AsRef<str>) -> &'static Self {
+    pub fn new(s: impl AsRef<str>) -> &'static mut Self {
         let b = s.as_ref().as_bytes();
         let s = unsafe { raw::string_new_len(b.as_ptr() as _, b.len() as _) };
-        unsafe { Self::wrap(s) }
+        unsafe { Self::wrap_mut(s) }
     }
 
     /// Converts the string to a Rust string, returning an error if its utf-16
@@ -74,7 +74,7 @@ impl AsMut<[u16]> for Il2CppString {
     }
 }
 
-impl<T> From<T> for &'static Il2CppString
+impl<T> From<T> for &'static mut Il2CppString
 where
     T: AsRef<str>,
 {
@@ -83,7 +83,7 @@ where
     }
 }
 
-impl FromStr for &'static Il2CppString {
+impl FromStr for &'static mut Il2CppString {
     type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
