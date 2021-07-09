@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::mem::transmute;
+use std::ops::{Deref, DerefMut};
 use std::{fmt, slice};
 
 use crate::raw::{
@@ -67,9 +68,10 @@ impl MethodInfo {
     // pub fn make_generic(&self, types: Vec<&Il2CppClass>) -> &'static MethodInfo {
     //     assert!(self.is_generic());
     //     let types = types.iter().map(|class| class.t )
-    //     let types_ptrs = unsafe { transmute::<_, &[*mut Il2CppClass]>(types.as_slice()) };
-    //     let method_obj = self.reflection_object();
-    //     let generic_obj = method_obj.object().invoke("MakeGenericMethod", types_arr).unwrap();
+    //     let types_ptrs = unsafe { transmute::<_, &[*mut
+    // Il2CppClass]>(types.as_slice()) };     let method_obj =
+    // self.reflection_object();     let generic_obj =
+    // method_obj.object().invoke("MakeGenericMethod", types_arr).unwrap();
 
     // }
 
@@ -146,7 +148,6 @@ impl fmt::Debug for MethodInfo {
 impl fmt::Display for MethodInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let params = self.parameters();
-        let n = params.len() - 1;
 
         if self.is_static() {
             f.write_str("static ")?;
@@ -158,11 +159,17 @@ impl fmt::Display for MethodInfo {
             f.write_str("virtual ")?;
         }
 
-        write!(f, "{} {}(", self.return_ty(), self.name())?;
-        for p in &params[..n] {
-            write!(f, "{}, ", p)?;
+        if params.is_empty() {
+            write!(f, "{} {}()", self.return_ty(), self.name())
+        } else {
+            let n = params.len() - 1;
+
+            write!(f, "{} {}(", self.return_ty(), self.name())?;
+            for p in &params[..n] {
+                write!(f, "{}, ", p)?;
+            }
+            write!(f, "{})", params[n])
         }
-        write!(f, "{})", params[n])
     }
 }
 
@@ -174,17 +181,25 @@ impl Il2CppReflectionMethod {
     pub fn method_info(&self) -> &MethodInfo {
         unsafe { MethodInfo::wrap(raw::method_get_from_reflection(self.raw())) }
     }
+}
 
-    /// Inner [`Il2CppObject`] of this object
-    pub fn object(&self) -> &Il2CppObject {
+impl Deref for Il2CppReflectionMethod {
+    type Target = Il2CppObject;
+
+    fn deref(&self) -> &Self::Target {
         unsafe { Il2CppObject::wrap(&self.raw().object) }
+    }
+}
+
+impl DerefMut for Il2CppReflectionMethod {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { Il2CppObject::wrap_mut(&mut self.raw_mut().object) }
     }
 }
 
 impl fmt::Debug for Il2CppReflectionMethod {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Il2CppReflectionMethod")
-            .field("object", self.object())
             .field("method_info", self.method_info())
             .finish()
     }

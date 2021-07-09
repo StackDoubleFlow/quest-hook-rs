@@ -2,6 +2,7 @@ use paste::paste;
 use std::borrow::Cow;
 use std::ffi::CStr;
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 
 use crate::raw::{
     self, Il2CppTypeEnum_IL2CPP_TYPE_BOOLEAN, Il2CppTypeEnum_IL2CPP_TYPE_CHAR,
@@ -142,21 +143,35 @@ impl fmt::Display for Builtin {
 /// Object used for reflection of types
 pub struct Il2CppReflectionType(raw::Il2CppReflectionType);
 
-impl fmt::Debug for Il2CppReflectionType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Il2CppReflectionType")
-            .field("object", self.object())
-            .finish()
-    }
-}
-
 unsafe impl WrapRaw for Il2CppReflectionType {
     type Raw = raw::Il2CppReflectionType;
 }
 
 impl Il2CppReflectionType {
-    /// Inner [`Il2CppObject`] of this object
-    pub fn object(&self) -> &Il2CppObject {
+    /// [`Il2CppType`] which this object represents
+    pub fn ty(&self) -> &Il2CppType {
+        unsafe { Il2CppType::wrap(&*self.raw().type_) }
+    }
+}
+
+impl Deref for Il2CppReflectionType {
+    type Target = Il2CppObject;
+
+    fn deref(&self) -> &Self::Target {
         unsafe { Il2CppObject::wrap(&self.raw().object) }
+    }
+}
+
+impl DerefMut for Il2CppReflectionType {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { Il2CppObject::wrap_mut(&mut self.raw_mut().object) }
+    }
+}
+
+impl fmt::Debug for Il2CppReflectionType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Il2CppReflectionType")
+            .field("ty", self.ty())
+            .finish()
     }
 }
