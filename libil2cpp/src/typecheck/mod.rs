@@ -17,8 +17,8 @@ macro_rules! impl_builtin_value {
                 ty.raw().byref() == 0 && ($(ty.is_builtin(Builtin::$builtin))||+)
             }
 
-            fn invokable(&self) -> *mut c_void {
-                self as *const $type as *mut c_void
+            fn invokable(&mut self) -> *mut c_void {
+                self as *mut $type as *mut c_void
             }
         }
         unsafe impl Argument for &mut $type {

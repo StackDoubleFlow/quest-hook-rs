@@ -43,8 +43,8 @@ impl MethodInfo {
     /// To be safe, the provided types have to match the method signature
     pub unsafe fn invoke_unchecked<T, A, R, const N: usize>(
         &self,
-        this: T,
-        args: A,
+        mut this: T,
+        mut args: A,
     ) -> Result<R, &mut Il2CppException>
     where
         T: This,

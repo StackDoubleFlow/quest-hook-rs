@@ -26,7 +26,7 @@ impl FieldInfo {
     ///
     /// # Safety
     /// To be safe, the provided type has to match the field signature
-    pub unsafe fn store_unchecked<A>(&self, instance: &mut Il2CppObject, val: A)
+    pub unsafe fn store_unchecked<A>(&self, instance: &mut Il2CppObject, mut val: A)
     where
         A: Argument,
     {

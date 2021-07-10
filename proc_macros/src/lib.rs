@@ -294,7 +294,7 @@ fn create_impl_arguments_parameters(range: ExprRange) -> Result<TokenStream, Err
                     args.len() == #n #( && #matches_argument)*
                 }
 
-                fn invokable(&self) -> [*mut c_void; #n] {
+                fn invokable(&mut self) -> [*mut c_void; #n] {
                     [#(#invokables),*]
                 }
             }
