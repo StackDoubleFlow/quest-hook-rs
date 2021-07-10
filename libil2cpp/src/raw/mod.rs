@@ -9,7 +9,7 @@ mod types;
 pub use functions::*;
 pub use types::*;
 
-use std::mem::transmute;
+use std::mem::{size_of, transmute};
 
 /// Safe wrapper around a raw il2cpp type which can be used in its place
 ///
@@ -76,4 +76,15 @@ pub unsafe trait WrapRaw: Sized {
     unsafe fn wrap_ptr_mut<'a>(ptr: *mut Self::Raw) -> Option<&'a mut Self> {
         transmute(ptr)
     }
+}
+
+/// Unboxes a value type stored as an [`Il2CppObject`]
+///
+/// # Safety
+/// The object must be of the valid type and cointain a valid value.
+#[inline]
+pub unsafe fn unbox<T>(object: &Il2CppObject) -> T {
+    let address = object as *const Il2CppObject as usize;
+    let ptr = (address + size_of::<Il2CppObject>()) as *const T;
+    ptr.read_unaligned()
 }

@@ -209,7 +209,7 @@ macro_rules! impl_return_value {
             }
 
             fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-                unsafe { *(raw::object_unbox(object.unwrap().raw_mut()) as *mut Self) }
+                unsafe { raw::unbox(object.unwrap().raw()) }
             }
         }
 
