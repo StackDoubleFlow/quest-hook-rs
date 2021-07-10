@@ -448,7 +448,7 @@
             }
 
             <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-                <span class="kw">unsafe</span> { <span class="kw-2">*</span>(<span class="ident">raw::object_unbox</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>().<span class="ident">raw_mut</span>()) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="self">Self</span>) }
+                <span class="kw">unsafe</span> { <span class="ident">raw::unbox</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>().<span class="ident">raw</span>()) }
             }
         }
 

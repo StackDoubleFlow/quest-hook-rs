@@ -62,7 +62,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">object::Il2CppObject</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">parameter_info::ParameterInfo</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">quest_hook_proc_macros::unsafe_value_type_impl</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">raw::WrapRaw</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">raw</span>::{<span class="ident">unbox</span>, <span class="ident">WrapRaw</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">string::Il2CppString</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ty</span>::{<span class="ident">Builtin</span>, <span class="ident">Il2CppReflectionType</span>, <span class="ident">Il2CppType</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">typecheck::callee</span>::{<span class="ident">Parameter</span>, <span class="ident">Parameters</span>, <span class="ident">Return</span> <span class="kw">as</span> <span class="ident">CalleeReturn</span>, <span class="ident">This</span> <span class="kw">as</span> <span class="ident">CalleeThis</span>};
