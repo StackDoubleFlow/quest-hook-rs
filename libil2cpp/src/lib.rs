@@ -28,9 +28,6 @@ pub use quest_hook_proc_macros::unsafe_value_type_impl;
 pub use raw::{unbox, WrapRaw};
 pub use string::Il2CppString;
 pub use ty::{Builtin, Il2CppReflectionType, Il2CppType};
-pub use typecheck::callee::{Parameter, Parameters, Return as CalleeReturn, This as CalleeThis};
-pub use typecheck::caller::{Argument, Arguments, Return, This};
-pub use typecheck::ty::Type;
-
-// Maybe I have OCD
-pub use {Parameter as CalleeArgument, Parameters as CalleeArguments};
+pub use typecheck::callee::{Parameter, Parameters, Return, ThisParameter};
+pub use typecheck::caller::{Argument, Arguments, Returned, ThisArgument};
+pub use typecheck::ty::{Reference, Type, Value};
