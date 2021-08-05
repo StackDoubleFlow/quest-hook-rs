@@ -1,6 +1,7 @@
 use std::any::Any;
+use std::fmt;
 
-use crate::{Builtin, Il2CppException, Il2CppType, MethodInfo, Type};
+use crate::{Builtin, Il2CppType, MethodInfo, Type};
 
 use super::ty::semantics;
 
@@ -276,9 +277,10 @@ unsafe impl Return for () {
     fn into_actual(self) {}
 }
 
-unsafe impl<T> Return for Result<T, &mut Il2CppException>
+unsafe impl<T, E> Return for Result<T, E>
 where
     T: Return,
+    E: fmt::Debug,
 {
     type Actual = T::Actual;
     type Type = T::Type;
@@ -288,10 +290,7 @@ where
     }
 
     fn into_actual(self) -> Self::Actual {
-        match self {
-            Ok(x) => x.into_actual(),
-            Err(e) => unsafe { e.throw() }, // Safety: YEEHAW
-        }
+        self.unwrap().into_actual()
     }
 }
 

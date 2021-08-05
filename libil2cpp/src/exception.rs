@@ -97,3 +97,6 @@ impl fmt::Debug for Il2CppException {
             .finish()
     }
 }
+
+impl std::error::Error for Il2CppException {}
+impl std::error::Error for &mut Il2CppException {}
