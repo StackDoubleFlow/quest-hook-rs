@@ -1,4 +1,4 @@
-use libil2cpp::{Parameter, Parameters, Return, ThisParameter};
+use libil2cpp::{Parameters, Return, ThisParameter};
 
 /// Trait implemented by all hooks to facilitate generic programming
 pub trait Hook<const N: usize> {

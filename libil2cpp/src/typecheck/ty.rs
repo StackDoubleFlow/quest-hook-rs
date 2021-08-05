@@ -74,27 +74,16 @@ impl semantics::ReferenceReturn for Reference {}
 #[allow(missing_debug_implementations)]
 pub struct Value;
 impl semantics::Semantics for Value {}
-impl semantics::ValueArgument for Value {}
 impl semantics::ReferenceArgument for Value {}
-impl semantics::ValueParameter for Value {}
 impl semantics::ReferenceParameter for Value {}
-impl semantics::ValueReturned for Value {}
-impl semantics::ValueReturn for Value {}
 
 pub(crate) mod semantics {
     pub trait Semantics {}
 
     pub trait ReferenceArgument: Semantics {}
-    pub trait ValueArgument: Semantics {}
-
     pub trait ReferenceParameter: Semantics {}
-    pub trait ValueParameter: Semantics {}
-
     pub trait ReferenceReturned: Semantics {}
-    pub trait ValueReturned: Semantics {}
-
     pub trait ReferenceReturn: Semantics {}
-    pub trait ValueReturn: Semantics {}
 }
 
 /// Implements the [`Type`] trait for a C# reference type
@@ -211,6 +200,56 @@ macro_rules! unsafe_impl_value_type {
             }
             fn matches_reference_return(_: &Il2CppType) -> bool {
                 false
+            }
+        }
+
+        unsafe impl $crate::Argument for $type {
+            type Type = Self;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                Self::matches_value_argument(ty)
+            }
+
+            fn invokable(&mut self) -> *mut ::std::ffi::c_void {
+                self as *mut Self as *mut ::std::ffi::c_void
+            }
+        }
+
+        unsafe impl $crate::Parameter for $type {
+            type Actual = Self;
+            type Type = Self;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                Self::matches_value_parameter(ty)
+            }
+
+            fn from_actual(actual: Self::Actual) -> Self {
+                actual
+            }
+        }
+
+        unsafe impl $crate::Returned for $type {
+            type Type = Self;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                Self::matches_value_returned(ty)
+            }
+
+            fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+                unsafe { $crate::raw::unbox($crate::WrapRaw::raw(object.unwrap())) }
+            }
+        }
+
+        unsafe impl $crate::Return for $type {
+            type Actual = Self;
+            type Type = Self;
+
+            fn matches(ty: &Il2CppType) -> bool {
+                Self::matches_value_return(ty)
+            }
+
+            fn into_actual(self) -> Self::Actual {
+                self
             }
         }
     };

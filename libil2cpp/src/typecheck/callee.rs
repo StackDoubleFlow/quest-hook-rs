@@ -197,20 +197,37 @@ where
     }
 }
 
-unsafe impl<T, S> Parameter for T
+unsafe impl<'a, T, S> Parameter for &'a mut T
 where
     T: Type<Semantics = S>,
-    S: semantics::ValueParameter,
+    S: semantics::ReferenceParameter,
 {
-    type Actual = Self;
+    type Actual = Option<&'a mut T>;
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_value_parameter(ty)
+        T::matches_reference_parameter(ty)
     }
 
     fn from_actual(actual: Self::Actual) -> Self {
-        actual
+        actual.unwrap()
+    }
+}
+
+unsafe impl<'a, T, S> Parameter for &'a T
+where
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceParameter,
+{
+    type Actual = Option<&'a mut T>;
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches_reference_parameter(ty)
+    }
+
+    fn from_actual(actual: Self::Actual) -> Self {
+        &*actual.unwrap()
     }
 }
 
@@ -231,20 +248,20 @@ where
     }
 }
 
-unsafe impl<T, S> Return for T
+unsafe impl<'a, T, S> Return for &'a mut T
 where
     T: Type<Semantics = S>,
-    S: semantics::ValueReturn,
+    S: semantics::ReferenceReturn,
 {
-    type Actual = Self;
+    type Actual = Option<&'a mut T>;
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_value_return(ty)
+        T::matches_reference_return(ty)
     }
 
     fn into_actual(self) -> Self::Actual {
-        self
+        Some(self)
     }
 }
 

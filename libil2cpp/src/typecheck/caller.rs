@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use std::mem::transmute;
 use std::ptr::null_mut;
 
-use crate::{raw, Builtin, Il2CppObject, Il2CppType, MethodInfo, Type, WrapRaw};
+use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, Type};
 
 use super::ty::semantics;
 
@@ -148,7 +148,7 @@ where
     }
 }
 
-unsafe impl<'a, T, S> Argument for &'a mut T
+unsafe impl<T, S> Argument for &mut T
 where
     T: Type<Semantics = S>,
     S: semantics::ReferenceArgument,
@@ -180,7 +180,7 @@ where
     }
 }
 
-unsafe impl<'a, T, S> Returned for Option<&'a T>
+unsafe impl<T, S> Returned for Option<&T>
 where
     T: Type<Semantics = S>,
     S: semantics::ReferenceReturned,
@@ -196,19 +196,35 @@ where
     }
 }
 
-unsafe impl<T, S> Returned for T
+unsafe impl<T, S> Returned for &mut T
 where
     T: Type<Semantics = S>,
-    S: semantics::ValueReturned,
+    S: semantics::ReferenceReturned,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_value_returned(ty)
+        T::matches_reference_returned(ty)
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { raw::unbox(object.unwrap().raw()) }
+        unsafe { transmute(object.unwrap()) }
+    }
+}
+
+unsafe impl<T, S> Returned for &T
+where
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceReturned,
+{
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches_reference_returned(ty)
+    }
+
+    fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+        unsafe { transmute(object.unwrap()) }
     }
 }
 
