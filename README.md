@@ -6,7 +6,7 @@ A Rust library used for writing (mostly) memory safe mods for Oculus Quest Unity
 
 ## Usage
 
-Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library.
+Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile `quest_hook`.
 
 ```toml
 [lib]

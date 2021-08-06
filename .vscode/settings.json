@@ -5,6 +5,7 @@
     "ndk",
     "clippy",
     "--workspace",
+    "--examples",
     "--message-format=json"
   ],
   "rust-analyzer.assist.importGranularity": "module"
