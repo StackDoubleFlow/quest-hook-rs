@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `libil2cpp&#x2F;src&#x2F;typecheck&#x2F;caller.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>caller.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../libil2cpp/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `libil2cpp&#x2F;src&#x2F;typecheck&#x2F;caller.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>caller.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../libil2cpp/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -236,19 +236,74 @@
 <span id="236">236</span>
 <span id="237">237</span>
 <span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
 <span class="kw">use</span> <span class="ident">std::ffi::c_void</span>;
 <span class="kw">use</span> <span class="ident">std::mem::transmute</span>;
 <span class="kw">use</span> <span class="ident">std::ptr::null_mut</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">raw</span>, <span class="ident">Builtin</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">ParameterInfo</span>, <span class="ident">Type</span>, <span class="ident">WrapRaw</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Builtin</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Type</span>};
+
+<span class="kw">use</span> <span class="kw">super</span><span class="ident">::ty::semantics</span>;
+
+<span class="doccomment">/// Trait implemented by types that can be used as a C# `this` arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Note</span>
+<span class="doccomment">/// You should most likely not be implementing this trait yourself, but rather</span>
+<span class="doccomment">/// the [`Type`] trait</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Safety</span>
+<span class="doccomment">/// The implementation must be correct</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">ThisArgument</span> {
+    <span class="doccomment">/// Normalized type of `this`, useful for caching</span>
+    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
+
+    <span class="doccomment">/// Checks whether the type can be used as a C# `this` argument for the</span>
+    <span class="doccomment">/// given [`MethodInfo`]</span>
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+
+    <span class="doccomment">/// Returns an untyped pointer which can be used as a libill2cpp `this`</span>
+    <span class="doccomment">/// argument</span>
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
+}
 
 <span class="doccomment">/// Trait implemented by types that can be used as C# method arguments</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// # Note</span>
+<span class="doccomment">/// You should most likely not be implementing this trait yourself, but rather</span>
+<span class="doccomment">/// the [`Type`] trait</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// Interfaces depending on this trait assume that all of its methods are</span>
-<span class="doccomment">/// correct in an il2cpp context</span>
+<span class="doccomment">/// The implementation must be correct</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Argument</span> {
     <span class="doccomment">/// Normalized type of the argument, useful for caching</span>
     <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
@@ -256,130 +311,209 @@
     <span class="doccomment">/// Checks whether the type can be used as a C# argument with the given</span>
     <span class="doccomment">/// [`Il2CppType`] to call a method</span>
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
-    <span class="doccomment">/// Returns an untyped pointer which can be used as an argument to invoke C#</span>
-    <span class="doccomment">/// methods</span>
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
+
+    <span class="doccomment">/// Returns an untyped pointer which can be used as a libil2cpp argument</span>
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
 }
 
-<span class="doccomment">/// Trait implemented by types that can be used as a C# instance arguments</span>
+<span class="doccomment">/// Trait implemented by types that can be used as return types from C# methods</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Note</span>
+<span class="doccomment">/// You should most likely not be implementing this trait yourself, but rather</span>
+<span class="doccomment">/// the [`Type`] trait</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// Interfaces depending on this trait assume that all of its methods are</span>
-<span class="doccomment">/// correct in an il2cpp context</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">This</span> {
-    <span class="doccomment">/// Normalized type of the `this`, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
-
-    <span class="doccomment">/// Checks whether the type can be used as a C# instance argument for the</span>
-    <span class="doccomment">/// given [`MethodInfo`]</span>
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
-    <span class="doccomment">/// Returns an untyped pointer which can be used as an instance argument</span>
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>;
-}
-
-<span class="doccomment">/// Trait implemented by types that can be used as a collection of C# method</span>
-<span class="doccomment">/// arguments</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// Interfaces depending on this trait assume that all of its methods are</span>
-<span class="doccomment">/// correct in an il2cpp context</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Arguments</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Normalized type of the arguments, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
-
-    <span class="doccomment">/// Checks whether the type can be used as a C# argument collection with the</span>
-    <span class="doccomment">/// given [`ParameterInfo`]s to call a method</span>
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ParameterInfo</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
-    <span class="doccomment">/// Returns an array of untyped pointer which can be used to invoke C#</span>
-    <span class="doccomment">/// methods</span>
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="ident">N</span>];
-}
-
-<span class="doccomment">/// Trait implemented by types that can be used as caller return types for C#</span>
-<span class="doccomment">/// methods</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// Interfaces depending on this trait assume that all of its methods are</span>
-<span class="doccomment">/// correct in an il2cpp context</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Return</span> {
+<span class="doccomment">/// The implementation must be correct</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Returned</span> {
     <span class="doccomment">/// Normalized type of the return type, useful for caching</span>
     <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
 
-    <span class="doccomment">/// Checks whether the type can be used as a C# return type with the given</span>
-    <span class="doccomment">/// [`Il2CppType`] in a method definition</span>
+    <span class="doccomment">/// Checks whether the type can be used as a C# return type of the given</span>
+    <span class="doccomment">/// [`Il2CppType`]</span>
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+
     <span class="doccomment">/// Converts the [`Il2CppObject`] returned by</span>
     <span class="doccomment">/// [`runtime_invoke`](crate::raw::runtime_invoke) into self</span>
     <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
-<span class="comment">// When we are the caller, we can&#39;t know if the arguments will be mutated, so we</span>
-<span class="comment">// can&#39;t impl Argument for &amp;T or Option&lt;&amp;T&gt;</span>
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Argument</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Type</span> <span class="op">+</span> <span class="ident">Any</span>,
-{
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+<span class="doccomment">/// Trait implemented by types that can be used as a collection of C# method</span>
+<span class="doccomment">/// arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Note</span>
+<span class="doccomment">/// You should most likely not be implementing this trait yourself</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Safety</span>
+<span class="doccomment">/// The implementation must be correct</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Arguments</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Normalized type of the arguments, useful for caching</span>
+    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
 
-    <span class="ident">default</span> <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">ty</span>.<span class="ident">class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">T::class</span>())
-    }
+    <span class="doccomment">/// Checks whether the type can be used as a C# argument collection for the</span>
+    <span class="doccomment">/// given [`MethodInfo`]</span>
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>
-    }
-}
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Argument</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Type</span> <span class="op">+</span> <span class="ident">Any</span>,
-{
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> <span class="kw">as</span> <span class="ident">Argument</span><span class="op">&gt;</span><span class="ident">::matches</span>(<span class="ident">ty</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
-        <span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">*</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span>) };
-        <span class="kw">unsafe</span> { <span class="ident">transmute</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span><span class="op">&gt;</span>(<span class="ident">this</span>) }
-    }
+    <span class="doccomment">/// Returns an array of untyped pointer which can be used to invoke C#</span>
+    <span class="doccomment">/// methods</span>
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="ident">N</span>];
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">This</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ThisArgument</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Type</span> <span class="op">+</span> <span class="ident">Any</span>,
+    <span class="ident">T</span>: <span class="ident">Type</span>,
 {
     <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">method</span>.<span class="ident">class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">T::class</span>())
+        <span class="ident">T::matches_this_argument</span>(<span class="ident">method</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>((<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="self">Self</span>).<span class="ident">read</span>()) }
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">This</span> <span class="kw">for</span> () {
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ThisArgument</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_this_argument</span>(<span class="ident">method</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">ThisArgument</span> <span class="kw">for</span> () {
     <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">method</span>.<span class="ident">is_static</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
         <span class="ident">null_mut</span>()
     }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Argument</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceArgument</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_argument</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>((<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="self">Self</span>).<span class="ident">read</span>()) }
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Argument</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceArgument</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_argument</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Returned</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturned</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_returned</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="ident">object</span>) }
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Returned</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturned</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_returned</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="ident">object</span>) }
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Returned</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturned</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_returned</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>()) }
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Returned</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">T</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Semantics</span> <span class="op">=</span> <span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturned</span>,
+{
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">T::matches_reference_returned</span>(<span class="ident">ty</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>()) }
+    }
+}
+
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Returned</span> <span class="kw">for</span> () {
+    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
+
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">ty</span>.<span class="ident">is_builtin</span>(<span class="ident">Builtin::Void</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) {}
 }
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Arguments</span><span class="op">&lt;</span><span class="number">0</span><span class="op">&gt;</span> <span class="kw">for</span> () {
     <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ParameterInfo</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">args</span>.<span class="ident">is_empty</span>()
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">method</span>.<span class="ident">parameters</span>().<span class="ident">is_empty</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="number">0</span>] {
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="number">0</span>] {
         []
     }
 }
@@ -390,91 +524,15 @@
 {
     <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> (<span class="ident">A::Type</span>,);
 
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ParameterInfo</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">A::matches</span>(<span class="ident">args</span>[<span class="number">0</span>].<span class="ident">ty</span>())
+    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">method</span>.<span class="ident">parameters</span>();
+        <span class="ident">params</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="kw">unsafe</span> { <span class="ident">A::matches</span>(<span class="ident">params</span>.<span class="ident">get_unchecked</span>(<span class="number">0</span>).<span class="ident">ty</span>()) }
     }
 
-    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="number">1</span>] {
+    <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>; <span class="number">1</span>] {
         [<span class="ident">Argument::invokable</span>(<span class="self">self</span>)]
     }
 }
-
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Return</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Type</span> <span class="op">+</span> <span class="ident">Any</span>,
-{
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="ident">default</span> <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">T::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
-    }
-
-    <span class="ident">default</span> <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="ident">object</span>) }
-    }
-}
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Return</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Type</span> <span class="op">+</span> <span class="ident">Any</span>,
-{
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
-
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Return</span><span class="op">&gt;</span><span class="ident">::matches</span>(<span class="ident">ty</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">unsafe</span> { <span class="ident">transmute</span>(<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Return</span><span class="op">&gt;</span><span class="ident">::from_object</span>(<span class="ident">object</span>)) }
-    }
-}
-
-<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Return</span> <span class="kw">for</span> () {
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
-
-    <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">ty</span>.<span class="ident">is_builtin</span>(<span class="ident">Builtin::Void</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {}
-}
-
-<span class="macro">macro_rules!</span> <span class="ident">impl_return_value</span> {
-    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builtin</span>:<span class="ident">ident</span>),<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Return</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
-            <span class="kw">type</span> <span class="macro-nonterminal">Type</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="kw">type</span>;
-
-            <span class="kw">fn</span> <span class="macro-nonterminal">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                $(<span class="ident">ty</span>.<span class="ident">is_builtin</span>(<span class="ident">Builtin</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">builtin</span>))<span class="op">|</span><span class="op">|</span><span class="op">+</span>
-            }
-
-            <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-                <span class="kw">unsafe</span> { <span class="ident">raw::unbox</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>().<span class="ident">raw</span>()) }
-            }
-        }
-
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Return</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span><span class="op">&gt;</span> {
-            <span class="kw">fn</span> <span class="macro-nonterminal">matches</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="bool-val">false</span>
-            }
-
-            <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-                <span class="macro">panic!</span>(<span class="string">&quot;value types can&#39;t be returned by reference&quot;</span>)
-            }
-        }
-    }
-}
-
-<span class="macro">impl_return_value!</span>(<span class="ident">u8</span>, <span class="ident">Byte</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">i8</span>, <span class="ident">SByte</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">u16</span>, <span class="ident">UShort</span>, <span class="ident">Char</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">i16</span>, <span class="ident">Short</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">u32</span>, <span class="ident">UInt</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">i32</span>, <span class="ident">Int</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">u64</span>, <span class="ident">ULong</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">i64</span>, <span class="ident">Long</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">f32</span>, <span class="ident">Single</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">f64</span>, <span class="ident">Double</span>);
-<span class="macro">impl_return_value!</span>(<span class="ident">bool</span>, <span class="ident">Bool</span>);
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="libil2cpp" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
