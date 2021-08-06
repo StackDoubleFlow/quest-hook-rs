@@ -41,7 +41,7 @@ use syn::{parse_macro_input, ExprRange, ItemFn, LitStr, Token};
 ///
 /// #[no_mangle]
 /// pub extern "C" fn load() {
-///     set_active_scene.install();
+///     set_active_scene.install().unwrap();
 /// }
 /// ```
 #[proc_macro_attribute]

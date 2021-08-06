@@ -26,5 +26,5 @@ fn set_position(this: &mut Il2CppObject, new_position: Vector3) {
 
 #[no_mangle]
 pub extern "C" fn load() {
-    set_position.install();
+    set_position.install().unwrap();
 }

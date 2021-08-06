@@ -17,5 +17,5 @@ fn set_active_scene(scene: &mut Il2CppObject) -> bool {
 
 #[no_mangle]
 pub extern "C" fn load() {
-    set_active_scene.install();
+    set_active_scene.install().unwrap();
 }
