@@ -6,6 +6,7 @@
 //! Procedural macros for the quest_hook crate
 
 mod hook;
+mod il2cpp_functions;
 mod impl_arguments_parameters;
 
 use proc_macro::TokenStream;
@@ -24,6 +25,16 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemFn);
 
     match hook::expand(args, input) {
+        Ok(ts) => ts,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+#[proc_macro]
+#[doc(hidden)]
+pub fn il2cpp_functions(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as il2cpp_functions::Input);
+    match il2cpp_functions::expand(input) {
         Ok(ts) => ts,
         Err(err) => err.to_compile_error().into(),
     }
