@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::fmt;
 
 use crate::{Builtin, Il2CppType, MethodInfo, Type};
@@ -16,8 +15,6 @@ use super::ty::semantics;
 pub unsafe trait ThisParameter {
     /// Type of the actual `this` parameter
     type Actual;
-    /// Normalized type of `this`, useful for caching
-    type Type: Any;
 
     /// Checks whether the type can be used as a C# instance parameter for the
     /// given [`MethodInfo`]
@@ -40,8 +37,6 @@ pub unsafe trait ThisParameter {
 pub unsafe trait Parameter {
     /// Type of the actual parameter
     type Actual;
-    /// Normalized type of the parameter, useful for caching
-    type Type: Any;
 
     /// Checks whether the type can be used as a C# parameter with the given
     /// [`Il2CppType`]
@@ -65,8 +60,6 @@ pub unsafe trait Parameter {
 pub unsafe trait Return {
     /// Type of the actual return value
     type Actual;
-    /// Normalized type of the return value, useful for caching
-    type Type: Any;
 
     /// Checks whether the type can be used as a C# return type of the given
     /// [`Il2CppType`]
@@ -87,9 +80,6 @@ pub unsafe trait Return {
 /// # Safety
 /// The implementation must be correct
 pub unsafe trait Parameters {
-    /// Normalized type of the parameters, useful for caching
-    type Type: Any;
-
     /// Parameter count
     const COUNT: usize;
 
@@ -103,7 +93,6 @@ where
     T: Type,
 {
     type Actual = Self;
-    type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
         T::matches_this_parameter(method)
@@ -122,7 +111,6 @@ where
     T: Type,
 {
     type Actual = Option<Self>;
-    type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
         T::matches_this_parameter(method)
@@ -138,7 +126,6 @@ where
 
 unsafe impl ThisParameter for () {
     type Actual = ();
-    type Type = ();
 
     fn matches(method: &MethodInfo) -> bool {
         method.is_static()
@@ -154,7 +141,6 @@ where
     S: semantics::ReferenceParameter,
 {
     type Actual = Self;
-    type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
         T::matches_reference_parameter(ty)
@@ -174,7 +160,6 @@ where
     S: semantics::ReferenceParameter,
 {
     type Actual = Option<Self>;
-    type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
         T::matches_reference_parameter(ty)
@@ -194,7 +179,6 @@ where
     S: semantics::ReferenceReturn,
 {
     type Actual = Self;
-    type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
         T::matches_reference_return(ty)
@@ -214,7 +198,6 @@ where
     S: semantics::ReferenceReturn,
 {
     type Actual = Option<Self>;
-    type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
         T::matches_reference_return(ty)
@@ -230,7 +213,6 @@ where
 
 unsafe impl Return for () {
     type Actual = ();
-    type Type = ();
 
     fn matches(ty: &Il2CppType) -> bool {
         ty.is_builtin(Builtin::Void)
@@ -246,7 +228,6 @@ where
     E: fmt::Debug,
 {
     type Actual = T::Actual;
-    type Type = T::Type;
 
     fn matches(ty: &Il2CppType) -> bool {
         T::matches(ty)
@@ -261,8 +242,6 @@ where
 }
 
 unsafe impl Parameters for () {
-    type Type = ();
-
     const COUNT: usize = 0;
 
     fn matches(method: &MethodInfo) -> bool {
@@ -274,8 +253,6 @@ unsafe impl<P> Parameters for P
 where
     P: Parameter,
 {
-    type Type = (P::Type,);
-
     const COUNT: usize = 1;
 
     fn matches(method: &MethodInfo) -> bool {

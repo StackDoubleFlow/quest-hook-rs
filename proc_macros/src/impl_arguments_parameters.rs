@@ -51,7 +51,6 @@ pub fn expand(range: ExprRange) -> Result<TokenStream, Error> {
 
         let generic_params_parameter_tuple = generic_params_parameter.clone();
         let generic_params_parameter_where = generic_params_parameter.clone();
-        let generic_params_parameter_type = generic_params_parameter.clone();
 
         let impl_ts = quote! {
             unsafe impl<#(#generic_params_argument),*> Arguments<#n> for (#(#generic_params_argument_tuple,)*)
@@ -74,8 +73,6 @@ pub fn expand(range: ExprRange) -> Result<TokenStream, Error> {
             where
                 #(#generic_params_parameter_where: Parameter),*
             {
-                type Type = (#(#generic_params_parameter_type::Type,)*);
-
                 const COUNT: usize = #n;
 
                 fn matches(method: &MethodInfo) -> bool {

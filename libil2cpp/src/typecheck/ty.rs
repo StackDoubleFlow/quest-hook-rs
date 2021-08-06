@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use crate::{
     Il2CppClass, Il2CppObject, Il2CppReflectionMethod, Il2CppReflectionType, Il2CppString,
     Il2CppType, MethodInfo,
@@ -10,7 +8,7 @@ use crate::{
 /// # Safety
 /// The Rust and C# types must be ABI-compatible and the trait implementation
 /// must be correct
-pub unsafe trait Type: Any {
+pub unsafe trait Type: 'static {
     /// Semantics of the type, either [`Reference`] or [`Value`]
     type Semantics: semantics::Semantics;
 
@@ -217,7 +215,6 @@ macro_rules! unsafe_impl_value_type {
 
         unsafe impl $crate::Parameter for $type {
             type Actual = Self;
-            type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
                 <Self as $crate::Type>::matches_value_parameter(ty)
@@ -245,7 +242,6 @@ macro_rules! unsafe_impl_value_type {
 
         unsafe impl $crate::Return for $type {
             type Actual = Self;
-            type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
                 <Self as $crate::Type>::matches_value_return(ty)
