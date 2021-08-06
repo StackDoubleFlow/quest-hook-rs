@@ -8,6 +8,7 @@ pub extern "C" fn setup() {
 }
 
 #[derive(Debug)]
+#[repr(C)]
 struct Vector3 {
     x: f32,
     y: f32,
