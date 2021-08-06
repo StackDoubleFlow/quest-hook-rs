@@ -99,6 +99,15 @@ impl TryFrom<&Il2CppString> for String {
     }
 }
 
+impl<T> PartialEq<T> for Il2CppString
+where
+    T: AsRef<str>,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.to_string().map_or(false, |s| s == other.as_ref())
+    }
+}
+
 impl fmt::Debug for Il2CppString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.to_string_lossy(), f)
