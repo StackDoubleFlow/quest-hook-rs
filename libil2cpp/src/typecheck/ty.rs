@@ -207,7 +207,7 @@ macro_rules! unsafe_impl_value_type {
             type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                Self::matches_value_argument(ty)
+                <Self as $crate::Type>::matches_value_argument(ty)
             }
 
             fn invokable(&mut self) -> *mut ::std::ffi::c_void {
@@ -220,7 +220,7 @@ macro_rules! unsafe_impl_value_type {
             type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                Self::matches_value_parameter(ty)
+                <Self as $crate::Type>::matches_value_parameter(ty)
             }
 
             fn from_actual(actual: Self::Actual) -> Self {
@@ -235,7 +235,7 @@ macro_rules! unsafe_impl_value_type {
             type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                Self::matches_value_returned(ty)
+                <Self as $crate::Type>::matches_value_returned(ty)
             }
 
             fn from_object(object: Option<&mut $crate::Il2CppObject>) -> Self {
@@ -248,7 +248,7 @@ macro_rules! unsafe_impl_value_type {
             type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                Self::matches_value_return(ty)
+                <Self as $crate::Type>::matches_value_return(ty)
             }
 
             fn into_actual(self) -> Self::Actual {

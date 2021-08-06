@@ -1,5 +1,7 @@
+#![deny(warnings)]
+
 use quest_hook::hook;
-use quest_hook::libil2cpp::unsafe_impl_value_type;
+use quest_hook::libil2cpp::{unsafe_impl_value_type, Il2CppObject};
 use quest_hook::tracing::debug;
 
 #[no_mangle]
@@ -9,7 +11,7 @@ pub extern "C" fn setup() {
 
 #[derive(Debug)]
 #[repr(C)]
-struct Vector3 {
+pub struct Vector3 {
     x: f32,
     y: f32,
     z: f32,
@@ -21,7 +23,7 @@ fn set_position(this: &mut Il2CppObject, new_position: Vector3) {
     let old_position: Vector3 = this.invoke("get_position", ()).unwrap();
     debug!("{:?} -> {:?}", old_position, new_position);
 
-    set_position.original(this, position)
+    set_position.original(this, new_position)
 }
 
 #[no_mangle]

@@ -26,3 +26,10 @@ thiserror = "1"
 [features]
 default = []
 strict = ["quest_hook_proc_macros/strict", "libil2cpp/strict"]
+
+[[example]]
+name = "hello_world"
+crate-type = ["cdylib"]
+[[example]]
+name = "custom_type"
+crate-type = ["cdylib"]

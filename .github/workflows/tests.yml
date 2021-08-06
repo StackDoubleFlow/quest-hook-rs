@@ -39,6 +39,13 @@ jobs:
           args: clippy --workspace --features=strict
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - name: Check for clippy warnings (examples)
+        uses: actions-rs/cargo@v1
+        with:
+          command: ndk
+          args: clippy --examples
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Check formatting
         uses: actions-rs/cargo@v1

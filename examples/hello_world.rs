@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use quest_hook::hook;
 use quest_hook::libil2cpp::{Il2CppObject, Il2CppString};
 use quest_hook::tracing::debug;
