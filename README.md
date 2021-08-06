@@ -29,7 +29,7 @@ use quest_hook::tracing::debug;
 
 #[no_mangle]
 pub extern "C" fn setup() {
-    quest_hook::setup!();
+    quest_hook::setup("hello world");
 }
 
 #[hook("UnityEngine.SceneManagement", "SceneManager", "SetActiveScene")]

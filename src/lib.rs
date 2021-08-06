@@ -16,8 +16,6 @@ pub use quest_hook_proc_macros::hook;
 pub use tracing_android::tracing;
 
 #[doc(hidden)]
-pub mod backtrace;
-#[doc(hidden)]
 pub use inline_hook;
 #[doc(hidden)]
 pub use tracing_android;
