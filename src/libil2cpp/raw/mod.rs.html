@@ -88,6 +88,9 @@
 <span id="88">88</span>
 <span id="89">89</span>
 <span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
 </pre><pre class="rust">
 <span class="doccomment">//! Raw il2cpp types and functions</span>
 <span class="doccomment">//!</span>
@@ -95,6 +98,9 @@
 <span class="doccomment">//! dynamically loaded from libil2cpp.so.</span>
 
 <span class="kw">mod</span> <span class="ident">functions</span>;
+
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2019&quot;</span>, <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;types_2019.rs&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2018&quot;</span>, <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;types_2018.rs&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">types</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">functions</span>::<span class="kw-2">*</span>;
