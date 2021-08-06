@@ -69,7 +69,7 @@
 }
 
 <span class="doccomment">/// Possible errors when installing a hook</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">thiserror::Error</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">thiserror::Error</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">HookInstallError</span> {
     <span class="doccomment">/// Hook already installed</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;hook already installed&quot;</span>)]</span>
