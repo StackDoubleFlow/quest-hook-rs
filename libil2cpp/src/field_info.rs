@@ -3,7 +3,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::mem::MaybeUninit;
 
-use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Return, WrapRaw};
+use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Returned, WrapRaw};
 
 /// Information about a C# field
 #[repr(transparent)]
@@ -26,7 +26,7 @@ impl FieldInfo {
     ///
     /// # Safety
     /// To be safe, the provided type has to match the field signature
-    pub unsafe fn store_unchecked<A>(&self, instance: &mut Il2CppObject, val: A)
+    pub unsafe fn store_unchecked<A>(&self, instance: &mut Il2CppObject, mut val: A)
     where
         A: Argument,
     {
@@ -36,7 +36,7 @@ impl FieldInfo {
     /// Load a typechecked value from a field
     pub fn load<R>(&self, instance: &mut Il2CppObject) -> R
     where
-        R: Return,
+        R: Returned,
     {
         assert!(R::matches(self.ty()));
 
@@ -49,7 +49,7 @@ impl FieldInfo {
     /// To be safe, the provided type has to match the field signature
     pub unsafe fn load_unchecked<R>(&self, instance: &mut Il2CppObject) -> R
     where
-        R: Return,
+        R: Returned,
     {
         let val = MaybeUninit::uninit();
         raw::field_get_value(instance.raw_mut(), self.raw(), &val as *const _ as *const _);

@@ -3,8 +3,8 @@ use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
 
 use crate::{
-    raw, Arguments, CalleeReturn, CalleeThis, FieldInfo, Il2CppException, Il2CppType, MethodInfo,
-    Parameters, Return, WrapRaw,
+    raw, Arguments, FieldInfo, Il2CppException, Il2CppType, MethodInfo, Parameters, Return,
+    Returned, ThisParameter, WrapRaw,
 };
 
 /// An il2cpp class
@@ -76,15 +76,13 @@ impl Il2CppClass {
     pub fn find_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
     where
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         for c in self.hierarchy() {
             let mut matching = c
                 .methods()
                 .iter()
-                .filter(|mi| {
-                    mi.name() == name && A::matches(mi.parameters()) && R::matches(mi.return_ty())
-                })
+                .filter(|mi| mi.name() == name && A::matches(mi) && R::matches(mi.return_ty()))
                 .copied();
 
             match match matching.next() {
@@ -106,16 +104,13 @@ impl Il2CppClass {
     pub fn find_static_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
     where
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         let mut matching = self
             .methods()
             .iter()
             .filter(|mi| {
-                mi.name() == name
-                    && mi.is_static()
-                    && A::matches(mi.parameters())
-                    && R::matches(mi.return_ty())
+                mi.name() == name && mi.is_static() && A::matches(mi) && R::matches(mi.return_ty())
             })
             .copied();
 
@@ -129,11 +124,11 @@ impl Il2CppClass {
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking from a callee perspective
-    pub fn find_method_callee<T, P, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    pub fn find_method_callee<T, P, R>(&self, name: &str) -> Option<&MethodInfo>
     where
-        T: CalleeThis,
-        P: Parameters<N>,
-        R: CalleeReturn,
+        T: ThisParameter,
+        P: Parameters,
+        R: Return,
     {
         for c in self.hierarchy() {
             let mut matching = c
@@ -142,7 +137,7 @@ impl Il2CppClass {
                 .filter(|mi| {
                     mi.name() == name
                         && T::matches(mi)
-                        && P::matches(mi.parameters())
+                        && P::matches(mi)
                         && R::matches(mi.return_ty())
                 })
                 .copied();
@@ -215,7 +210,7 @@ impl Il2CppClass {
     ) -> Result<R, &mut Il2CppException>
     where
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         let method = self.find_static_method::<A, R, N>(name).unwrap();
         unsafe { method.invoke_unchecked((), args) }

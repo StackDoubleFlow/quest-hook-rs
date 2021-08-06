@@ -1,4 +1,4 @@
-#![feature(once_cell, min_specialization)]
+#![feature(once_cell)]
 #![warn(rust_2018_idioms, missing_debug_implementations, missing_docs)]
 #![cfg_attr(feature = "strict", deny(warnings))]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp")]
@@ -24,13 +24,9 @@ pub use field_info::FieldInfo;
 pub use method_info::{Il2CppReflectionMethod, MethodInfo};
 pub use object::Il2CppObject;
 pub use parameter_info::ParameterInfo;
-pub use quest_hook_proc_macros::unsafe_value_type_impl;
 pub use raw::{unbox, WrapRaw};
 pub use string::Il2CppString;
 pub use ty::{Builtin, Il2CppReflectionType, Il2CppType};
-pub use typecheck::callee::{Parameter, Parameters, Return as CalleeReturn, This as CalleeThis};
-pub use typecheck::caller::{Argument, Arguments, Return, This};
-pub use typecheck::ty::Type;
-
-// Maybe I have OCD
-pub use {Parameter as CalleeArgument, Parameters as CalleeArguments};
+pub use typecheck::callee::{Parameter, Parameters, Return, ThisParameter};
+pub use typecheck::caller::{Argument, Arguments, Returned, ThisArgument};
+pub use typecheck::ty::{Reference, Type, Value};

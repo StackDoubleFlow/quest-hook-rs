@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Return, WrapRaw};
+use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Returned, WrapRaw};
 
 /// An il2cpp object
 #[repr(transparent)]
@@ -25,7 +25,7 @@ impl Il2CppObject {
     ) -> Result<R, &mut Il2CppException>
     where
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         let method = self.class().find_method::<A, R, N>(name).unwrap();
         unsafe { method.invoke_unchecked(self, args) }
@@ -57,7 +57,7 @@ impl Il2CppObject {
     /// This method will panic if the given field can't be found
     pub fn load<R>(&mut self, field: &str) -> R
     where
-        R: Return,
+        R: Returned,
     {
         let field = self.class().find_field(field).unwrap();
         field.load(self)

@@ -36,6 +36,11 @@ impl Il2CppType {
         unsafe { CStr::from_ptr(name) }.to_string_lossy()
     }
 
+    /// Whether the type is a ref type
+    pub fn is_ref(&self) -> bool {
+        self.raw().byref() != 0
+    }
+
     /// [`Il2CppReflectionType`] which represents the type
     pub fn reflection_object(&self) -> &Il2CppReflectionType {
         unsafe { Il2CppReflectionType::wrap(raw::type_get_object(self.raw())) }

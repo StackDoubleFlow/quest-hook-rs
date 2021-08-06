@@ -1,191 +1,285 @@
 use std::any::Any;
+use std::fmt;
 
-use crate::{Builtin, Il2CppType, MethodInfo, ParameterInfo, Type};
+use crate::{Builtin, Il2CppType, MethodInfo, Type};
 
-/// Trait implemented by types that can be used as C# method parameters
+use super::ty::semantics;
+
+/// Trait implemented by types that can be used as C# `this` method parameters
+///
+/// # Note
+/// You should most likely not be implementing this trait yourself, but rather
+/// the [`Type`] trait
 ///
 /// # Safety
-/// Interfaces depending on this trait assume that all of its methods are
-/// correct in an il2cpp context
-pub unsafe trait Parameter {
-    /// Normalized type of the parameter, useful for caching
-    type Type: Any;
-
-    /// Checks whether the type can be used as a C# parameter with the given
-    /// [`Il2CppType`] in a method definition
-    fn matches(ty: &Il2CppType) -> bool;
-}
-
-/// Trait implemented by types that can be used as a C# instance parameters
-///
-/// # Safety
-/// Interfaces depending on this trait assume that all of its methods are
-/// correct in an il2cpp context
-pub unsafe trait This {
+/// The implementation must be correct
+pub unsafe trait ThisParameter {
+    /// Type of the actual `this` parameter
+    type Actual;
     /// Normalized type of `this`, useful for caching
     type Type: Any;
 
     /// Checks whether the type can be used as a C# instance parameter for the
     /// given [`MethodInfo`]
     fn matches(method: &MethodInfo) -> bool;
+
+    /// Converts from the actual type to the desired one
+    fn from_actual(actual: Self::Actual) -> Self;
+    /// Converts from the desired type into the actual one
+    fn into_actual(self) -> Self::Actual;
+}
+
+/// Trait implemented by types that can be used as C# method parameters
+///
+/// # Note
+/// You should most likely not be implementing this trait yourself, but rather
+/// the [`Type`] trait
+///
+/// # Safety
+/// The implementation must be correct
+pub unsafe trait Parameter {
+    /// Type of the actual parameter
+    type Actual;
+    /// Normalized type of the parameter, useful for caching
+    type Type: Any;
+
+    /// Checks whether the type can be used as a C# parameter with the given
+    /// [`Il2CppType`]
+    fn matches(ty: &Il2CppType) -> bool;
+
+    /// Converts from the actual type to the desired one
+    fn from_actual(actual: Self::Actual) -> Self;
+    /// Converts from the desired type into the actual one
+    fn into_actual(self) -> Self::Actual;
+}
+
+/// Trait implemented by types that can be used as return types for C#
+/// methods
+///
+/// # Note
+/// You should most likely not be implementing this trait yourself, but rather
+/// the [`Type`] trait
+///
+/// # Safety
+/// The implementation must be correct
+pub unsafe trait Return {
+    /// Type of the actual return value
+    type Actual;
+    /// Normalized type of the return value, useful for caching
+    type Type: Any;
+
+    /// Checks whether the type can be used as a C# return type of the given
+    /// [`Il2CppType`]
+    fn matches(ty: &Il2CppType) -> bool;
+
+    /// Converts from the desired type into the actual one
+    fn into_actual(self) -> Self::Actual;
+    /// Converts from the actual type to the desired one
+    fn from_actual(actual: Self::Actual) -> Self;
 }
 
 /// Trait implemented by types that can be used as a collection of C# method
 /// parameters
 ///
+/// # Note
+/// You should most likely not be implementing this trait yourself
+///
 /// # Safety
-/// Interfaces depending on this trait assume that all of its methods are
-/// correct in an il2cpp context
-pub unsafe trait Parameters<const N: usize> {
+/// The implementation must be correct
+pub unsafe trait Parameters {
     /// Normalized type of the parameters, useful for caching
     type Type: Any;
 
-    /// Checks whether the type can be used as a C# parameter collection with
-    /// the given [`ParameterInfo`]s in a method definition
-    fn matches(params: &[ParameterInfo]) -> bool;
+    /// Parameter count
+    const COUNT: usize;
+
+    /// Checks whether the type can be used as a C# parameter collection for the
+    /// given [`MethodInfo`]
+    fn matches(method: &MethodInfo) -> bool;
 }
 
-/// Trait implemented by types that can be used as callee return types for C#
-/// methods
-///
-/// # Safety
-/// Interfaces depending on this trait assume that all of its methods are
-/// correct in an il2cpp context
-pub unsafe trait Return {
-    /// Normalized type of the return type, useful for caching
-    type Type: Any;
-
-    /// Checks whether the type can be used as a C# return type with the given
-    /// [`Il2CppType`] in a method definition
-    fn matches(ty: &Il2CppType) -> bool;
-}
-
-// When we are the callee, we can't know if the parameters will be null, so we
-// can't impl Parameter for &T or &mut T
-unsafe impl<T> Parameter for Option<&T>
+unsafe impl<T> ThisParameter for Option<&mut T>
 where
-    T: Type + Any,
+    T: Type,
 {
-    type Type = T;
-
-    default fn matches(ty: &Il2CppType) -> bool {
-        T::class().is_assignable_from(ty.class())
-    }
-}
-unsafe impl<T> Parameter for Option<&mut T>
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        <Option<&T> as Parameter>::matches(ty)
-    }
-}
-
-unsafe impl<T> This for &T
-where
-    T: Type + Any,
-{
+    type Actual = Self;
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
-        T::class().is_assignable_from(method.class())
+        T::matches_this_parameter(method)
+    }
+
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual
+    }
+    fn into_actual(self) -> Self::Actual {
+        self
     }
 }
-unsafe impl<T> This for &mut T
+
+unsafe impl<T> ThisParameter for &mut T
 where
-    T: Type + Any,
+    T: Type,
 {
+    type Actual = Option<Self>;
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
-        <&T as This>::matches(method)
+        T::matches_this_parameter(method)
+    }
+
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual.unwrap()
+    }
+    fn into_actual(self) -> Self::Actual {
+        Some(self)
     }
 }
 
-unsafe impl This for () {
+unsafe impl ThisParameter for () {
+    type Actual = ();
     type Type = ();
 
     fn matches(method: &MethodInfo) -> bool {
         method.is_static()
     }
+
+    fn from_actual((): ()) {}
+    fn into_actual(self) {}
 }
 
-unsafe impl Parameters<0> for () {
-    type Type = ();
-
-    fn matches(args: &[ParameterInfo]) -> bool {
-        args.is_empty()
-    }
-}
-
-unsafe impl<P> Parameters<1> for P
+unsafe impl<T, S> Parameter for Option<&mut T>
 where
-    P: Parameter,
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceParameter,
 {
-    type Type = (P::Type,);
-
-    fn matches(params: &[ParameterInfo]) -> bool {
-        params.len() == 1 && P::matches(params[0].ty())
-    }
-}
-
-unsafe impl<T> Return for &mut T
-where
-    T: Type + Any,
-{
-    type Type = T;
-
-    default fn matches(ty: &Il2CppType) -> bool {
-        ty.class().is_assignable_from(T::class())
-    }
-}
-unsafe impl<T> Return for Option<&mut T>
-where
-    T: Type + Any,
-{
+    type Actual = Self;
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        <&mut T as Return>::matches(ty)
+        T::matches_reference_parameter(ty)
+    }
+
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual
+    }
+    fn into_actual(self) -> Self::Actual {
+        self
+    }
+}
+
+unsafe impl<T, S> Parameter for &mut T
+where
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceParameter,
+{
+    type Actual = Option<Self>;
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches_reference_parameter(ty)
+    }
+
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual.unwrap()
+    }
+    fn into_actual(self) -> Self::Actual {
+        Some(self)
+    }
+}
+
+unsafe impl<T, S> Return for Option<&mut T>
+where
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceReturn,
+{
+    type Actual = Self;
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches_reference_return(ty)
+    }
+
+    fn into_actual(self) -> Self::Actual {
+        self
+    }
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual
+    }
+}
+
+unsafe impl<T, S> Return for &mut T
+where
+    T: Type<Semantics = S>,
+    S: semantics::ReferenceReturn,
+{
+    type Actual = Option<Self>;
+    type Type = T;
+
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches_reference_return(ty)
+    }
+
+    fn into_actual(self) -> Self::Actual {
+        Some(self)
+    }
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual.unwrap()
     }
 }
 
 unsafe impl Return for () {
+    type Actual = ();
     type Type = ();
 
     fn matches(ty: &Il2CppType) -> bool {
         ty.is_builtin(Builtin::Void)
     }
+
+    fn into_actual(self) {}
+    fn from_actual((): ()) {}
 }
 
-macro_rules! impl_return_value {
-    ($type:ty, $($builtin:ident),+) => {
-        unsafe impl Return for $type {
-            type Type = $type;
+unsafe impl<T, E> Return for Result<T, E>
+where
+    T: Return,
+    E: fmt::Debug,
+{
+    type Actual = T::Actual;
+    type Type = T::Type;
 
-            fn matches(ty: &Il2CppType) -> bool {
-                $(ty.is_builtin(Builtin::$builtin))||+
-            }
-        }
+    fn matches(ty: &Il2CppType) -> bool {
+        T::matches(ty)
+    }
 
-        unsafe impl Return for &mut $type {
-            fn matches(_: &Il2CppType) -> bool {
-                false
-            }
-        }
+    fn into_actual(self) -> Self::Actual {
+        self.unwrap().into_actual()
+    }
+    fn from_actual(actual: Self::Actual) -> Self {
+        Ok(T::from_actual(actual))
     }
 }
 
-impl_return_value!(u8, Byte);
-impl_return_value!(i8, SByte);
-impl_return_value!(u16, UShort, Char);
-impl_return_value!(i16, Short);
-impl_return_value!(u32, UInt);
-impl_return_value!(i32, Int);
-impl_return_value!(u64, ULong);
-impl_return_value!(i64, Long);
-impl_return_value!(f32, Single);
-impl_return_value!(f64, Double);
-impl_return_value!(bool, Bool);
+unsafe impl Parameters for () {
+    type Type = ();
+
+    const COUNT: usize = 0;
+
+    fn matches(method: &MethodInfo) -> bool {
+        method.parameters().is_empty()
+    }
+}
+
+unsafe impl<P> Parameters for P
+where
+    P: Parameter,
+{
+    type Type = (P::Type,);
+
+    const COUNT: usize = 1;
+
+    fn matches(method: &MethodInfo) -> bool {
+        let params = method.parameters();
+        params.len() == 1 && unsafe { P::matches(params.get_unchecked(0).ty()) }
+    }
+}

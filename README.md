@@ -1,12 +1,12 @@
 # quest_hook
 
-A Rust library used for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp games. Mods using this library may be loaded using [QuestLoader](https://github.com/sc2ad/QuestLoader).
+A library for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp games. Mods using this library may be loaded using [QuestLoader](https://github.com/sc2ad/QuestLoader).
 
 [![Docs](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Docs?color=blue&label=docs&style=for-the-badge)](https://stackdoubleflow.github.io/quest-hook-rs/quest_hook/) [![Tests](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Tests?label=tests&style=for-the-badge)](https://github.com/StackDoubleFlow/quest-hook-rs/actions/workflows/tests.yml)
 
 ## Usage
 
-Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library.
+Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile `quest_hook`.
 
 ```toml
 [lib]
@@ -24,31 +24,29 @@ It is also recommended to use [`cargo-ndk`](https://github.com/bbqsrc/cargo-ndk)
 
 ```rust
 use quest_hook::hook;
-use quest_hook::libil2cpp::Il2CppObject;
-use quest_hook::tracing::info;
+use quest_hook::libil2cpp::{Il2CppObject, Il2CppString};
+use quest_hook::tracing::debug;
 
 #[no_mangle]
 pub extern "C" fn setup() {
-    quest_hook::setup!();
+    quest_hook::setup("hello world");
 }
 
-#[hook("", "MainSettingsModelSO", "Load")]
-fn on_enable(this: &mut Il2CppObject, forced: bool) {
-    on_enable.original(this, forced);
+#[hook("UnityEngine.SceneManagement", "SceneManager", "SetActiveScene")]
+fn set_active_scene(scene: &mut Il2CppObject) -> bool {
+    let name: &Il2CppString = scene.invoke("get_name", ()).unwrap();
+    debug!("Hello, {}!", name);
 
-    let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled").unwrap();
-    burn_mark_trails_enabled.invoke_void("set_value", true).unwrap();
+    set_active_scene.original(scene)
 }
 
 #[no_mangle]
 pub extern "C" fn load() {
-    info!("Installing burn_marks hooks!");
-
-    on_enable.install();
-
-    info!("Installed burn_marks hooks!");
+    set_active_scene.install().unwrap();
 }
 ```
+
+Check out the [`examples`](./examples/) directory for more examples.
 
 ## Contributing
 

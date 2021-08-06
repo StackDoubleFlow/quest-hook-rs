@@ -8,8 +8,8 @@ use crate::raw::{
     self, METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL,
 };
 use crate::{
-    Arguments, Il2CppClass, Il2CppException, Il2CppObject, Il2CppType, ParameterInfo, Return, This,
-    WrapRaw,
+    Arguments, Il2CppClass, Il2CppException, Il2CppObject, Il2CppType, ParameterInfo, Returned,
+    ThisArgument, WrapRaw,
 };
 
 /// Information about a C# method
@@ -25,12 +25,12 @@ impl MethodInfo {
         args: A,
     ) -> Result<R, &mut Il2CppException>
     where
-        T: This,
+        T: ThisArgument,
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         assert!(T::matches(self));
-        assert!(A::matches(self.parameters()));
+        assert!(A::matches(self));
         assert!(R::matches(self.return_ty()));
 
         unsafe { self.invoke_unchecked(this, args) }
@@ -43,13 +43,13 @@ impl MethodInfo {
     /// To be safe, the provided types have to match the method signature
     pub unsafe fn invoke_unchecked<T, A, R, const N: usize>(
         &self,
-        this: T,
-        args: A,
+        mut this: T,
+        mut args: A,
     ) -> Result<R, &mut Il2CppException>
     where
-        T: This,
+        T: ThisArgument,
         A: Arguments<N>,
-        R: Return,
+        R: Returned,
     {
         let mut exception = None;
         let r = raw::runtime_invoke(
