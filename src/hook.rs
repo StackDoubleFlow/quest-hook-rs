@@ -17,7 +17,7 @@ pub trait Hook {
     const METHOD_NAME: &'static str;
 
     /// Installs the hook
-    fn install(&self);
+    fn install(&self) -> Result<(), HookInstallError>;
 
     /// Pointer to the hook function
     fn hook(&self) -> *mut ();

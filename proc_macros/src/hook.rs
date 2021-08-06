@@ -1,7 +1,7 @@
 use heck::{CamelCase, SnakeCase};
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
+use proc_macro2::{Group, TokenStream as TokenStream2, TokenTree as TokenTree2};
+use quote::{format_ident, quote, ToTokens};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, FnArg, Generics, Ident, ItemFn, LitStr, Pat, PatType, ReturnType, Token,
@@ -16,12 +16,14 @@ pub fn expand(args: Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<Toke
     let struct_def = metadata.struct_def();
     let struct_impl = metadata.struct_impl();
     let static_def = metadata.static_def();
+    let trait_impl = metadata.trait_impl();
 
     let ts = quote! {
         #outer_fn
         #struct_def
         #struct_impl
         #static_def
+        #trait_impl
     };
     Ok(ts.into())
 }
@@ -424,6 +426,43 @@ impl Metadata {
             }
         }
     }
+
+    fn trait_impl(&self) -> TokenStream2 {
+        let struct_name = self.struct_name();
+
+        let namespace = &self.namespace;
+        let class = &self.class;
+        let method = &self.method;
+
+        let this_ty = staticify(self.typechecking_this_ty());
+        let params_ty = staticify(self.typechecking_params_ty());
+        let return_ty = staticify(self.return_ty());
+
+        let fn_name = self.fn_name();
+
+        quote! {
+            impl ::quest_hook::Hook for #struct_name {
+                type This = #this_ty;
+                type Parameters = #params_ty;
+                type Return = #return_ty;
+
+                const NAMESPACE: &'static str = #namespace;
+                const CLASS_NAME: &'static str = #class;
+                const METHOD_NAME: &'static str = #method;
+
+                fn install(&self) -> Result<(), ::quest_hook::HookInstallError> {
+                    self.install()
+                }
+
+                fn original(&self) -> *mut () {
+                    self.original.load(::std::sync::atomic::Ordering::Relaxed)
+                }
+                fn hook(&self) -> *mut () {
+                    #fn_name as _
+                }
+            }
+        }
+    }
 }
 
 fn unit_ty() -> Type {
@@ -435,4 +474,24 @@ fn unit_ty() -> Type {
 
 fn attr_is(attr: &Attribute, ident: &str) -> bool {
     matches!(attr.path.get_ident(), Some(ai) if ai == ident)
+}
+
+fn staticify(tokens: impl ToTokens) -> TokenStream2 {
+    let mut ts = TokenStream2::new();
+    let mut iter = tokens.to_token_stream().into_iter().peekable();
+    while let Some(tt) = iter.next() {
+        match &tt {
+            TokenTree2::Group(g) => {
+                let delimiter = g.delimiter();
+                let stream = staticify(g.stream());
+                ts.extend_one(TokenTree2::Group(Group::new(delimiter, stream)))
+            }
+            TokenTree2::Punct(p) if p.as_char() == '&' => match iter.peek() {
+                Some(TokenTree2::Punct(p)) if p.as_char() == '\'' => ts.extend_one(tt),
+                _ => ts.extend_one(quote!(&'static)),
+            },
+            _ => ts.extend_one(tt),
+        }
+    }
+    ts
 }
