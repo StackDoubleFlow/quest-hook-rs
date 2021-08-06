@@ -86,9 +86,12 @@ pub unsafe trait Return {
 ///
 /// # Safety
 /// The implementation must be correct
-pub unsafe trait Parameters<const N: usize> {
+pub unsafe trait Parameters {
     /// Normalized type of the parameters, useful for caching
     type Type: Any;
+
+    /// Parameter count
+    const COUNT: usize;
 
     /// Checks whether the type can be used as a C# parameter collection for the
     /// given [`MethodInfo`]
@@ -257,19 +260,23 @@ where
     }
 }
 
-unsafe impl Parameters<0> for () {
+unsafe impl Parameters for () {
     type Type = ();
+
+    const COUNT: usize = 0;
 
     fn matches(method: &MethodInfo) -> bool {
         method.parameters().is_empty()
     }
 }
 
-unsafe impl<P> Parameters<1> for P
+unsafe impl<P> Parameters for P
 where
     P: Parameter,
 {
     type Type = (P::Type,);
+
+    const COUNT: usize = 1;
 
     fn matches(method: &MethodInfo) -> bool {
         let params = method.parameters();

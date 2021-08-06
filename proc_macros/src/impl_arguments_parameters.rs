@@ -70,11 +70,13 @@ pub fn expand(range: ExprRange) -> Result<TokenStream, Error> {
                 }
             }
 
-            unsafe impl<#(#generic_params_parameter),*> Parameters<#n> for (#(#generic_params_parameter_tuple,)*)
+            unsafe impl<#(#generic_params_parameter),*> Parameters for (#(#generic_params_parameter_tuple,)*)
             where
                 #(#generic_params_parameter_where: Parameter),*
             {
                 type Type = (#(#generic_params_parameter_type::Type,)*);
+
+                const COUNT: usize = #n;
 
                 fn matches(method: &MethodInfo) -> bool {
                     let params = method.parameters();

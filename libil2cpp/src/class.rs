@@ -124,10 +124,10 @@ impl Il2CppClass {
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking from a callee perspective
-    pub fn find_method_callee<T, P, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    pub fn find_method_callee<T, P, R>(&self, name: &str) -> Option<&MethodInfo>
     where
         T: ThisParameter,
-        P: Parameters<N>,
+        P: Parameters,
         R: Return,
     {
         for c in self.hierarchy() {

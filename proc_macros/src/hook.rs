@@ -195,15 +195,6 @@ impl Metadata {
             })
     }
 
-    fn params_count(&self) -> usize {
-        let with_this = self.input.sig.inputs.len();
-        if self.has_this() {
-            with_this - 1
-        } else {
-            with_this
-        }
-    }
-
     fn params_ty(&self) -> impl Iterator<Item = &'_ Type> + '_ {
         self.params().map(|param| &*param.ty)
     }
@@ -325,7 +316,6 @@ impl Metadata {
         let namespace = &self.namespace;
         let class = &self.class;
         let method = &self.method;
-        let params_count = self.params_count();
 
         let this_ty = self.typechecking_this_ty();
         let params_ty = self.typechecking_params_ty();
@@ -349,7 +339,7 @@ impl Metadata {
                     Some(class) => class,
                     None => return Err(HookInstallError::ClassNotFound),
                 };
-                let method = match class.find_method_callee::<#this_ty, #params_ty, #return_ty, #params_count>(#method) {
+                let method = match class.find_method_callee::<#this_ty, #params_ty, #return_ty>(#method) {
                     Some(method) => method,
                     None => return Err(HookInstallError::MethodNotFound),
                 };

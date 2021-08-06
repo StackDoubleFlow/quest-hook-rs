@@ -1,11 +1,11 @@
 use libil2cpp::{Parameters, Return, ThisParameter};
 
 /// Trait implemented by all hooks to facilitate generic programming
-pub trait Hook<const N: usize> {
+pub trait Hook {
     /// Type of this for the hooked method
     type This: ThisParameter;
     /// Type of the parameters for the hooked method
-    type Parameters: Parameters<N>;
+    type Parameters: Parameters;
     /// Type of the return for the hooked method
     type Return: Return;
 
