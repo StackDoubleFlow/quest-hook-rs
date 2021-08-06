@@ -25,6 +25,8 @@ pub unsafe trait ThisParameter {
 
     /// Converts from the actual type to the desired one
     fn from_actual(actual: Self::Actual) -> Self;
+    /// Converts from the desired type into the actual one
+    fn into_actual(self) -> Self::Actual;
 }
 
 /// Trait implemented by types that can be used as C# method parameters
@@ -47,6 +49,8 @@ pub unsafe trait Parameter {
 
     /// Converts from the actual type to the desired one
     fn from_actual(actual: Self::Actual) -> Self;
+    /// Converts from the desired type into the actual one
+    fn into_actual(self) -> Self::Actual;
 }
 
 /// Trait implemented by types that can be used as return types for C#
@@ -68,8 +72,10 @@ pub unsafe trait Return {
     /// [`Il2CppType`]
     fn matches(ty: &Il2CppType) -> bool;
 
-    /// Converts from the desired type to the actual one
+    /// Converts from the desired type into the actual one
     fn into_actual(self) -> Self::Actual;
+    /// Converts from the actual type to the desired one
+    fn from_actual(actual: Self::Actual) -> Self;
 }
 
 /// Trait implemented by types that can be used as a collection of C# method
@@ -103,29 +109,16 @@ where
     fn from_actual(actual: Self::Actual) -> Self {
         actual
     }
-}
-
-unsafe impl<'a, T> ThisParameter for Option<&'a T>
-where
-    T: Type,
-{
-    type Actual = Option<&'a mut T>;
-    type Type = T;
-
-    fn matches(method: &MethodInfo) -> bool {
-        T::matches_this_parameter(method)
-    }
-
-    fn from_actual(actual: Self::Actual) -> Self {
-        actual.map(|x| &*x)
+    fn into_actual(self) -> Self::Actual {
+        self
     }
 }
 
-unsafe impl<'a, T> ThisParameter for &'a mut T
+unsafe impl<T> ThisParameter for &mut T
 where
     T: Type,
 {
-    type Actual = Option<&'a mut T>;
+    type Actual = Option<Self>;
     type Type = T;
 
     fn matches(method: &MethodInfo) -> bool {
@@ -135,21 +128,8 @@ where
     fn from_actual(actual: Self::Actual) -> Self {
         actual.unwrap()
     }
-}
-
-unsafe impl<'a, T> ThisParameter for &'a T
-where
-    T: Type,
-{
-    type Actual = Option<&'a mut T>;
-    type Type = T;
-
-    fn matches(method: &MethodInfo) -> bool {
-        T::matches_this_parameter(method)
-    }
-
-    fn from_actual(actual: Self::Actual) -> Self {
-        &*actual.unwrap()
+    fn into_actual(self) -> Self::Actual {
+        Some(self)
     }
 }
 
@@ -162,6 +142,7 @@ unsafe impl ThisParameter for () {
     }
 
     fn from_actual((): ()) {}
+    fn into_actual(self) {}
 }
 
 unsafe impl<T, S> Parameter for Option<&mut T>
@@ -179,31 +160,17 @@ where
     fn from_actual(actual: Self::Actual) -> Self {
         actual
     }
+    fn into_actual(self) -> Self::Actual {
+        self
+    }
 }
 
-unsafe impl<'a, T, S> Parameter for Option<&'a T>
+unsafe impl<T, S> Parameter for &mut T
 where
     T: Type<Semantics = S>,
     S: semantics::ReferenceParameter,
 {
-    type Actual = Option<&'a mut T>;
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_parameter(ty)
-    }
-
-    fn from_actual(actual: Self::Actual) -> Self {
-        actual.map(|x| &*x)
-    }
-}
-
-unsafe impl<'a, T, S> Parameter for &'a mut T
-where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceParameter,
-{
-    type Actual = Option<&'a mut T>;
+    type Actual = Option<Self>;
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
@@ -213,22 +180,8 @@ where
     fn from_actual(actual: Self::Actual) -> Self {
         actual.unwrap()
     }
-}
-
-unsafe impl<'a, T, S> Parameter for &'a T
-where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceParameter,
-{
-    type Actual = Option<&'a mut T>;
-    type Type = T;
-
-    fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_parameter(ty)
-    }
-
-    fn from_actual(actual: Self::Actual) -> Self {
-        &*actual.unwrap()
+    fn into_actual(self) -> Self::Actual {
+        Some(self)
     }
 }
 
@@ -247,14 +200,17 @@ where
     fn into_actual(self) -> Self::Actual {
         self
     }
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual
+    }
 }
 
-unsafe impl<'a, T, S> Return for &'a mut T
+unsafe impl<T, S> Return for &mut T
 where
     T: Type<Semantics = S>,
     S: semantics::ReferenceReturn,
 {
-    type Actual = Option<&'a mut T>;
+    type Actual = Option<Self>;
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
@@ -263,6 +219,9 @@ where
 
     fn into_actual(self) -> Self::Actual {
         Some(self)
+    }
+    fn from_actual(actual: Self::Actual) -> Self {
+        actual.unwrap()
     }
 }
 
@@ -275,6 +234,7 @@ unsafe impl Return for () {
     }
 
     fn into_actual(self) {}
+    fn from_actual((): ()) {}
 }
 
 unsafe impl<T, E> Return for Result<T, E>
@@ -291,6 +251,9 @@ where
 
     fn into_actual(self) -> Self::Actual {
         self.unwrap().into_actual()
+    }
+    fn from_actual(actual: Self::Actual) -> Self {
+        Ok(T::from_actual(actual))
     }
 }
 

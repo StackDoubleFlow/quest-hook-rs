@@ -100,43 +100,43 @@ macro_rules! unsafe_impl_reference_type {
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;
 
-            fn matches_this_argument(method: &MethodInfo) -> bool {
+            fn matches_this_argument(method: &$crate::MethodInfo) -> bool {
                 method
                     .class()
                     .is_assignable_from(<Self as $crate::Type>::class())
             }
 
-            fn matches_this_parameter(method: &MethodInfo) -> bool {
+            fn matches_this_parameter(method: &$crate::MethodInfo) -> bool {
                 <Self as $crate::Type>::class().is_assignable_from(method.class())
             }
 
-            fn matches_reference_argument(ty: &Il2CppType) -> bool {
+            fn matches_reference_argument(ty: &$crate::Il2CppType) -> bool {
                 ty.class()
                     .is_assignable_from(<Self as $crate::Type>::class())
             }
-            fn matches_value_argument(_: &Il2CppType) -> bool {
+            fn matches_value_argument(_: &$crate::Il2CppType) -> bool {
                 false
             }
 
-            fn matches_reference_parameter(ty: &Il2CppType) -> bool {
+            fn matches_reference_parameter(ty: &$crate::Il2CppType) -> bool {
                 <Self as $crate::Type>::class().is_assignable_from(ty.class())
             }
-            fn matches_value_parameter(_: &Il2CppType) -> bool {
+            fn matches_value_parameter(_: &$crate::Il2CppType) -> bool {
                 false
             }
 
-            fn matches_reference_returned(ty: &Il2CppType) -> bool {
+            fn matches_reference_returned(ty: &$crate::Il2CppType) -> bool {
                 <Self as $crate::Type>::class().is_assignable_from(ty.class())
             }
-            fn matches_value_returned(_: &Il2CppType) -> bool {
+            fn matches_value_returned(_: &$crate::Il2CppType) -> bool {
                 false
             }
 
-            fn matches_reference_return(ty: &Il2CppType) -> bool {
+            fn matches_reference_return(ty: &$crate::Il2CppType) -> bool {
                 ty.class()
                     .is_assignable_from(<Self as $crate::Type>::class())
             }
-            fn matches_value_return(_: &Il2CppType) -> bool {
+            fn matches_value_return(_: &$crate::Il2CppType) -> bool {
                 false
             }
         }
@@ -157,48 +157,48 @@ macro_rules! unsafe_impl_value_type {
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;
 
-            fn matches_this_argument(method: &MethodInfo) -> bool {
+            fn matches_this_argument(method: &$crate::MethodInfo) -> bool {
                 method
                     .class()
                     .is_assignable_from(<Self as $crate::Type>::class())
             }
 
-            fn matches_this_parameter(method: &MethodInfo) -> bool {
+            fn matches_this_parameter(method: &$crate::MethodInfo) -> bool {
                 <Self as $crate::Type>::class().is_assignable_from(method.class())
             }
 
-            fn matches_value_argument(ty: &Il2CppType) -> bool {
+            fn matches_value_argument(ty: &$crate::Il2CppType) -> bool {
                 !ty.is_ref()
                     && ty
                         .class()
                         .is_assignable_from(<Self as $crate::Type>::class())
             }
-            fn matches_reference_argument(ty: &Il2CppType) -> bool {
+            fn matches_reference_argument(ty: &$crate::Il2CppType) -> bool {
                 ty.is_ref()
                     && ty
                         .class()
                         .is_assignable_from(<Self as $crate::Type>::class())
             }
 
-            fn matches_value_parameter(ty: &Il2CppType) -> bool {
+            fn matches_value_parameter(ty: &$crate::Il2CppType) -> bool {
                 !ty.is_ref() && <Self as $crate::Type>::class().is_assignable_from(ty.class())
             }
-            fn matches_reference_parameter(ty: &Il2CppType) -> bool {
+            fn matches_reference_parameter(ty: &$crate::Il2CppType) -> bool {
                 ty.is_ref() && <Self as $crate::Type>::class().is_assignable_from(ty.class())
             }
 
-            fn matches_value_returned(ty: &Il2CppType) -> bool {
+            fn matches_value_returned(ty: &$crate::Il2CppType) -> bool {
                 <Self as $crate::Type>::class().is_assignable_from(ty.class())
             }
-            fn matches_reference_returned(_: &Il2CppType) -> bool {
+            fn matches_reference_returned(_: &$crate::Il2CppType) -> bool {
                 false
             }
 
-            fn matches_value_return(ty: &Il2CppType) -> bool {
+            fn matches_value_return(ty: &$crate::Il2CppType) -> bool {
                 ty.class()
                     .is_assignable_from(<Self as $crate::Type>::class())
             }
-            fn matches_reference_return(_: &Il2CppType) -> bool {
+            fn matches_reference_return(_: &$crate::Il2CppType) -> bool {
                 false
             }
         }
@@ -206,7 +206,7 @@ macro_rules! unsafe_impl_value_type {
         unsafe impl $crate::Argument for $type {
             type Type = Self;
 
-            fn matches(ty: &Il2CppType) -> bool {
+            fn matches(ty: &$crate::Il2CppType) -> bool {
                 Self::matches_value_argument(ty)
             }
 
@@ -219,23 +219,26 @@ macro_rules! unsafe_impl_value_type {
             type Actual = Self;
             type Type = Self;
 
-            fn matches(ty: &Il2CppType) -> bool {
+            fn matches(ty: &$crate::Il2CppType) -> bool {
                 Self::matches_value_parameter(ty)
             }
 
             fn from_actual(actual: Self::Actual) -> Self {
                 actual
             }
+            fn into_actual(self) -> Self::Actual {
+                self
+            }
         }
 
         unsafe impl $crate::Returned for $type {
             type Type = Self;
 
-            fn matches(ty: &Il2CppType) -> bool {
+            fn matches(ty: &$crate::Il2CppType) -> bool {
                 Self::matches_value_returned(ty)
             }
 
-            fn from_object(object: Option<&mut Il2CppObject>) -> Self {
+            fn from_object(object: Option<&mut $crate::Il2CppObject>) -> Self {
                 unsafe { $crate::raw::unbox($crate::WrapRaw::raw(object.unwrap())) }
             }
         }
@@ -244,12 +247,15 @@ macro_rules! unsafe_impl_value_type {
             type Actual = Self;
             type Type = Self;
 
-            fn matches(ty: &Il2CppType) -> bool {
+            fn matches(ty: &$crate::Il2CppType) -> bool {
                 Self::matches_value_return(ty)
             }
 
             fn into_actual(self) -> Self::Actual {
                 self
+            }
+            fn from_actual(actual: Self::Actual) -> Self {
+                actual
             }
         }
     };

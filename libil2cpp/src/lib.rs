@@ -24,7 +24,6 @@ pub use field_info::FieldInfo;
 pub use method_info::{Il2CppReflectionMethod, MethodInfo};
 pub use object::Il2CppObject;
 pub use parameter_info::ParameterInfo;
-pub use quest_hook_proc_macros::unsafe_value_type_impl;
 pub use raw::{unbox, WrapRaw};
 pub use string::Il2CppString;
 pub use ty::{Builtin, Il2CppReflectionType, Il2CppType};
