@@ -24,31 +24,29 @@ It is also recommended to use [`cargo-ndk`](https://github.com/bbqsrc/cargo-ndk)
 
 ```rust
 use quest_hook::hook;
-use quest_hook::libil2cpp::Il2CppObject;
-use quest_hook::tracing::info;
+use quest_hook::libil2cpp::{Il2CppObject, Il2CppString};
+use quest_hook::tracing::debug;
 
 #[no_mangle]
 pub extern "C" fn setup() {
     quest_hook::setup!();
 }
 
-#[hook("", "MainSettingsModelSO", "Load")]
-fn on_enable(this: &mut Il2CppObject, forced: bool) {
-    on_enable.original(this, forced);
+#[hook("UnityEngine.SceneManagement", "SceneManager", "SetActiveScene")]
+fn set_active_scene(scene: &mut Il2CppObject) -> bool {
+    let name: &Il2CppString = scene.invoke("get_name", ()).unwrap();
+    debug!("Hello, {}!", name);
 
-    let burn_mark_trails_enabled: &mut Il2CppObject = this.load("burnMarkTrailsEnabled").unwrap();
-    burn_mark_trails_enabled.invoke_void("set_value", true).unwrap();
+    set_active_scene.original(scene)
 }
 
 #[no_mangle]
 pub extern "C" fn load() {
-    info!("Installing burn_marks hooks!");
-
-    on_enable.install();
-
-    info!("Installed burn_marks hooks!");
+    set_active_scene.install();
 }
 ```
+
+Check out the [`examples`](./examples/) directory for more examples.
 
 ## Contributing
 

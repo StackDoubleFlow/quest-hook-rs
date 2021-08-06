@@ -22,24 +22,26 @@ use syn::{parse_macro_input, ExprRange, ItemFn, LitStr, Token};
 /// # Examples
 ///
 /// ```no_run
-/// use quest_hook::inline_hook::hook;
-/// use quest_hook::libil2cpp::Il2CppObject;
-/// use tracing_android::tracing::info;
+/// use quest_hook::hook;
+/// use quest_hook::libil2cpp::{Il2CppObject, Il2CppString};
+/// use quest_hook::tracing::debug;
 ///
-/// #[hook("", "MainSettingsModelSO", "OnEnable")]
-/// fn on_enable(this: &Il2CppObject) {
-///     info!("MainSettingsModelSO.OnEnable was called!");
+/// #[no_mangle]
+/// pub extern "C" fn setup() {
+///     quest_hook::setup!();
+/// }
 ///
-///     on_enable.original(this); // Call the original C# method
+/// #[hook("UnityEngine.SceneManagement", "SceneManager", "SetActiveScene")]
+/// fn set_active_scene(scene: &mut Il2CppObject) -> bool {
+///     let name: &Il2CppString = scene.invoke("get_name", ()).unwrap();
+///     debug!("Hello, {}!", name);
+///
+///     set_active_scene.original(scene)
 /// }
 ///
 /// #[no_mangle]
 /// pub extern "C" fn load() {
-///     info!("Installing hooks!");
-///
-///     on_enable.install(); // Install the hook
-///
-///     info!("Installed  hooks!");
+///     set_active_scene.install();
 /// }
 /// ```
 #[proc_macro_attribute]

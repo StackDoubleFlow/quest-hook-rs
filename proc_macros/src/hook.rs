@@ -182,7 +182,7 @@ impl Metadata {
     }
 
     fn params(&self) -> impl Iterator<Item = &'_ PatType> + '_ {
-        let skip = if self.has_this() { 1 } else { 2 };
+        let skip = if self.has_this() { 1 } else { 0 };
 
         self.input
             .sig
@@ -193,6 +193,15 @@ impl Metadata {
                 FnArg::Typed(arg) => arg,
                 _ => unreachable!(),
             })
+    }
+
+    fn params_count(&self) -> usize {
+        let with_this = self.input.sig.inputs.len();
+        if self.has_this() {
+            with_this - 1
+        } else {
+            with_this
+        }
     }
 
     fn params_ty(&self) -> impl Iterator<Item = &'_ Type> + '_ {
@@ -316,6 +325,7 @@ impl Metadata {
         let namespace = &self.namespace;
         let class = &self.class;
         let method = &self.method;
+        let params_count = self.params_count();
 
         let this_ty = self.typechecking_this_ty();
         let params_ty = self.typechecking_params_ty();
@@ -339,7 +349,7 @@ impl Metadata {
                     Some(class) => class,
                     None => return Err(HookInstallError::ClassNotFound),
                 };
-                let method = match class.find_method_callee::<#this_ty, #params_ty, #return_ty, _>(#method) {
+                let method = match class.find_method_callee::<#this_ty, #params_ty, #return_ty, #params_count>(#method) {
                     Some(method) => method,
                     None => return Err(HookInstallError::MethodNotFound),
                 };
@@ -403,7 +413,7 @@ impl Metadata {
                 use ::std::sync::atomic::Ordering;
 
                 let ptr = self.original.load(Ordering::Relaxed);
-                let original = unsafe { transmute<*mut (), Option<#original_ty>>(ptr) };
+                let original = unsafe { transmute::<*mut (), Option<#original_ty>>(ptr) };
                 let original = original.expect("hook is not installed");
 
                 let r = original(#this_arg #(#params_args)*);
