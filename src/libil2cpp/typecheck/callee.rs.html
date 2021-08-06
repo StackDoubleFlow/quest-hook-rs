@@ -260,31 +260,7 @@
 <span id="260">260</span>
 <span id="261">261</span>
 <span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
 </pre><pre class="rust">
-<span class="kw">use</span> <span class="ident">std::any::Any</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Builtin</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Type</span>};
@@ -302,8 +278,6 @@
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">ThisParameter</span> {
     <span class="doccomment">/// Type of the actual `this` parameter</span>
     <span class="kw">type</span> <span class="ident">Actual</span>;
-    <span class="doccomment">/// Normalized type of `this`, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
 
     <span class="doccomment">/// Checks whether the type can be used as a C# instance parameter for the</span>
     <span class="doccomment">/// given [`MethodInfo`]</span>
@@ -326,8 +300,6 @@
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Parameter</span> {
     <span class="doccomment">/// Type of the actual parameter</span>
     <span class="kw">type</span> <span class="ident">Actual</span>;
-    <span class="doccomment">/// Normalized type of the parameter, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
 
     <span class="doccomment">/// Checks whether the type can be used as a C# parameter with the given</span>
     <span class="doccomment">/// [`Il2CppType`]</span>
@@ -351,8 +323,6 @@
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Return</span> {
     <span class="doccomment">/// Type of the actual return value</span>
     <span class="kw">type</span> <span class="ident">Actual</span>;
-    <span class="doccomment">/// Normalized type of the return value, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
 
     <span class="doccomment">/// Checks whether the type can be used as a C# return type of the given</span>
     <span class="doccomment">/// [`Il2CppType`]</span>
@@ -373,9 +343,6 @@
 <span class="doccomment">/// # Safety</span>
 <span class="doccomment">/// The implementation must be correct</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">Parameters</span> {
-    <span class="doccomment">/// Normalized type of the parameters, useful for caching</span>
-    <span class="kw">type</span> <span class="ident">Type</span>: <span class="ident">Any</span>;
-
     <span class="doccomment">/// Parameter count</span>
     <span class="kw">const</span> <span class="ident">COUNT</span>: <span class="ident">usize</span>;
 
@@ -389,7 +356,6 @@
     <span class="ident">T</span>: <span class="ident">Type</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="self">Self</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_this_parameter</span>(<span class="ident">method</span>)
@@ -408,7 +374,6 @@
     <span class="ident">T</span>: <span class="ident">Type</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_this_parameter</span>(<span class="ident">method</span>)
@@ -424,7 +389,6 @@
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">ThisParameter</span> <span class="kw">for</span> () {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">method</span>.<span class="ident">is_static</span>()
@@ -440,7 +404,6 @@
     <span class="ident">S</span>: <span class="ident">semantics::ReferenceParameter</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="self">Self</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_reference_parameter</span>(<span class="ident">ty</span>)
@@ -460,7 +423,6 @@
     <span class="ident">S</span>: <span class="ident">semantics::ReferenceParameter</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_reference_parameter</span>(<span class="ident">ty</span>)
@@ -480,7 +442,6 @@
     <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturn</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="self">Self</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_reference_return</span>(<span class="ident">ty</span>)
@@ -500,7 +461,6 @@
     <span class="ident">S</span>: <span class="ident">semantics::ReferenceReturn</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches_reference_return</span>(<span class="ident">ty</span>)
@@ -516,7 +476,6 @@
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Return</span> <span class="kw">for</span> () {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">ty</span>.<span class="ident">is_builtin</span>(<span class="ident">Builtin::Void</span>)
@@ -532,7 +491,6 @@
     <span class="ident">E</span>: <span class="ident">fmt::Debug</span>,
 {
     <span class="kw">type</span> <span class="ident">Actual</span> <span class="op">=</span> <span class="ident">T::Actual</span>;
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> <span class="ident">T::Type</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">T::matches</span>(<span class="ident">ty</span>)
@@ -547,8 +505,6 @@
 }
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Parameters</span> <span class="kw">for</span> () {
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> ();
-
     <span class="kw">const</span> <span class="ident">COUNT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -560,8 +516,6 @@
 <span class="kw">where</span>
     <span class="ident">P</span>: <span class="ident">Parameter</span>,
 {
-    <span class="kw">type</span> <span class="ident">Type</span> <span class="op">=</span> (<span class="ident">P::Type</span>,);
-
     <span class="kw">const</span> <span class="ident">COUNT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span>;
 
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
