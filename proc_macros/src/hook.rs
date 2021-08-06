@@ -344,8 +344,8 @@ impl Metadata {
                     None => return Err(HookInstallError::ClassNotFound),
                 };
                 let method = match class.find_method_callee::<#this_ty, #params_ty, #return_ty>(#method) {
-                    Some(method) => method,
-                    None => return Err(HookInstallError::MethodNotFound),
+                    Ok(method) => method,
+                    Err(_) => return Err(HookInstallError::MethodNotFound),
                 };
 
                 let mut temp = null_mut();
