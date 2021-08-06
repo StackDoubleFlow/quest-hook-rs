@@ -4,6 +4,9 @@
 //! dynamically loaded from libil2cpp.so.
 
 mod functions;
+
+#[cfg_attr(feature = "unity2019", path = "types_2019.rs")]
+#[cfg_attr(feature = "unity2018", path = "types_2018.rs")]
 mod types;
 
 pub use functions::*;

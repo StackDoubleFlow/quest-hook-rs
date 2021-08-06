@@ -12,6 +12,11 @@ use crate::{
     ThisArgument, WrapRaw,
 };
 
+#[cfg(feature = "unity2019")]
+type ParameterInfoSlice<'a> = &'a [ParameterInfo];
+#[cfg(feature = "unity2018")]
+type ParameterInfoSlice<'a> = &'a [&'static ParameterInfo];
+
 /// Information about a C# method
 #[repr(transparent)]
 pub struct MethodInfo(raw::MethodInfo);
@@ -98,7 +103,7 @@ impl MethodInfo {
     }
 
     /// Parameters the method takes
-    pub fn parameters(&self) -> &[ParameterInfo] {
+    pub fn parameters(&self) -> ParameterInfoSlice<'_> {
         let parameters = self.raw().parameters;
         if !parameters.is_null() {
             unsafe { slice::from_raw_parts(parameters as _, self.raw().parameters_count as _) }

@@ -76,7 +76,8 @@ macro_rules! builtins {
     ($($const:ident => ($variant:ident, $id:ident, $name:literal),)*) => {
         #[doc = "Builtin C# types"]
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-        #[repr(u32)]
+        #[cfg_attr(feature = "unity2019", repr(u32))]
+        #[cfg_attr(feature = "unity2018", repr(i32))]
         pub enum Builtin {
             $(
                 #[doc = concat!("`", $name, "`")]
@@ -88,7 +89,11 @@ macro_rules! builtins {
             #[doc = "Whether the type represents the given [`Builtin`]"]
             #[inline]
             pub fn is_builtin(&self, builtin: Builtin) -> bool {
-                self.raw().type_() == builtin as u32
+                #[cfg(feature = "unity2019")]
+                { self.raw().type_() == builtin as u32 }
+
+                #[cfg(feature = "unity2018")]
+                { self.raw().type_() == builtin as i32 }
             }
 
             paste! {

@@ -1,4 +1,3 @@
-use std::any::TypeId;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
@@ -7,6 +6,11 @@ use crate::{
     raw, Arguments, FieldInfo, Il2CppException, Il2CppType, MethodInfo, Parameters, Return,
     Returned, ThisParameter, WrapRaw,
 };
+
+#[cfg(feature = "unity2019")]
+type FieldInfoSlice<'a> = &'a [FieldInfo];
+#[cfg(feature = "unity2018")]
+type FieldInfoSlice<'a> = &'a [&'static FieldInfo];
 
 /// An il2cpp class
 #[repr(transparent)]
@@ -80,7 +84,7 @@ impl Il2CppClass {
             let key = cache::MethodCacheKey {
                 class: class_key,
                 name: name.into(),
-                ty: TypeId::of::<fn(Self, A::Type) -> R::Type>(),
+                ty: std::any::TypeId::of::<fn(Self, A::Type) -> R::Type>(),
             };
             if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
                 return Ok(method);
@@ -131,7 +135,7 @@ impl Il2CppClass {
             let key = cache::MethodCacheKey {
                 class: class_key,
                 name: name.into(),
-                ty: TypeId::of::<fn((), A::Type) -> R::Type>(),
+                ty: std::any::TypeId::of::<fn((), A::Type) -> R::Type>(),
             };
             if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
                 return Ok(method);
@@ -292,7 +296,7 @@ impl Il2CppClass {
     }
 
     /// Fields of the class
-    pub fn fields(&self) -> &[FieldInfo] {
+    pub fn fields(&self) -> FieldInfoSlice<'_> {
         let raw = self.raw();
         let fields = raw.fields;
         if !fields.is_null() {
