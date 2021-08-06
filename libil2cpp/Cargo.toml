@@ -10,9 +10,10 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-libloading = "0.7"
-paste = "1"
 quest_hook_proc_macros = { path = "../proc_macros" }
+libloading = "0.7"
+thiserror = "1"
+paste = "1"
 
 [features]
 default = ["cache"]

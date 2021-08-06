@@ -26,7 +26,7 @@ pub trait Hook {
 }
 
 /// Possible errors when installing a hook
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum HookInstallError {
     /// Hook already installed
     #[error("hook already installed")]

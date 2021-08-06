@@ -18,7 +18,7 @@ mod ty;
 mod typecheck;
 
 pub use array::Il2CppArray;
-pub use class::Il2CppClass;
+pub use class::{FindMethodError, Il2CppClass};
 pub use exception::Il2CppException;
 pub use field_info::FieldInfo;
 pub use method_info::{Il2CppReflectionMethod, MethodInfo};

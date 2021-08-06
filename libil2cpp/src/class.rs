@@ -1,3 +1,4 @@
+use std::any::TypeId;
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
@@ -13,71 +14,80 @@ pub struct Il2CppClass(raw::Il2CppClass);
 
 impl Il2CppClass {
     /// Find a class by namespace and name
-    pub fn find(
-        namespace: impl Into<Cow<'static, str>>,
-        name: impl Into<Cow<'static, str>>,
-    ) -> Option<&'static Self> {
-        // Reduce the amount of generated code by removing the generics
-        fn inner(
-            namespace: Cow<'static, str>,
-            name: Cow<'static, str>,
-        ) -> Option<&'static Il2CppClass> {
-            #[cfg(feature = "cache")]
-            let cache::ClassCacheKey { namespace, name } = {
-                let key = cache::ClassCacheKey { namespace, name };
-                if let Some(class) = cache::CLASS_CACHE.with(|c| c.borrow().get(&key).copied()) {
-                    return Some(class);
-                }
-                key
+    pub fn find(namespace: &str, name: &str) -> Option<&'static Self> {
+        #[cfg(feature = "cache")]
+        let key = {
+            let key = cache::ClassCacheKey {
+                namespace: namespace.into(),
+                name: name.into(),
+            };
+            if let Some(class) = cache::CLASS_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                return Some(class);
+            }
+            key
+        };
+
+        let c_namespace = CString::new(namespace).unwrap();
+        let c_name = CString::new(name).unwrap();
+
+        let domain = unsafe { raw::domain_get() };
+
+        let mut assemblies_count = 0;
+        let assemblies = unsafe { raw::domain_get_assemblies(domain, &mut assemblies_count) };
+
+        for assembly in assemblies.iter().take(assemblies_count) {
+            // For some reason, an assembly might not have an image
+            let image = match unsafe { raw::assembly_get_image(assembly) } {
+                Some(image) => image,
+                None => continue,
             };
 
-            let c_namespace = CString::new(namespace.as_ref()).unwrap();
-            let c_name = CString::new(name.as_ref()).unwrap();
+            let class =
+                unsafe { raw::class_from_name(image, c_namespace.as_ptr(), c_name.as_ptr()) };
+            if let Some(class) = class {
+                // Ensure class is initialized
+                // TODO: Call Class::Init somehow
+                let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
 
-            let domain = unsafe { raw::domain_get() };
+                let class = unsafe { Il2CppClass::wrap(class) };
 
-            let mut assemblies_count = 0;
-            let assemblies = unsafe { raw::domain_get_assemblies(domain, &mut assemblies_count) };
+                #[cfg(feature = "cache")]
+                cache::CLASS_CACHE.with(move |c| c.borrow_mut().insert(key.into(), class));
 
-            for assembly in assemblies.iter().take(assemblies_count) {
-                // For some reason, an assembly might not have an image
-                let image = match unsafe { raw::assembly_get_image(assembly) } {
-                    Some(image) => image,
-                    None => continue,
-                };
-
-                let class =
-                    unsafe { raw::class_from_name(image, c_namespace.as_ptr(), c_name.as_ptr()) };
-                if let Some(class) = class {
-                    // Ensure class is initialized
-                    // TODO: Call Class::Init somehow
-                    let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
-
-                    let class = unsafe { Il2CppClass::wrap(class) };
-
-                    #[cfg(feature = "cache")]
-                    cache::CLASS_CACHE.with(move |c| {
-                        c.borrow_mut()
-                            .insert(cache::ClassCacheKey { namespace, name }, class)
-                    });
-
-                    return Some(class);
-                }
+                return Some(class);
             }
-
-            None
         }
 
-        inner(namespace.into(), name.into())
+        None
     }
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking
-    pub fn find_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    pub fn find_method<A, R, const N: usize>(
+        &self,
+        name: &str,
+    ) -> Result<&'static MethodInfo, FindMethodError>
     where
         A: Arguments<N>,
         R: Returned,
     {
+        #[cfg(feature = "cache")]
+        let key = {
+            let class_key = cache::ClassCacheKey {
+                namespace: self.namespace(),
+                name: self.name(),
+            };
+            let key = cache::MethodCacheKey {
+                class: class_key,
+                name: name.into(),
+                ty: TypeId::of::<fn(Self, A::Type) -> R::Type>(),
+            };
+            if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                return Ok(method);
+            }
+            key
+        };
+
         for c in self.hierarchy() {
             let mut matching = c
                 .methods()
@@ -90,54 +100,53 @@ impl Il2CppClass {
                 None => continue,
                 Some(mi) => (mi, matching.next()),
             } {
-                // If we have one match, we return it
-                (mi, None) => return Some(mi),
-                // If we have 2+ matches, we return None to avoid conflicts
-                _ => return None,
+                (mi, None) => {
+                    #[cfg(feature = "cache")]
+                    cache::METHOD_CACHE.with(move |c| c.borrow_mut().insert(key.into(), mi));
+
+                    return Ok(mi);
+                }
+                _ => return Err(FindMethodError::Many),
             }
         }
 
-        None
+        Err(FindMethodError::None)
     }
 
     /// Find a `static` method belonging to the class by name with type checking
-    pub fn find_static_method<A, R, const N: usize>(&self, name: &str) -> Option<&MethodInfo>
+    pub fn find_static_method<A, R, const N: usize>(
+        &self,
+        name: &str,
+    ) -> Result<&'static MethodInfo, FindMethodError>
     where
         A: Arguments<N>,
         R: Returned,
     {
-        let mut matching = self
-            .methods()
-            .iter()
-            .filter(|mi| {
-                mi.name() == name && mi.is_static() && A::matches(mi) && R::matches(mi.return_ty())
-            })
-            .copied();
+        #[cfg(feature = "cache")]
+        let key = {
+            let class_key = cache::ClassCacheKey {
+                namespace: self.namespace(),
+                name: self.name(),
+            };
+            let key = cache::MethodCacheKey {
+                class: class_key,
+                name: name.into(),
+                ty: TypeId::of::<fn((), A::Type) -> R::Type>(),
+            };
+            if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                return Ok(method);
+            }
+            key
+        };
 
-        match (matching.next(), matching.next()) {
-            // If we have one match, we return it
-            (Some(mi), None) | (None, Some(mi)) => Some(mi),
-            // If we have 2+ or zero matches, we return None
-            _ => None,
-        }
-    }
-
-    /// Find a method belonging to the class or its parents by name with type
-    /// checking from a callee perspective
-    pub fn find_method_callee<T, P, R>(&self, name: &str) -> Option<&MethodInfo>
-    where
-        T: ThisParameter,
-        P: Parameters,
-        R: Return,
-    {
         for c in self.hierarchy() {
             let mut matching = c
                 .methods()
                 .iter()
                 .filter(|mi| {
                     mi.name() == name
-                        && T::matches(mi)
-                        && P::matches(mi)
+                        && mi.is_static()
+                        && A::matches(mi)
                         && R::matches(mi.return_ty())
                 })
                 .copied();
@@ -147,14 +156,43 @@ impl Il2CppClass {
                 None => continue,
                 Some(mi) => (mi, matching.next()),
             } {
-                // If we have one match, we return it
-                (mi, None) => return Some(mi),
-                // If we have 2+ matches, we return None to avoid conflicts
-                _ => return None,
+                (mi, None) => {
+                    #[cfg(feature = "cache")]
+                    cache::METHOD_CACHE.with(move |c| c.borrow_mut().insert(key.into(), mi));
+
+                    return Ok(mi);
+                }
+                _ => return Err(FindMethodError::Many),
             }
         }
 
-        None
+        Err(FindMethodError::None)
+    }
+
+    /// Find a method belonging to the class or its parents by name with type
+    /// checking from a callee perspective
+    pub fn find_method_callee<T, P, R>(
+        &self,
+        name: &str,
+    ) -> Result<&'static MethodInfo, FindMethodError>
+    where
+        T: ThisParameter,
+        P: Parameters,
+        R: Return,
+    {
+        let mut matching = self
+            .methods()
+            .iter()
+            .filter(|mi| {
+                mi.name() == name && T::matches(mi) && P::matches(mi) && R::matches(mi.return_ty())
+            })
+            .copied();
+
+        match (matching.next(), matching.next()) {
+            (Some(mi), None) | (None, Some(mi)) => Ok(mi),
+            (Some(_), Some(_)) => Err(FindMethodError::Many),
+            (None, None) => Err(FindMethodError::None),
+        }
     }
 
     /// Find a method belonging to the class or its parents by name and
@@ -163,7 +201,7 @@ impl Il2CppClass {
         &self,
         name: &str,
         parameters_count: usize,
-    ) -> Option<&MethodInfo> {
+    ) -> Result<&'static MethodInfo, FindMethodError> {
         for c in self.hierarchy() {
             let mut matching = c
                 .methods()
@@ -176,14 +214,12 @@ impl Il2CppClass {
                 None => continue,
                 Some(mi) => (mi, matching.next()),
             } {
-                // If we have one match, we return it
-                (mi, None) => return Some(mi),
-                // If we have 2+ matches, we return None to avoid conflicts
-                _ => return None,
+                (mi, None) => return Ok(mi),
+                _ => return Err(FindMethodError::Many),
             }
         }
 
-        None
+        Err(FindMethodError::None)
     }
 
     /// Find a field belonging to the class or its parents by name
@@ -245,7 +281,7 @@ impl Il2CppClass {
     }
 
     /// Methods of the class
-    pub fn methods(&self) -> &[&MethodInfo] {
+    pub fn methods(&self) -> &[&'static MethodInfo] {
         let raw = self.raw();
         let methods = raw.methods;
         if !methods.is_null() {
@@ -374,19 +410,74 @@ impl<'a> From<&'a Il2CppType> for &'a Il2CppClass {
     }
 }
 
+/// Possible errors when looking up a method
+#[derive(Debug, thiserror::Error, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FindMethodError {
+    /// No matching method were found
+    #[error("no matching methods found")]
+    None,
+
+    /// Multiple matching methods were found
+    #[error("multiple matching methods found")]
+    Many,
+}
+
 #[cfg(feature = "cache")]
 mod cache {
-    use std::borrow::Cow;
+    use std::any::TypeId;
+    use std::borrow::{Borrow, Cow};
     use std::cell::RefCell;
     use std::collections::HashMap;
 
     #[derive(PartialEq, Eq, Hash)]
-    pub(super) struct ClassCacheKey {
-        pub(super) namespace: Cow<'static, str>,
-        pub(super) name: Cow<'static, str>,
+    pub(super) struct ClassCacheKey<'a> {
+        pub(super) namespace: Cow<'a, str>,
+        pub(super) name: Cow<'a, str>,
+    }
+
+    #[derive(PartialEq, Eq, Hash)]
+    pub(super) struct StaticClassCacheKey(ClassCacheKey<'static>);
+
+    impl<'a> From<ClassCacheKey<'a>> for StaticClassCacheKey {
+        fn from(ClassCacheKey { namespace, name }: ClassCacheKey<'a>) -> Self {
+            let namespace = namespace.into_owned().into();
+            let name = name.into_owned().into();
+            Self(ClassCacheKey { namespace, name })
+        }
+    }
+
+    impl<'a> Borrow<ClassCacheKey<'a>> for StaticClassCacheKey {
+        fn borrow(&self) -> &ClassCacheKey<'a> {
+            &self.0
+        }
+    }
+
+    #[derive(PartialEq, Eq, Hash)]
+    pub(super) struct MethodCacheKey<'a> {
+        pub(super) class: ClassCacheKey<'a>,
+        pub(super) name: Cow<'a, str>,
+        pub(super) ty: TypeId,
+    }
+
+    #[derive(PartialEq, Eq, Hash)]
+    pub(super) struct StaticMethodCacheKey(MethodCacheKey<'static>);
+
+    impl<'a> From<MethodCacheKey<'a>> for StaticMethodCacheKey {
+        fn from(MethodCacheKey { class, name, ty }: MethodCacheKey<'a>) -> Self {
+            let class = StaticClassCacheKey::from(class).0;
+            let name = name.into_owned().into();
+            Self(MethodCacheKey { class, name, ty })
+        }
+    }
+
+    impl<'a> Borrow<MethodCacheKey<'a>> for StaticMethodCacheKey {
+        fn borrow(&self) -> &MethodCacheKey<'a> {
+            &self.0
+        }
     }
 
     thread_local! {
-        pub(super) static CLASS_CACHE: RefCell<HashMap<ClassCacheKey, &'static super::Il2CppClass>> = Default::default();
+        pub(super) static CLASS_CACHE: RefCell<HashMap<StaticClassCacheKey, &'static super::Il2CppClass>> = Default::default();
+        pub(super) static METHOD_CACHE: RefCell<HashMap<StaticMethodCacheKey, &'static super::MethodInfo>> = Default::default();
     }
 }
