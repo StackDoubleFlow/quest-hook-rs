@@ -1,8 +1,9 @@
 use heck::{CamelCase, SnakeCase};
 use proc_macro::TokenStream;
 use proc_macro2::{Group, TokenStream as TokenStream2, TokenTree as TokenTree2};
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::{
     Abi, Attribute, Error, FnArg, Generics, Ident, ItemFn, LitStr, Pat, PatType, ReturnType, Token,
     Type, TypeTuple,
@@ -218,18 +219,19 @@ impl Metadata {
     }
 
     fn actual_this_ty(&self) -> Option<TokenStream2> {
-        self.this_ty()
-            .map(|t| quote!(<#t as ::quest_hook::libil2cpp::ThisParameter>::Actual))
+        self.this_ty().map(
+            |t| quote_spanned!(t.span()=> <#t as ::quest_hook::libil2cpp::ThisParameter>::Actual),
+        )
     }
 
     fn actual_params_ty(&self) -> impl Iterator<Item = TokenStream2> + '_ {
         self.params_ty()
-            .map(|t| quote!(<#t as ::quest_hook::libil2cpp::Parameter>::Actual))
+            .map(|t| quote_spanned!(t.span()=> <#t as ::quest_hook::libil2cpp::Parameter>::Actual))
     }
 
     fn actual_return_ty(&self) -> TokenStream2 {
         let return_ty = self.return_ty();
-        quote!(<#return_ty as ::quest_hook::libil2cpp::Return>::Actual)
+        quote_spanned!(return_ty.span()=> <#return_ty as ::quest_hook::libil2cpp::Return>::Actual)
     }
 
     fn this_ident(&self) -> Option<Ident> {
@@ -488,7 +490,7 @@ fn staticify(tokens: impl ToTokens) -> TokenStream2 {
             }
             TokenTree2::Punct(p) if p.as_char() == '&' => match iter.peek() {
                 Some(TokenTree2::Punct(p)) if p.as_char() == '\'' => ts.extend_one(tt),
-                _ => ts.extend_one(quote!(&'static)),
+                _ => ts.extend_one(quote_spanned!(tt.span()=> &'static)),
             },
             _ => ts.extend_one(tt),
         }
