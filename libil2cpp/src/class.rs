@@ -18,6 +18,7 @@ pub struct Il2CppClass(raw::Il2CppClass);
 
 impl Il2CppClass {
     /// Find a class by namespace and name
+    #[crate::instrument(level = "debug")]
     pub fn find(namespace: &str, name: &str) -> Option<&'static Self> {
         #[cfg(feature = "cache")]
         let key = {
@@ -26,8 +27,10 @@ impl Il2CppClass {
                 name: name.into(),
             };
             if let Some(class) = cache::CLASS_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                debug!("cache hit");
                 return Some(class);
             }
+            debug!("cache miss");
             key
         };
 
@@ -67,6 +70,7 @@ impl Il2CppClass {
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking
+    #[crate::instrument(level = "debug")]
     pub fn find_method<A, R, const N: usize>(
         &self,
         name: &str,
@@ -87,8 +91,10 @@ impl Il2CppClass {
                 ty: std::any::TypeId::of::<fn(Self, A::Type) -> R::Type>(),
             };
             if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                debug!("cache hit");
                 return Ok(method);
             }
+            debug!("cache miss");
             key
         };
 
@@ -118,6 +124,7 @@ impl Il2CppClass {
     }
 
     /// Find a `static` method belonging to the class by name with type checking
+    #[crate::instrument(level = "debug")]
     pub fn find_static_method<A, R, const N: usize>(
         &self,
         name: &str,
@@ -138,8 +145,10 @@ impl Il2CppClass {
                 ty: std::any::TypeId::of::<fn((), A::Type) -> R::Type>(),
             };
             if let Some(method) = cache::METHOD_CACHE.with(|c| c.borrow().get(&key).copied()) {
+                debug!("cache hit");
                 return Ok(method);
             }
+            debug!("cache miss");
             key
         };
 
@@ -175,6 +184,7 @@ impl Il2CppClass {
 
     /// Find a method belonging to the class or its parents by name with type
     /// checking from a callee perspective
+    #[crate::instrument(level = "debug")]
     pub fn find_method_callee<T, P, R>(
         &self,
         name: &str,
@@ -227,6 +237,7 @@ impl Il2CppClass {
     }
 
     /// Find a field belonging to the class or its parents by name
+    #[crate::instrument(level = "debug")]
     pub fn find_field(&self, name: &str) -> Option<&FieldInfo> {
         for c in self.hierarchy() {
             let mut matching = c.fields().iter().filter(|fi| fi.name() == name);

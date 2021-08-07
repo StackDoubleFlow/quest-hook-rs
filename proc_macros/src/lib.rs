@@ -49,3 +49,9 @@ pub fn impl_arguments_parameters(input: TokenStream) -> TokenStream {
         Err(err) => err.to_compile_error().into(),
     }
 }
+
+#[proc_macro_attribute]
+#[doc(hidden)]
+pub fn identity(_: TokenStream, input: TokenStream) -> TokenStream {
+    input
+}

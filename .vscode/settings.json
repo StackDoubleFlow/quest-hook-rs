@@ -6,7 +6,8 @@
     "clippy",
     "--workspace",
     "--examples",
-    "--message-format=json"
+    "--message-format=json",
+    "--features=unity2019"
   ],
   "rust-analyzer.assist.importGranularity": "module"
 }
