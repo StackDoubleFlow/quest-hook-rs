@@ -22,18 +22,21 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r22
-      - uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-ndk
 
       - uses: actions/cache@v2
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
           key: docs-${{ hashFiles('**/Cargo.toml') }}
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-ndk
 
       - name: Generate docs
         uses: actions-rs/cargo@v1

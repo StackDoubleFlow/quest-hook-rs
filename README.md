@@ -6,7 +6,7 @@ A library for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp ga
 
 ## Usage
 
-Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile `quest_hook`.
+Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile `quest_hook`. **Don't forget to select a Unity version**.
 
 ```toml
 [lib]
@@ -47,6 +47,11 @@ pub extern "C" fn load() {
 ```
 
 Check out the [`examples`](./examples/) directory for more examples.
+
+## Cargo features
+
+- `unity2019`, `unity2018` - Unity version the targetted game uses
+- `util`
 
 ## Contributing
 
