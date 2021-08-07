@@ -20,7 +20,6 @@
 <span id="20">20</span>
 <span id="21">21</span>
 <span id="22">22</span>
-<span id="23">23</span>
 </pre><pre class="rust">
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">rust_2018_idioms</span>, <span class="ident">missing_debug_implementations</span>, <span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;strict&quot;</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
@@ -34,10 +33,9 @@
 <span class="kw">mod</span> <span class="ident">hook</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hook</span>::<span class="kw-2">*</span>;
 
-<span class="macro">feature!</span> {
-    <span class="attribute">#[<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;util&quot;</span>]</span>
-    <span class="kw">mod</span> <span class="ident">setup</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">setup::setup</span>;
+<span class="macro">feature!</span> { <span class="attribute">#[<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;util&quot;</span>]</span>
+    <span class="kw">mod</span> <span class="ident">util</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">util</span>::<span class="kw-2">*</span>;
 }
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">libil2cpp</span>;

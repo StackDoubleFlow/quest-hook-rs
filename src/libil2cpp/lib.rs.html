@@ -44,6 +44,9 @@
 <span id="44">44</span>
 <span id="45">45</span>
 <span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
 </pre><pre class="rust">
 <span class="attribute">#![<span class="ident">feature</span>(<span class="ident">once_cell</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">rust_2018_idioms</span>, <span class="ident">missing_debug_implementations</span>, <span class="ident">missing_docs</span>)]</span>
@@ -52,6 +55,9 @@
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp&quot;</span>)]</span>
 
 <span class="doccomment">//! Wrappers and raw bindings for Unity&#39;s libil2cpp</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2019&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2018&quot;</span>)))]</span>
+<span class="macro">compile_error!</span>(<span class="string">&quot;No Unity version selected&quot;</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;trace&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
