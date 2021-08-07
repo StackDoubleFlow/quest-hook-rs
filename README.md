@@ -13,7 +13,7 @@ Simply add the library as a dependency to your `Cargo.toml` and set the crate ty
 crate-type = ["cdylib"]
 
 [dependencies]
-quest_hook = { git = "https://github.com/StackDoubleFlow/quest-hook-rs.git" }
+quest_hook = { git = "https://github.com/StackDoubleFlow/quest-hook-rs.git", features = ["unity2019"] }
 ```
 
 This library is still under heavy development and breaking changes are frequent. To avoid dealing with those, you can [pin the dependency to a specific commit or tag](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories).

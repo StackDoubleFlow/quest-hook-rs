@@ -6,6 +6,9 @@
 
 //! Wrappers and raw bindings for Unity's libil2cpp
 
+#[cfg(not(any(feature = "unity2019", feature = "unity2018")))]
+compile_error!("No Unity version selected");
+
 #[cfg(feature = "trace")]
 #[macro_use]
 extern crate tracing;

@@ -10,10 +10,9 @@ mod cfg;
 mod hook;
 pub use hook::*;
 
-feature! {
-    #[feature = "util"]
-    mod setup;
-    pub use setup::setup;
+feature! { #[feature = "util"]
+    mod util;
+    pub use util::*;
 }
 
 pub use libil2cpp;
