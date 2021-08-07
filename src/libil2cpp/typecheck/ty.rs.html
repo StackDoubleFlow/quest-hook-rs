@@ -297,7 +297,7 @@
 
     <span class="doccomment">/// [`Il2CppClass`] of the type</span>
     <span class="kw">fn</span> <span class="ident">class</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Il2CppClass</span> {
-        <span class="ident">Il2CppClass::find</span>(<span class="self">Self</span><span class="ident">::NAMESPACE</span>, <span class="self">Self</span><span class="ident">::CLASS_NAME</span>).<span class="ident">unwrap</span>()
+        <span class="ident">Il2CppClass::find</span>(<span class="ident"><span class="self">Self</span>::NAMESPACE</span>, <span class="ident"><span class="self">Self</span>::CLASS_NAME</span>).<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Whether the type can be used as a `this` argument for the given</span>
@@ -370,49 +370,49 @@
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">unsafe_impl_reference_type</span> {
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">namespace</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">class</span>:<span class="ident">literal</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
-            <span class="kw">type</span> <span class="macro-nonterminal">Semantics</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Reference</span>;
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+            <span class="kw">type</span> <span class="macro-nonterminal">Semantics</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Reference</span>;
 
             <span class="kw">const</span> <span class="ident">NAMESPACE</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">namespace</span>;
             <span class="kw">const</span> <span class="ident">CLASS_NAME</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">class</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches_this_argument</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_this_argument</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">method</span>
                     .<span class="ident">class</span>()
-                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_this_parameter</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">method</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_this_parameter</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">method</span>.<span class="ident">class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_reference_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_reference_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">ty</span>.<span class="ident">class</span>()
-                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_value_argument</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_argument</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_reference_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_reference_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_value_parameter</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_parameter</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_reference_returned</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_reference_returned</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_value_returned</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_returned</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_reference_return</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_reference_return</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">ty</span>.<span class="ident">class</span>()
-                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_value_return</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_return</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
         }
@@ -427,63 +427,63 @@
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">unsafe_impl_value_type</span> {
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">namespace</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">class</span>:<span class="ident">literal</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
-            <span class="kw">type</span> <span class="macro-nonterminal">Semantics</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Value</span>;
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+            <span class="kw">type</span> <span class="macro-nonterminal">Semantics</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Value</span>;
 
             <span class="kw">const</span> <span class="ident">NAMESPACE</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">namespace</span>;
             <span class="kw">const</span> <span class="ident">CLASS_NAME</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">class</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches_this_argument</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_this_argument</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">method</span>
                     .<span class="ident">class</span>()
-                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_this_parameter</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">method</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_this_parameter</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">method</span>.<span class="ident">class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_value_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="op">!</span><span class="ident">ty</span>.<span class="ident">is_ref</span>()
                     <span class="op">&amp;&amp;</span> <span class="ident">ty</span>
                         .<span class="ident">class</span>()
-                        .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                        .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_reference_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_reference_argument</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">ty</span>.<span class="ident">is_ref</span>()
                     <span class="op">&amp;&amp;</span> <span class="ident">ty</span>
                         .<span class="ident">class</span>()
-                        .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                        .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_value_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">!</span><span class="ident">ty</span>.<span class="ident">is_ref</span>() <span class="op">&amp;&amp;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_value_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">!</span><span class="ident">ty</span>.<span class="ident">is_ref</span>() <span class="op">&amp;&amp;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_reference_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="ident">ty</span>.<span class="ident">is_ref</span>() <span class="op">&amp;&amp;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_reference_parameter</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="ident">ty</span>.<span class="ident">is_ref</span>() <span class="op">&amp;&amp;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_value_returned</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
+            <span class="kw">fn</span> <span class="ident">matches_value_returned</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>().<span class="ident">is_assignable_from</span>(<span class="ident">ty</span>.<span class="ident">class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_reference_returned</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_reference_returned</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">matches_value_return</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_value_return</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="ident">ty</span>.<span class="ident">class</span>()
-                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
+                    .<span class="ident">is_assignable_from</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::class</span>())
             }
-            <span class="kw">fn</span> <span class="ident">matches_reference_return</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+            <span class="kw">fn</span> <span class="ident">matches_reference_return</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
                 <span class="bool-val">false</span>
             }
         }
 
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Argument</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Argument</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">type</span> <span class="macro-nonterminal">Type</span> <span class="op">=</span> <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_argument</span>(<span class="ident">ty</span>)
+            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_argument</span>(<span class="ident">ty</span>)
             }
 
             <span class="kw">fn</span> <span class="ident">invokable</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">::std::ffi::c_void</span> {
@@ -491,44 +491,44 @@
             }
         }
 
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Parameter</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Parameter</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">type</span> <span class="macro-nonterminal">Actual</span> <span class="op">=</span> <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_parameter</span>(<span class="ident">ty</span>)
+            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_parameter</span>(<span class="ident">ty</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">actual</span>
             }
-            <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+            <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
                 <span class="self">self</span>
             }
         }
 
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Returned</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Returned</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">type</span> <span class="macro-nonterminal">Type</span> <span class="op">=</span> <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_returned</span>(<span class="ident">ty</span>)
+            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_returned</span>(<span class="ident">ty</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-                <span class="kw">unsafe</span> { <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::raw::unbox</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::WrapRaw::raw</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>())) }
+            <span class="kw">fn</span> <span class="ident">from_object</span>(<span class="ident">object</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppObject</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="kw">unsafe</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::raw::unbox</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::WrapRaw::raw</span>(<span class="ident">object</span>.<span class="ident">unwrap</span>())) }
             }
         }
 
-        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Return</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+        <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Return</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">type</span> <span class="macro-nonterminal">Actual</span> <span class="op">=</span> <span class="self">Self</span>;
 
-            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span><span class="macro-nonterminal">::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_return</span>(<span class="ident">ty</span>)
+            <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+                <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Type</span><span class="op">&gt;</span><span class="ident">::matches_value_return</span>(<span class="ident">ty</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+            <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
                 <span class="self">self</span>
             }
-            <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="ident">actual</span>
             }
         }

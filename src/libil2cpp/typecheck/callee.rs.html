@@ -265,7 +265,7 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Builtin</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Type</span>};
 
-<span class="kw">use</span> <span class="kw">super</span><span class="ident">::ty::semantics</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ty::semantics</span>;
 
 <span class="doccomment">/// Trait implemented by types that can be used as C# `this` method parameters</span>
 <span class="doccomment">///</span>
@@ -284,9 +284,9 @@
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">MethodInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="doccomment">/// Converts from the actual type to the desired one</span>
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
     <span class="doccomment">/// Converts from the desired type into the actual one</span>
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span>;
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span>;
 }
 
 <span class="doccomment">/// Trait implemented by types that can be used as C# method parameters</span>
@@ -306,9 +306,9 @@
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="doccomment">/// Converts from the actual type to the desired one</span>
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
     <span class="doccomment">/// Converts from the desired type into the actual one</span>
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span>;
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span>;
 }
 
 <span class="doccomment">/// Trait implemented by types that can be used as return types for C#</span>
@@ -329,9 +329,9 @@
     <span class="kw">fn</span> <span class="ident">matches</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="doccomment">/// Converts from the desired type into the actual one</span>
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span>;
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span>;
     <span class="doccomment">/// Converts from the actual type to the desired one</span>
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
 <span class="doccomment">/// Trait implemented by types that can be used as a collection of C# method</span>
@@ -361,10 +361,10 @@
         <span class="ident">T::matches_this_parameter</span>(<span class="ident">method</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>
     }
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="self">self</span>
     }
 }
@@ -379,10 +379,10 @@
         <span class="ident">T::matches_this_parameter</span>(<span class="ident">method</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>.<span class="ident">unwrap</span>()
     }
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>)
     }
 }
@@ -409,10 +409,10 @@
         <span class="ident">T::matches_reference_parameter</span>(<span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>
     }
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="self">self</span>
     }
 }
@@ -428,10 +428,10 @@
         <span class="ident">T::matches_reference_parameter</span>(<span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>.<span class="ident">unwrap</span>()
     }
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>)
     }
 }
@@ -447,10 +447,10 @@
         <span class="ident">T::matches_reference_return</span>(<span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="self">self</span>
     }
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>
     }
 }
@@ -466,10 +466,10 @@
         <span class="ident">T::matches_reference_return</span>(<span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>)
     }
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">actual</span>.<span class="ident">unwrap</span>()
     }
 }
@@ -496,10 +496,10 @@
         <span class="ident">T::matches</span>(<span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Actual</span> {
+    <span class="kw">fn</span> <span class="ident">into_actual</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Actual</span> {
         <span class="self">self</span>.<span class="ident">unwrap</span>().<span class="ident">into_actual</span>()
     }
-    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="self">Self</span><span class="ident">::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_actual</span>(<span class="ident">actual</span>: <span class="ident"><span class="self">Self</span>::Actual</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">T::from_actual</span>(<span class="ident">actual</span>))
     }
 }

@@ -18,27 +18,33 @@
 <span id="18">18</span>
 <span id="19">19</span>
 <span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
 </pre><pre class="rust">
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">rust_2018_idioms</span>, <span class="ident">missing_debug_implementations</span>, <span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;strict&quot;</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
-<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">backtrace</span>)]</span>
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">backtrace</span>, <span class="ident">doc_cfg</span>)]</span>
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://stackdoubleflow.github.io/quest-hook-rs/quest_hook&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">doc</span> <span class="op">=</span> <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]</span>
 
-<span class="kw">mod</span> <span class="ident">hook</span>;
-<span class="kw">mod</span> <span class="ident">setup</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">mod</span> <span class="ident">cfg</span>;
 
+<span class="kw">mod</span> <span class="ident">hook</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hook</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">setup</span>::<span class="kw-2">*</span>;
+
+<span class="macro">feature!</span> {
+    <span class="attribute">#[<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;util&quot;</span>]</span>
+    <span class="kw">mod</span> <span class="ident">setup</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">setup::setup</span>;
+}
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">libil2cpp</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">quest_hook_proc_macros::hook</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_android::tracing</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">inline_hook</span>;
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_android</span>;
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="quest_hook" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
