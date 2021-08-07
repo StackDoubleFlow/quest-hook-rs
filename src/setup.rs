@@ -1,11 +1,10 @@
 use std::backtrace::Backtrace;
 
-use tracing_android::tracing::error;
+use tracing::error;
 
-/// Properly sets up logging and panic handling using
-/// [`tracing`](tracing_android::tracing)
-pub fn setup(name: &str) {
-    tracing_android::subscriber(name).init();
+/// Properly sets up logging and panic handling using [`tracing_android`]
+pub fn setup(name: impl ToString) {
+    tracing_android::init(name);
 
     std::panic::set_hook(Box::new(|panic_info| {
         let (filename, line) = panic_info
