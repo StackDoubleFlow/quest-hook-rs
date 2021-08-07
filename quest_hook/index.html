@@ -2,7 +2,7 @@
 <p>A library for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp games. Mods using this library may be loaded using <a href="https://github.com/sc2ad/QuestLoader">QuestLoader</a>.</p>
 <p><a href="https://stackdoubleflow.github.io/quest-hook-rs/quest_hook/"><img src="https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Docs?color=blue&amp;label=docs&amp;style=for-the-badge" alt="Docs" /></a> <a href="https://github.com/StackDoubleFlow/quest-hook-rs/actions/workflows/tests.yml"><img src="https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Tests?label=tests&amp;style=for-the-badge" alt="Tests" /></a></p>
 <h2 id="usage" class="section-header"><a href="#usage">Usage</a></h2>
-<p>Simply add the library as a dependency to your <code>Cargo.toml</code> and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile <code>quest_hook</code>.</p>
+<p>Simply add the library as a dependency to your <code>Cargo.toml</code> and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile <code>quest_hook</code>. <strong>Don’t forget to select a Unity version</strong>.</p>
 <div class="example-wrap"><pre class="language-toml">[lib]
 crate-type = [&quot;cdylib&quot;]
 
@@ -34,6 +34,11 @@ quest_hook = { git = &quot;https://github.com/StackDoubleFlow/quest-hook-rs.git&
     <span class="ident">set_active_scene</span>.<span class="ident">install</span>().<span class="ident">unwrap</span>();
 }</pre></div>
 <p>Check out the <a href="./examples/"><code>examples</code></a> directory for more examples.</p>
+<h2 id="cargo-features" class="section-header"><a href="#cargo-features">Cargo features</a></h2>
+<ul>
+<li><code>unity2019</code>, <code>unity2018</code> - Unity version the targetted game uses</li>
+<li><code>util</code></li>
+</ul>
 <h2 id="contributing" class="section-header"><a href="#contributing">Contributing</a></h2>
 <p>Contributions are welcome, especially to the documentation and examples. Most of the discussions regarding the development of this library happen in the <code>#quest-mod-dev</code> channel of the <a href="https://discord.gg/beatsabermods">BSMG Discord server</a>.</p>
 <p>Everything that can be reasonably be done in Rust should be done in Rust. The reasons behind this choice are improving readability and providing a more Rust-friendly API, and not safety. This library is, by nature, extremely unsafe, and contains a lot of unsafe code.</p>
