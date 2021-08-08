@@ -553,7 +553,7 @@
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">class</span>) <span class="op">=</span> <span class="ident">class</span> {
                 <span class="comment">// Ensure class is initialized</span>
                 <span class="comment">// TODO: Call Class::Init somehow</span>
-                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">raw::class_get_method_from_name</span>(<span class="ident">class</span>, <span class="string">&quot;&quot;</span>.<span class="ident">as_ptr</span>(), <span class="number">0</span>) };
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">raw::class_get_method_from_name</span>(<span class="ident">class</span>, <span class="string">b&quot;\0&quot;</span>.<span class="ident">as_ptr</span>(), <span class="number">0</span>) };
 
                 <span class="kw">let</span> <span class="ident">class</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">Il2CppClass::wrap</span>(<span class="ident">class</span>) };
 
