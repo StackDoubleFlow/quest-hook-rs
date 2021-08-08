@@ -54,7 +54,7 @@ impl Il2CppClass {
             if let Some(class) = class {
                 // Ensure class is initialized
                 // TODO: Call Class::Init somehow
-                let _ = unsafe { raw::class_get_method_from_name(class, "".as_ptr(), 0) };
+                let _ = unsafe { raw::class_get_method_from_name(class, b"\0".as_ptr(), 0) };
 
                 let class = unsafe { Il2CppClass::wrap(class) };
 
