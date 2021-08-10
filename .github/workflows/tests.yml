@@ -45,7 +45,7 @@ jobs:
           args: --all -- --check
 
   tests-android:
-    name: Tests (Android)
+    name: Android Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:

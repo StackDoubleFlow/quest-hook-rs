@@ -8,10 +8,10 @@
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(target = "aarch64-linux-android")] {
+    if #[cfg(all(target_arch = "aarch64", target_os = "android"))] {
         mod aarch64_linux_android;
         pub use crate::aarch64_linux_android::*;
-    } else if #[cfg(target = "armv7-linux-androideabi")] {
+    } else if #[cfg(all(target_arch = "arm", target_os = "android"))] {
         mod armv7_linux_androideabi;
         pub use crate::armv7_linux_androideabi::*;
     } else {

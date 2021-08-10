@@ -1,14 +1,9 @@
 use std::ffi::c_void;
-use std::os::raw::c_int;
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicPtr, Ordering};
 
 extern "C" {
-    unsafe fn A64HookFunction(
-        symbol: *const c_void,
-        replace: *const c_void,
-        result: *mut *mut c_void,
-    );
+    fn A64HookFunction(symbol: *const c_void, replace: *const c_void, result: *mut *mut c_void);
 }
 
 /// A function hook specific to ARMv8 Android

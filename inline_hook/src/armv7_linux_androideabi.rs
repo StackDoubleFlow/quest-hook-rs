@@ -1,28 +1,23 @@
-use std::ffi::c_void;
 use std::os::raw::c_int;
 use std::ptr::null_mut;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicPtr, Ordering};
 
 extern "C" {
-    unsafe fn registerInlineHook(
-        target_addr: u32,
-        new_addr: u32,
-        proto_addr: *mut *mut u32,
-    ) -> c_int;
-    unsafe fn inlineHook(target_addr: u32) -> c_int;
+    fn registerInlineHook(target_addr: u32, new_addr: u32, proto_addr: *mut *mut u32) -> c_int;
+    fn inlineHook(target_addr: u32) -> c_int;
 }
 
 /// A function hook specific to ARMv7 Android
 #[derive(Debug)]
 pub struct Hook {
-    original: AtomicU32,
+    original: AtomicPtr<u32>,
 }
 
 impl Hook {
     /// Creates a new, unitialized hook
     pub const fn new() -> Self {
         Hook {
-            original: AtomicU32::new(0),
+            original: AtomicPtr::new(null_mut()),
         }
     }
 
@@ -46,14 +41,14 @@ impl Hook {
 
     /// Whether the hook is installed
     pub fn is_installed(&self) -> bool {
-        self.original.load(Ordering::SeqCst) != 0
+        !self.original.load(Ordering::SeqCst).is_null()
     }
 
     /// Returns the address of a trampoline function to the original target, if
     /// installed
     pub fn original(&self) -> Option<*const ()> {
         match self.original.load(Ordering::SeqCst) {
-            0 => None,
+            null if null.is_null() => None,
             original => Some(original as *const ()),
         }
     }
