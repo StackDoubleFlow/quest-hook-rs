@@ -28,8 +28,8 @@ jobs:
       - name: Generate docs
         uses: actions-rs/cargo@v1
         with:
-          command: ndk
-          args: doc --workspace --no-deps --features=unity2019
+          command: doc
+          args: --workspace --no-deps --features=unity2019
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
