@@ -1,4 +1,4 @@
-#![deny(warnings)]
+#![feature(generic_associated_types)]
 
 use quest_hook::hook;
 use quest_hook::libil2cpp::{unsafe_impl_value_type, Il2CppObject};

@@ -11,6 +11,8 @@ use crate::{
 pub unsafe trait Type: 'static {
     /// Semantics of the type, either [`Reference`] or [`Value`]
     type Semantics: semantics::Semantics;
+    /// Type of the values held in variables of the type
+    type Held<'a>;
 
     /// Namespace containingthe class the type represents
     const NAMESPACE: &'static str;
@@ -94,6 +96,7 @@ macro_rules! unsafe_impl_reference_type {
     ($type:ty, $namespace:literal, $class:literal) => {
         unsafe impl $crate::Type for $type {
             type Semantics = $crate::Reference;
+            type Held<'a> = &'a $type;
 
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;
@@ -151,6 +154,7 @@ macro_rules! unsafe_impl_value_type {
     ($type:ty, $namespace:literal, $class:literal) => {
         unsafe impl $crate::Type for $type {
             type Semantics = $crate::Value;
+            type Held<'a> = $type;
 
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;

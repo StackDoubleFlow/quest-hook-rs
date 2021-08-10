@@ -1,4 +1,4 @@
-#![feature(once_cell)]
+#![feature(once_cell, generic_associated_types)]
 #![warn(rust_2018_idioms, missing_debug_implementations, missing_docs)]
 #![allow(clippy::single_component_path_imports)]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp")]
