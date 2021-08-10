@@ -26,7 +26,7 @@ pub unsafe trait WrapRaw: Sized {
     /// Returns a reference to the underlying raw il2cpp type
     #[inline]
     fn raw(&self) -> &Self::Raw {
-        unsafe { &*(self as *const _ as *const _) }
+        unsafe { &*(self as *const Self).cast() }
     }
 
     /// Returns a mutable reference to the underlying raw il2cpp type
@@ -37,7 +37,7 @@ pub unsafe trait WrapRaw: Sized {
     /// know exactly what you are doing.
     #[inline]
     unsafe fn raw_mut(&mut self) -> &mut Self::Raw {
-        &mut *(self as *mut _ as *mut _)
+        &mut *(self as *mut Self).cast()
     }
 
     /// Wraps a reference to the raw il2cpp type
@@ -46,7 +46,7 @@ pub unsafe trait WrapRaw: Sized {
     /// The wrapped type must be in a valid state.
     #[inline]
     unsafe fn wrap(raw: &Self::Raw) -> &Self {
-        &*(raw as *const _ as *const _)
+        &*(raw as *const Self::Raw).cast()
     }
 
     /// Wraps a mutable reference to the raw il2cpp type
@@ -55,7 +55,7 @@ pub unsafe trait WrapRaw: Sized {
     /// The wrapped type must be in a valid state.
     #[inline]
     unsafe fn wrap_mut(raw: &mut Self::Raw) -> &mut Self {
-        &mut *(raw as *mut _ as *mut _)
+        &mut *(raw as *mut Self::Raw).cast()
     }
 
     /// Wraps a const pointer to the raw il2cpp type

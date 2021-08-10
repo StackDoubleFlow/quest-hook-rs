@@ -51,8 +51,8 @@ impl FieldInfo {
     where
         R: Returned,
     {
-        let val = MaybeUninit::uninit();
-        raw::field_get_value(instance.raw_mut(), self.raw(), &val as *const _ as *const _);
+        let mut val: MaybeUninit<R> = MaybeUninit::uninit();
+        raw::field_get_value(instance.raw_mut(), self.raw(), val.as_mut_ptr().cast());
         val.assume_init()
     }
 

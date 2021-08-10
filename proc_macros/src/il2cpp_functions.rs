@@ -11,11 +11,11 @@ impl Parse for Input {
         while !input.is_empty() {
             fns.push(input.parse::<ForeignItemFn>()?);
         }
-        Ok(Input(fns))
+        Ok(Self(fns))
     }
 }
 
-pub fn expand(input: Input) -> Result<TokenStream, Error> {
+pub fn expand(input: &Input) -> Result<TokenStream, Error> {
     let mut ts = quote! {
         static LIBIL2CPP: SyncLazy<Library> =
             SyncLazy::new(|| unsafe { Library::new("libil2cpp.so") }.unwrap());

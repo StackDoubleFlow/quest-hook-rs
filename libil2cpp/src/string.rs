@@ -14,7 +14,7 @@ impl Il2CppString {
     /// Creates a new string from a Rust string
     pub fn new(s: impl AsRef<str>) -> &'static mut Self {
         let b = s.as_ref().as_bytes();
-        let s = unsafe { raw::string_new_len(b.as_ptr() as _, b.len() as _) };
+        let s = unsafe { raw::string_new_len(b.as_ptr().cast(), b.len() as _) };
         unsafe { Self::wrap_mut(s) }
     }
 

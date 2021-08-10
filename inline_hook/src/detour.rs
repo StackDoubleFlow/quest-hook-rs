@@ -11,7 +11,7 @@ pub struct Hook {
 impl Hook {
     /// Creates a new, unitialized hook
     pub const fn new() -> Self {
-        Hook {
+        Self {
             detour: SyncOnceCell::new(),
         }
     }

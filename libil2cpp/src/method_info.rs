@@ -106,7 +106,7 @@ impl MethodInfo {
     pub fn parameters(&self) -> ParameterInfoSlice<'_> {
         let parameters = self.raw().parameters;
         if !parameters.is_null() {
-            unsafe { slice::from_raw_parts(parameters as _, self.raw().parameters_count as _) }
+            unsafe { slice::from_raw_parts(parameters.cast(), self.raw().parameters_count as _) }
         } else {
             &[]
         }

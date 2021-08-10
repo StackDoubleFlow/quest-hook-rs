@@ -56,7 +56,7 @@ impl Il2CppClass {
                 // TODO: Call Class::Init somehow
                 let _ = unsafe { raw::class_get_method_from_name(class, b"\0".as_ptr().cast(), 0) };
 
-                let class = unsafe { Il2CppClass::wrap(class) };
+                let class = unsafe { Self::wrap(class) };
 
                 #[cfg(feature = "cache")]
                 cache::CLASS_CACHE.with(move |c| c.borrow_mut().insert(key.into(), class));
@@ -318,8 +318,8 @@ impl Il2CppClass {
     }
 
     /// Parent of the class, if it inherits from any
-    pub fn parent(&self) -> Option<&Il2CppClass> {
-        unsafe { Il2CppClass::wrap_ptr(self.raw().parent) }
+    pub fn parent(&self) -> Option<&Self> {
+        unsafe { Self::wrap_ptr(self.raw().parent) }
     }
 
     /// Iterator over the class hierarchy, starting with the class itself
@@ -330,7 +330,7 @@ impl Il2CppClass {
     }
 
     /// Interfaces this class implements
-    pub fn implemented_interfaces(&self) -> &[&Il2CppClass] {
+    pub fn implemented_interfaces(&self) -> &[&Self] {
         let raw = self.raw();
         let interfaces = raw.implementedInterfaces;
         if !interfaces.is_null() {
@@ -341,13 +341,13 @@ impl Il2CppClass {
     }
 
     /// Nested types of the class
-    pub fn nested_types(&self) -> &[&Il2CppClass] {
+    pub fn nested_types(&self) -> &[&Self] {
         let raw = self.raw();
         unsafe { slice::from_raw_parts(raw.nestedTypes as _, raw.nested_type_count as _) }
     }
 
     /// Whether the class is assignable from `other`
-    pub fn is_assignable_from(&self, other: &Il2CppClass) -> bool {
+    pub fn is_assignable_from(&self, other: &Self) -> bool {
         unsafe { raw::class_is_assignable_from(self.raw(), other.raw()) }
     }
 

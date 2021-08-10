@@ -8,6 +8,7 @@ use tracing_error::SpanTrace;
 /// Sets up Android logging with the provided tag and default settings using
 /// [`tracing`]. Also sets up panic handling with backtrace and spantrace
 /// capture enabled.
+#[allow(clippy::needless_pass_by_value)]
 pub fn setup(tag: impl ToString) {
     cfg_if! {
         if #[cfg(target_os = "android")] {
@@ -42,7 +43,7 @@ pub fn panic_hook(
             error!(target: "panic", "{:?}", Backtrace::force_capture());
         }
         if spantrace {
-            error!(target: "panic", "{:?}", SpanTrace::capture())
+            error!(target: "panic", "{:?}", SpanTrace::capture());
         }
     })
 }

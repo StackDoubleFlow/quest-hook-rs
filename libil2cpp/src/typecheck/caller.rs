@@ -116,7 +116,7 @@ where
     }
 
     fn invokable(&mut self) -> *mut c_void {
-        *self as *mut T as *mut c_void
+        (*self as *mut T).cast()
     }
 }
 
@@ -160,7 +160,7 @@ where
     }
 
     fn invokable(&mut self) -> *mut c_void {
-        *self as *mut T as *mut c_void
+        (*self as *mut T).cast()
     }
 }
 

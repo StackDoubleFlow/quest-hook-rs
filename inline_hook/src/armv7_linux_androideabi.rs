@@ -16,7 +16,7 @@ pub struct Hook {
 impl Hook {
     /// Creates a new, unitialized hook
     pub const fn new() -> Self {
-        Hook {
+        Self {
             original: AtomicPtr::new(null_mut()),
         }
     }

@@ -22,7 +22,7 @@ il2cpp_functions! {
     pub fn class_get_method_from_name(class: &Il2CppClass, name: *const c_char, args_count: u32) -> Option<&'static MethodInfo>;
     pub fn class_get_type(class: &Il2CppClass) -> &'static Il2CppType;
     pub fn field_set_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
-    pub fn field_get_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *const c_void);
+    pub fn field_get_value(obj: &mut Il2CppObject, field: &FieldInfo, value: *mut c_void);
     pub fn method_get_object(method: &MethodInfo, refclass: Option<&Il2CppClass>) -> &'static Il2CppReflectionMethod;
     pub fn method_get_from_reflection(method: &Il2CppReflectionMethod) -> &'static MethodInfo;
     pub fn method_is_generic(method: &MethodInfo) -> bool;

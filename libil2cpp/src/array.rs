@@ -11,7 +11,7 @@ pub struct Il2CppArray<T>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T> Il2CppArray<T> {
     /// Creates an array from a slice
-    pub fn from_slice(slice: &[T]) -> &Il2CppArray<T>
+    pub fn from_slice(slice: &[T]) -> &Self
     where
         T: Clone + Type,
     {
@@ -24,7 +24,7 @@ impl<T> Il2CppArray<T> {
                 ptr::write_unaligned(ptr, elem.clone());
             }
         }
-        unsafe { Il2CppArray::wrap_ptr_mut(arr) }.unwrap()
+        unsafe { Self::wrap_ptr_mut(arr) }.unwrap()
     }
 
     /// Slice of values in the array

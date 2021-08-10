@@ -9,7 +9,7 @@ use syn::{
     Type, TypeTuple,
 };
 
-pub fn expand(args: Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<TokenStream, Error> {
+pub fn expand(args: &Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<TokenStream, Error> {
     let metadata = Metadata::new(args, input)?;
     metadata.validate()?;
 
@@ -37,14 +37,14 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    fn new(args: Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<Self, Error> {
+    fn new(args: &Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<Self, Error> {
         let mut iter = args.iter().map(LitStr::value);
 
         macro_rules! parse {
             () => {
                 match iter.next() {
                     Some(a) => a,
-                    None => return Err(Error::new_spanned(&args, "Expected 3 arguments")),
+                    None => return Err(Error::new_spanned(args, "Expected 3 arguments")),
                 }
             };
         }
@@ -54,7 +54,7 @@ impl Metadata {
         let method = parse!();
 
         if iter.next().is_some() {
-            return Err(Error::new_spanned(&args, "Expected 3 arguments"));
+            return Err(Error::new_spanned(args, "Expected 3 arguments"));
         }
 
         Ok(Self {
@@ -125,7 +125,7 @@ impl Metadata {
                         ));
                     }
                 }
-                _ => (),
+                FnArg::Typed(_) => (),
             }
         }
 
@@ -162,7 +162,7 @@ impl Metadata {
     fn this(&self) -> Option<&PatType> {
         let first_input = match self.input.sig.inputs.iter().next()? {
             FnArg::Typed(arg) => arg,
-            _ => unreachable!(),
+            FnArg::Receiver(_) => unreachable!(),
         };
 
         let is_this = match &first_input.pat {
@@ -194,7 +194,7 @@ impl Metadata {
             .skip(skip)
             .map(|arg| match arg {
                 FnArg::Typed(arg) => arg,
-                _ => unreachable!(),
+                FnArg::Receiver(_) => unreachable!(),
             })
     }
 
@@ -475,7 +475,7 @@ fn staticify(tokens: impl ToTokens) -> TokenStream2 {
             TokenTree2::Group(g) => {
                 let delimiter = g.delimiter();
                 let stream = staticify(g.stream());
-                ts.extend_one(TokenTree2::Group(Group::new(delimiter, stream)))
+                ts.extend_one(TokenTree2::Group(Group::new(delimiter, stream)));
             }
             TokenTree2::Punct(p) if p.as_char() == '&' => match iter.peek() {
                 Some(TokenTree2::Punct(p)) if p.as_char() == '\'' => ts.extend_one(tt),

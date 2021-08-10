@@ -74,7 +74,7 @@ impl Il2CppObject {
         A: Argument,
     {
         let field = self.class().find_field(field).unwrap();
-        field.store(self, value)
+        field.store(self, value);
     }
 }
 
