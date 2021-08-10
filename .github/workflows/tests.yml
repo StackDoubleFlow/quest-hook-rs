@@ -91,7 +91,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: ndk
-          args: --target={{ matrix.ndk-target }} --platform=24 clippy --workspace --examples --features=${{ matrix.unity }}
+          args: --target=${{ matrix.ndk-target }} --platform=24 clippy --workspace --examples --features=${{ matrix.unity }}
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 

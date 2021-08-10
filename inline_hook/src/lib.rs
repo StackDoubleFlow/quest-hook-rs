@@ -49,6 +49,6 @@ mod tests {
 
         let original =
             unsafe { transmute::<*const (), fn(usize, usize) -> usize>(HOOK.original().unwrap()) };
-        assert_eq!(original(2, 3), 6);
+        assert_eq!(original(2, 3), 5);
     }
 }
