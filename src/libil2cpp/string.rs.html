@@ -136,7 +136,7 @@
     <span class="doccomment">/// Creates a new string from a Rust string</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">s</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">as_ref</span>().<span class="ident">as_bytes</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">raw::string_new_len</span>(<span class="ident">b</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw">_</span>, <span class="ident">b</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="kw">_</span>) };
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">raw::string_new_len</span>(<span class="ident">b</span>.<span class="ident">as_ptr</span>().<span class="ident">cast</span>(), <span class="ident">b</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="kw">_</span>) };
         <span class="kw">unsafe</span> { <span class="ident"><span class="self">Self</span>::wrap_mut</span>(<span class="ident">s</span>) }
     }
 

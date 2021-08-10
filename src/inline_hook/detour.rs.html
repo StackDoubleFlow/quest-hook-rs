@@ -56,7 +56,7 @@
 <span class="kw">impl</span> <span class="ident">Hook</span> {
     <span class="doccomment">/// Creates a new, unitialized hook</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Hook</span> {
+        <span class="self">Self</span> {
             <span class="ident">detour</span>: <span class="ident">SyncOnceCell::new</span>(),
         }
     }
