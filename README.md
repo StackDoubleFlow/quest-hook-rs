@@ -4,6 +4,24 @@ A library for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp ga
 
 [![Docs](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Docs?color=blue&label=docs&style=for-the-badge)](https://stackdoubleflow.github.io/quest-hook-rs/quest_hook/) [![Tests](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Tests?label=tests&style=for-the-badge)](https://github.com/StackDoubleFlow/quest-hook-rs/actions/workflows/tests.yml)
 
+## Platform support
+
+Despite its name and initial target and scope, this library supports modding most il2cpp games, as long as you have a way to load the mods.
+
+### Unity versions
+
+- Unity 2019
+- Unity 2018
+
+### Targets
+
+- Android ARMv8
+- Android ARMv7
+- Windows x64
+- Windows x86
+- Linux x64
+- Linux x86
+
 ## Usage
 
 Simply add the library as a dependency to your `Cargo.toml` and set the crate type to a C dynamic library. You will need to use a nightly version in order to compile `quest_hook`. **Don't forget to select a Unity version**.
@@ -17,8 +35,6 @@ quest_hook = { git = "https://github.com/StackDoubleFlow/quest-hook-rs.git", fea
 ```
 
 This library is still under heavy development and breaking changes are frequent. To avoid dealing with those, you can [pin the dependency to a specific commit or tag](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories).
-
-It is also recommended to use [`cargo-ndk`](https://github.com/bbqsrc/cargo-ndk) to simplify the build process.
 
 ## Example
 
@@ -51,7 +67,9 @@ Check out the [`examples`](./examples/) directory for more examples.
 ## Cargo features
 
 - `unity2019`, `unity2018` - Unity version the targetted game uses
-- `util`
+- `util` - Adds small utility functions for setting up logging and the like
+- `cache` - Enables class and method caching to greatly improve lookup speed at the cost of slightly higher memory consumption
+- `trace` - Adds `tracing` instrumentation to many internal function
 
 ## Contributing
 
@@ -61,13 +79,17 @@ Everything that can be reasonably be done in Rust should be done in Rust. The re
 
 A decent understanding of both Rust and C++ is required for most work on the library. The main reference used for development is libil2cpp, which is written in C++. Another excellent resource is [beatsaber-hook](https://github.com/sc2ad/beatsaber-hook), also written in C++.
 
-This library is mainly developed using Visual Studio Code with [rust-analyzer](https://rust-analyzer.github.io/) and [`cargo-ndk`](https://github.com/bbqsrc/cargo-ndk). Code style, quality and documentation are enforced using rustfmt and clippy via GitHub Actions. Due to the nature of this library, we can sadly not really unit test most of the features, but are open to suggestions to improve this aspect.
+This library is mainly developed using Visual Studio Code with [rust-analyzer](https://rust-analyzer.github.io/). Code style, quality and documentation are enforced using rustfmt and clippy via GitHub Actions. Due to the nature of this library, we can sadly not really unit test most of the features, but are open to suggestions to improve this aspect.
+
+### Project structure
+
+- `libil2cpp` - Abstractions and raw bindings for libil2cpp. This is where most of the code and functionality lives.
+- `inline_hook` - Cross-platform function hooking abstraction. This is where support for more targets can be added.
+- `proc_macros` - Home of the `hook` macro implementation, and of various internally used ones.
 
 ## License
 
-quest_hook is licensed under the [MIT License](./LICENSE). It also contains third party code licensed under different terms.
-
-- [And64InlineHook](./inline_hook/And64InlineHook/) - MIT License
+quest_hook is licensed under the [MIT License](./LICENSE).
 
 ## Credits
 
