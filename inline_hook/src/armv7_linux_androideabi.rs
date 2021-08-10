@@ -7,7 +7,7 @@ extern "C" {
     fn inlineHook(target_addr: u32) -> c_int;
 }
 
-/// A function hook specific to ARMv7 Android
+/// A function hook specific to `ARMv7` Android
 #[derive(Debug)]
 pub struct Hook {
     original: AtomicPtr<u32>,

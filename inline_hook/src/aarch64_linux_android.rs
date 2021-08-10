@@ -6,7 +6,7 @@ extern "C" {
     fn A64HookFunction(symbol: *const c_void, replace: *const c_void, result: *mut *mut c_void);
 }
 
-/// A function hook specific to ARMv8 Android
+/// A function hook specific to `ARMv8` Android
 #[derive(Debug)]
 pub struct Hook {
     original: AtomicPtr<c_void>,
@@ -26,11 +26,9 @@ impl Hook {
     /// # Safety
     /// `target` and `hook` must have the same signature and calling convention
     pub unsafe fn install(&self, target: *const (), hook: *const ()) -> bool {
-        let target = target as *const c_void;
-        let hook = hook as *const c_void;
         let mut original: *mut c_void = null_mut();
 
-        A64HookFunction(target, hook, &mut original);
+        A64HookFunction(target.cast(), hook.cast(), &mut original);
 
         self.original.store(original, Ordering::SeqCst);
         true
