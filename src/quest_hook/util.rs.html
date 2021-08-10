@@ -37,18 +37,36 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">std::backtrace::Backtrace</span>;
 <span class="kw">use</span> <span class="ident">std::panic::PanicInfo</span>;
 
+<span class="kw">use</span> <span class="ident">cfg_if::cfg_if</span>;
 <span class="kw">use</span> <span class="ident">tracing::error</span>;
 <span class="kw">use</span> <span class="ident">tracing_error::SpanTrace</span>;
 
 <span class="doccomment">/// Sets up Android logging with the provided tag and default settings using</span>
-<span class="doccomment">/// [`tracing_android`]. Also sets up panic handling with backtrace and</span>
-<span class="doccomment">/// spantrace capture enabled.</span>
+<span class="doccomment">/// [`tracing`]. Also sets up panic handling with backtrace and spantrace</span>
+<span class="doccomment">/// capture enabled.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">setup</span>(<span class="ident">tag</span>: <span class="kw">impl</span> <span class="ident">ToString</span>) {
-    <span class="ident">tracing_android::init</span>(<span class="ident">tag</span>);
+    <span class="macro">cfg_if!</span> {
+        <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span> {
+            <span class="ident">tracing_android::init</span>(<span class="ident">tag</span>);
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">env</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;LOG_{}&quot;</span>, <span class="ident">tag</span>.<span class="ident">to_string</span>().<span class="ident">to_ascii_uppercase</span>());
+            <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="ident">tracing_subscriber::filter::EnvFilter::from_env</span>(<span class="ident">env</span>);
+            <span class="ident">tracing_subscriber::fmt</span>().<span class="ident">with_env_filter</span>(<span class="ident">filter</span>).<span class="ident">init</span>();
+        }
+    }
     <span class="ident">std::panic::set_hook</span>(<span class="ident">panic_hook</span>(<span class="bool-val">true</span>, <span class="bool-val">true</span>));
 }
 

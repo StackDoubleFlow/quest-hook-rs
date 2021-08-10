@@ -40,6 +40,10 @@
 <span id="40">40</span>
 <span id="41">41</span>
 <span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
 </pre><pre class="rust">
 <span class="kw">use</span> <span class="ident">libil2cpp</span>::{<span class="ident">Parameters</span>, <span class="ident">Return</span>, <span class="ident">ThisParameter</span>};
 
@@ -63,9 +67,9 @@
     <span class="kw">fn</span> <span class="ident">install</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HookInstallError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Pointer to the hook function</span>
-    <span class="kw">fn</span> <span class="ident">hook</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> ();
-    <span class="doccomment">/// Pointer to the hooked method</span>
-    <span class="kw">fn</span> <span class="ident">original</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> ();
+    <span class="kw">fn</span> <span class="ident">hook</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> ();
+    <span class="doccomment">/// Pointer to the hooked method, if installed</span>
+    <span class="kw">fn</span> <span class="ident">original</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> ()<span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Possible errors when installing a hook</span>
@@ -82,6 +86,10 @@
     <span class="doccomment">/// Method not found</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;method not found&quot;</span>)]</span>
     <span class="ident">MethodNotFound</span>,
+
+    <span class="doccomment">/// Error installing hook</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;error installing hook&quot;</span>)]</span>
+    <span class="ident">InstallError</span>,
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="quest_hook" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

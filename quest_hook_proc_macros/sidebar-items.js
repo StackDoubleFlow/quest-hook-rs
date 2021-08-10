@@ -1,0 +1,1 @@
+initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]]});

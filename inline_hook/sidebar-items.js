@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["A64HookFunction",""]]});
+initSidebarItems({"struct":[["Hook","A function hook that works across most platforms"]]});

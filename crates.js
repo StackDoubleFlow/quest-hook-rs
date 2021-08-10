@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["inline_hook","libil2cpp","quest_hook"];
+window.ALL_CRATES = ["inline_hook","libil2cpp","quest_hook","quest_hook_proc_macros"];
