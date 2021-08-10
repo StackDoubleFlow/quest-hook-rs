@@ -1,13 +1,4 @@
 {
-  "rust-analyzer.cargo.target": "aarch64-linux-android",
-  "rust-analyzer.checkOnSave.overrideCommand": [
-    "cargo",
-    "ndk",
-    "clippy",
-    "--workspace",
-    "--examples",
-    "--message-format=json",
-    "--features=unity2019"
-  ],
-  "rust-analyzer.assist.importGranularity": "module"
+  "rust-analyzer.assist.importGranularity": "module",
+  "rust-analyzer.cargo.features": ["unity2019"]
 }

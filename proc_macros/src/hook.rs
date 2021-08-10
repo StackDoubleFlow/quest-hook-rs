@@ -282,6 +282,7 @@ impl Metadata {
             .map(|i| quote!(::quest_hook::libil2cpp::Parameter::from_actual(#i),));
 
         quote! {
+            #[inline(never)]
             pub #unsafety extern "C" fn #name(#this_param #(#params_params)*) -> #return_ty {
                 #inner_fn
                 let r = inner(#this_arg #(#params_args)*);
@@ -296,7 +297,7 @@ impl Metadata {
 
         quote! {
             #vis struct #struct_name {
-                original: ::std::sync::atomic::AtomicPtr<()>,
+                hook: ::quest_hook::inline_hook::Hook,
             }
         }
     }
@@ -309,7 +310,7 @@ impl Metadata {
         quote! {
             #[allow(non_upper_case_globals)]
             #vis static #name: #struct_name = #struct_name {
-                original: ::std::sync::atomic::AtomicPtr::new(::std::ptr::null_mut()),
+                hook: ::quest_hook::inline_hook::Hook::new(),
             };
         }
     }
@@ -332,10 +333,9 @@ impl Metadata {
                 use ::std::ptr::null_mut;
                 use ::std::sync::atomic::Ordering;
                 use ::quest_hook::HookInstallError;
-                use ::quest_hook::inline_hook::A64HookFunction;
                 use ::quest_hook::libil2cpp::{Il2CppClass, WrapRaw};
 
-                if !self.original.load(Ordering::Relaxed).is_null() {
+                if self.hook.is_installed() {
                     return Err(HookInstallError::AlreadyInstalled);
                 }
 
@@ -348,23 +348,13 @@ impl Metadata {
                     Err(_) => return Err(HookInstallError::MethodNotFound),
                 };
 
-                let mut temp = null_mut();
-                unsafe {
-                    A64HookFunction(
-                        method.raw().methodPointer.unwrap() as *mut _,
-                        #fn_name as *mut _,
-                        &mut temp,
-                    );
-                }
-
-                match self.original.compare_exchange(
-                    null_mut(),
-                    temp as *mut _,
-                    Ordering::AcqRel,
-                    Ordering::Relaxed,
-                ) {
-                    Ok(_) => Ok(()),
-                    Err(_) => panic!("method hooked twice"),
+                let success = unsafe {
+                    self.hook.install(method.raw().methodPointer.unwrap() as *const (), #fn_name as *const ())
+                };
+                if success {
+                    Ok(())
+                } else {
+                    Err(HookInstallError::InstallError)
                 }
             }
         }
@@ -406,9 +396,8 @@ impl Metadata {
                 use ::std::mem::transmute;
                 use ::std::sync::atomic::Ordering;
 
-                let ptr = self.original.load(Ordering::Relaxed);
-                let original = unsafe { transmute::<*mut (), Option<#original_ty>>(ptr) };
-                let original = original.expect("hook is not installed");
+                let ptr = self.hook.original().expect("hook is not installed");
+                let original = unsafe { transmute::<*const (), #original_ty>(ptr) };
 
                 let r = original(#this_arg #(#params_args)*);
                 ::quest_hook::libil2cpp::Return::from_actual(r)
@@ -456,11 +445,11 @@ impl Metadata {
                     self.install()
                 }
 
-                fn original(&self) -> *mut () {
-                    self.original.load(::std::sync::atomic::Ordering::Relaxed)
+                fn original(&self) -> Option<*const ()> {
+                    self.hook.original()
                 }
-                fn hook(&self) -> *mut () {
-                    #fn_name as _
+                fn hook(&self) -> *const () {
+                    #fn_name as *const ()
                 }
             }
         }

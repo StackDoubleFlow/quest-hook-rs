@@ -22,4 +22,3 @@ heck = "0.3"
 
 [features]
 default = []
-strict = []

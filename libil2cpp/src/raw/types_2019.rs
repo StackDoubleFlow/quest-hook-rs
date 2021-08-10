@@ -3171,8 +3171,6 @@ pub const kIl2CppInt64Max: i64 = 9223372036854775807;
 extern "C" {
     pub static kIl2CppUInt64Max: u64;
 }
-pub const kIl2CppIntPtrMin: isize = -9223372036854775808;
-pub const kIl2CppIntPtrMax: isize = 9223372036854775807;
 extern "C" {
     pub static kIl2CppUIntPtrMax: usize;
 }

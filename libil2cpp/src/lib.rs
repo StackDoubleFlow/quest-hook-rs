@@ -1,7 +1,6 @@
 #![feature(once_cell)]
 #![warn(rust_2018_idioms, missing_debug_implementations, missing_docs)]
 #![allow(clippy::single_component_path_imports)]
-#![cfg_attr(feature = "strict", deny(warnings))]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp")]
 
 //! Wrappers and raw bindings for Unity's libil2cpp

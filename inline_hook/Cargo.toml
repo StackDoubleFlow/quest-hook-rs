@@ -6,9 +6,12 @@ version = "0.1.0"
 authors = ["StackDoubleFlow <ojaslandge@gmail.com>"]
 edition = "2021"
 
-[package.metadata.ndk]
-targets = ["arm64-v8a"]
-platform = 24
+[dependencies]
+cfg-if = "1"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+detour = "0.8"
 
 [build-dependencies]
 cc = "1"
+cfg-if = "1"

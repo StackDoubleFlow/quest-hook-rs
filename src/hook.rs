@@ -20,9 +20,9 @@ pub trait Hook {
     fn install(&self) -> Result<(), HookInstallError>;
 
     /// Pointer to the hook function
-    fn hook(&self) -> *mut ();
-    /// Pointer to the hooked method
-    fn original(&self) -> *mut ();
+    fn hook(&self) -> *const ();
+    /// Pointer to the hooked method, if installed
+    fn original(&self) -> Option<*const ()>;
 }
 
 /// Possible errors when installing a hook
@@ -39,4 +39,8 @@ pub enum HookInstallError {
     /// Method not found
     #[error("method not found")]
     MethodNotFound,
+
+    /// Error installing hook
+    #[error("error installing hook")]
+    InstallError,
 }

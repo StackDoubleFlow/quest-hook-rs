@@ -1,14 +1,23 @@
 use std::backtrace::Backtrace;
 use std::panic::PanicInfo;
 
+use cfg_if::cfg_if;
 use tracing::error;
 use tracing_error::SpanTrace;
 
 /// Sets up Android logging with the provided tag and default settings using
-/// [`tracing_android`]. Also sets up panic handling with backtrace and
-/// spantrace capture enabled.
+/// [`tracing`]. Also sets up panic handling with backtrace and spantrace
+/// capture enabled.
 pub fn setup(tag: impl ToString) {
-    tracing_android::init(tag);
+    cfg_if! {
+        if #[cfg(target_os = "android")] {
+            tracing_android::init(tag);
+        } else {
+            let env = format!("LOG_{}", tag.to_string().to_ascii_uppercase());
+            let filter = tracing_subscriber::filter::EnvFilter::from_env(env);
+            tracing_subscriber::fmt().with_env_filter(filter).init();
+        }
+    }
     std::panic::set_hook(panic_hook(true, true));
 }
 

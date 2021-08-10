@@ -14,30 +14,29 @@ repository = "https://github.com/StackDoubleFlow/quest-hook-rs.git"
 license = "MIT"
 edition = "2021"
 
-[package.metadata.ndk]
-targets = ["arm64-v8a"]
-platform = 24
-
 [dependencies]
 quest_hook_proc_macros = { path = "./proc_macros" }
 inline_hook = { path = "./inline_hook" }
 libil2cpp = { path = "./libil2cpp", default-features = false }
+cfg-if = "1"
 tracing = { version = "0.1", features = [
     "std",
-    "attributes",
 ], default-features = false, optional = true }
+tracing-subscriber = { version = "0.2", default-features = false, optional = true }
 tracing-error = { version = "0.1", default-features = false, optional = true }
 tracing-android = { git = "https://github.com/raftario/tracing-android", optional = true }
 thiserror = "1"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+tracing-subscriber = { version = "0.2", optional = true }
 
 [features]
 default = ["util", "cache"]
 unity2019 = ["libil2cpp/unity2019"]
 unity2018 = ["libil2cpp/unity2018"]
-util = ["tracing", "tracing-error", "tracing-android"]
+util = ["tracing", "tracing-error", "tracing-subscriber", "tracing-android"]
 cache = ["libil2cpp/cache"]
 trace = ["libil2cpp/trace"]
-strict = ["quest_hook_proc_macros/strict", "libil2cpp/strict"]
 
 [[example]]
 name = "hello_world"
