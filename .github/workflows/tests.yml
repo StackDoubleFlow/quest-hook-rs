@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        unity: [unity2019]
+        unity: [unity2019, unity2018]
         os: [windows-latest, ubuntu-latest]
 
     steps:
@@ -30,7 +30,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --workspace --features=${{ matrix.unity }}
+          args: --workspace --features=${{ matrix.unity }} -- --skip bindgen
 
       - name: Check for clippy warnings
         uses: actions-rs/cargo@v1
