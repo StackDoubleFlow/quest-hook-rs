@@ -67,8 +67,8 @@
     nonstandard_style,
     rust_2018_idioms,
     missing_docs,
-    broken_intra_doc_links,
-    private_intra_doc_links
+    rustdoc::broken_intra_doc_links,
+    rustdoc::private_intra_doc_links
 )]
 #![allow(clippy::single_component_path_imports)]
 

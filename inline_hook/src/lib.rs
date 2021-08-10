@@ -67,8 +67,8 @@
     nonstandard_style,
     rust_2018_idioms,
     missing_docs,
-    broken_intra_doc_links,
-    private_intra_doc_links
+    rustdoc::broken_intra_doc_links,
+    rustdoc::private_intra_doc_links
 )]
 
 //! A cross platform function hooking abstraction, working across Windows,
