@@ -1,6 +1,5 @@
 fn main() {
     cc::Build::new()
-        .file("And64InlineHook/And64InlineHook.cpp")
-        .include("And64InlineHook")
+        .file("beatsaber-hook/src/inline-hook/And64InlineHook.cpp")
         .compile("inline_hook");
 }

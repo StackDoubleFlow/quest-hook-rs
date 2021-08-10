@@ -1,3 +1,5 @@
+cargo-features = ["edition2021"]
+
 [package]
 name = "libil2cpp"
 version = "0.1.0"
@@ -7,7 +9,7 @@ authors = [
 ]
 repository = "https://github.com/StackDoubleFlow/quest-hook-rs.git"
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 quest_hook_proc_macros = { path = "../proc_macros" }

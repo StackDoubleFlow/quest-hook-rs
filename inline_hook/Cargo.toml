@@ -1,8 +1,10 @@
+cargo-features = ["edition2021"]
+
 [package]
 name = "inline_hook"
 version = "0.1.0"
 authors = ["StackDoubleFlow <ojaslandge@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [package.metadata.ndk]
 targets = ["arm64-v8a"]
