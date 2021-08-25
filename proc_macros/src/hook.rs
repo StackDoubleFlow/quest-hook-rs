@@ -5,8 +5,8 @@ use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
-    Abi, Attribute, Error, FnArg, Generics, Ident, ItemFn, LitStr, Pat, PatType, ReturnType, Token,
-    Type, TypeTuple,
+    Abi, Attribute, Error, FnArg, GenericParam, Ident, ItemFn, LitStr, Pat, PatType, ReturnType,
+    Token, Type, TypeTuple,
 };
 
 pub fn expand(args: &Punctuated<LitStr, Token![,]>, input: ItemFn) -> Result<TokenStream, Error> {
@@ -87,11 +87,13 @@ impl Metadata {
         }
 
         let generics = &self.input.sig.generics;
-        if let Generics {
-            lt_token: Some(_),
-            gt_token: Some(_),
-            ..
-        } = generics
+        if !self
+            .input
+            .sig
+            .generics
+            .params
+            .iter()
+            .all(|g| matches!(g, GenericParam::Lifetime(_)))
         {
             return Err(Error::new_spanned(
                 generics,

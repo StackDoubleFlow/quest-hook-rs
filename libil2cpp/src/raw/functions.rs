@@ -26,7 +26,8 @@ il2cpp_functions! {
     pub fn method_get_object(method: &MethodInfo, refclass: Option<&Il2CppClass>) -> &'static Il2CppReflectionMethod;
     pub fn method_get_from_reflection(method: &Il2CppReflectionMethod) -> &'static MethodInfo;
     pub fn method_is_generic(method: &MethodInfo) -> bool;
-    pub fn array_new(elem_type: &Il2CppClass, length: usize) -> *mut Il2CppArray;
+    pub fn array_new(element_class: &Il2CppClass, length: usize) -> Option<&'static mut Il2CppArray>;
+    pub fn array_class_get(element_class: &Il2CppClass, rank: u32, bounded: bool) -> &'static Il2CppClass;
     pub fn type_get_name(ty: &Il2CppType) -> *const c_char;
     pub fn type_get_object(ty: &Il2CppType) -> &'static Il2CppReflectionType;
     pub fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&mut Il2CppException>) -> Option<&'static mut Il2CppObject>;

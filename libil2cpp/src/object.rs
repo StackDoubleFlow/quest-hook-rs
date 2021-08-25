@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Returned, WrapRaw};
+use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Returned, Type, WrapRaw};
 
 /// An il2cpp object
 #[repr(transparent)]
@@ -55,12 +55,12 @@ impl Il2CppObject {
     /// # Panics
     ///
     /// This method will panic if the given field can't be found
-    pub fn load<R>(&mut self, field: &str) -> R
+    pub fn load<T>(&mut self, field: &str) -> T::Held<'_>
     where
-        R: Returned,
+        T: Type,
     {
         let field = self.class().find_field(field).unwrap();
-        field.load(self)
+        field.load::<T>(self)
     }
 
     /// Stores a given value into a field of `self` with the given name, with

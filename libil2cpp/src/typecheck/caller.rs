@@ -5,8 +5,6 @@ use std::ptr::null_mut;
 
 use crate::{Builtin, Il2CppObject, Il2CppType, MethodInfo, Type};
 
-use super::ty::semantics;
-
 /// Trait implemented by types that can be used as a C# `this` arguments
 ///
 /// # Note
@@ -132,10 +130,11 @@ unsafe impl ThisArgument for () {
     }
 }
 
-unsafe impl<T, S> Argument for Option<&mut T>
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Argument for Option<&mut T>
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceArgument,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
@@ -148,10 +147,11 @@ where
     }
 }
 
-unsafe impl<T, S> Argument for &mut T
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Argument for &mut T
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceArgument,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
@@ -164,15 +164,16 @@ where
     }
 }
 
-unsafe impl<T, S> Returned for Option<&mut T>
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Returned for Option<&mut T>
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturned,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_returned(ty)
+        T::matches_returned(ty)
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
@@ -180,15 +181,16 @@ where
     }
 }
 
-unsafe impl<T, S> Returned for Option<&T>
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Returned for Option<&T>
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturned,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_returned(ty)
+        T::matches_returned(ty)
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
@@ -196,35 +198,37 @@ where
     }
 }
 
-unsafe impl<T, S> Returned for &mut T
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Returned for &mut T
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturned,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_returned(ty)
+        T::matches_returned(ty)
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { transmute(object.unwrap()) }
+        unsafe { &mut *(object.unwrap() as *mut Il2CppObject).cast() }
     }
 }
 
-unsafe impl<T, S> Returned for &T
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Returned for &T
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturned,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Type = T;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_returned(ty)
+        T::matches_returned(ty)
     }
 
     fn from_object(object: Option<&mut Il2CppObject>) -> Self {
-        unsafe { transmute(object.unwrap()) }
+        unsafe { &*(object.unwrap() as *mut Il2CppObject).cast() }
     }
 }
 

@@ -1,4 +1,4 @@
-#![feature(once_cell, generic_associated_types)]
+#![feature(once_cell, generic_associated_types, never_type)]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp")]
 #![warn(
     clippy::all,
@@ -114,4 +114,4 @@ pub use string::Il2CppString;
 pub use ty::{Builtin, Il2CppReflectionType, Il2CppType};
 pub use typecheck::callee::{Parameter, Parameters, Return, ThisParameter};
 pub use typecheck::caller::{Argument, Arguments, Returned, ThisArgument};
-pub use typecheck::ty::{Reference, Type, Value};
+pub use typecheck::ty::Type;

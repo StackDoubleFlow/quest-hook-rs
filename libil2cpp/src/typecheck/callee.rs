@@ -2,8 +2,6 @@ use std::fmt;
 
 use crate::{Builtin, Il2CppType, MethodInfo, Type};
 
-use super::ty::semantics;
-
 /// Trait implemented by types that can be used as C# `this` method parameters
 ///
 /// # Note
@@ -125,20 +123,25 @@ where
 }
 
 unsafe impl ThisParameter for () {
-    type Actual = ();
+    type Actual = !;
 
     fn matches(method: &MethodInfo) -> bool {
         method.is_static()
     }
 
-    fn from_actual((): ()) {}
-    fn into_actual(self) {}
+    fn from_actual(_: !) {
+        unreachable!();
+    }
+    fn into_actual(self) -> ! {
+        unreachable!()
+    }
 }
 
-unsafe impl<T, S> Parameter for Option<&mut T>
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Parameter for Option<&mut T>
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceParameter,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Actual = Self;
 
@@ -154,10 +157,11 @@ where
     }
 }
 
-unsafe impl<T, S> Parameter for &mut T
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Parameter for &mut T
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceParameter,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Actual = Option<Self>;
 
@@ -173,15 +177,16 @@ where
     }
 }
 
-unsafe impl<T, S> Return for Option<&mut T>
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Return for Option<&mut T>
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturn,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Actual = Self;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_return(ty)
+        T::matches_return(ty)
     }
 
     fn into_actual(self) -> Self::Actual {
@@ -192,15 +197,16 @@ where
     }
 }
 
-unsafe impl<T, S> Return for &mut T
+// TODO: Remove this once rustfmt stops dropping generics on GATs
+#[rustfmt::skip]
+unsafe impl<T> Return for &mut T
 where
-    T: Type<Semantics = S>,
-    S: semantics::ReferenceReturn,
+    T: for<'a> Type<Held<'a> = Option<&'a mut T>>,
 {
     type Actual = Option<Self>;
 
     fn matches(ty: &Il2CppType) -> bool {
-        T::matches_reference_return(ty)
+        T::matches_return(ty)
     }
 
     fn into_actual(self) -> Self::Actual {

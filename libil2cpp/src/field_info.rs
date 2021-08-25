@@ -3,7 +3,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::mem::MaybeUninit;
 
-use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Returned, WrapRaw};
+use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Type, WrapRaw};
 
 /// Information about a C# field
 #[repr(transparent)]
@@ -16,10 +16,7 @@ impl FieldInfo {
         A: Argument,
     {
         assert!(A::matches(self.ty()));
-
-        unsafe {
-            self.store_unchecked(instance, val);
-        }
+        unsafe { self.store_unchecked(instance, val) };
     }
 
     /// Store a value into a field without type checking
@@ -34,24 +31,23 @@ impl FieldInfo {
     }
 
     /// Load a typechecked value from a field
-    pub fn load<R>(&self, instance: &mut Il2CppObject) -> R
+    pub fn load<'a, T>(&self, instance: &'a mut Il2CppObject) -> T::Held<'a>
     where
-        R: Returned,
+        T: Type,
     {
-        assert!(R::matches(self.ty()));
-
-        unsafe { self.load_unchecked(instance) }
+        assert!(T::class().is_assignable_from(self.ty().class()));
+        unsafe { self.load_unchecked::<T>(instance) }
     }
 
     /// Load a value from a field without type checking
     ///
     /// # Safety
     /// To be safe, the provided type has to match the field signature
-    pub unsafe fn load_unchecked<R>(&self, instance: &mut Il2CppObject) -> R
+    pub unsafe fn load_unchecked<'a, T>(&self, instance: &'a mut Il2CppObject) -> T::Held<'a>
     where
-        R: Returned,
+        T: Type,
     {
-        let mut val: MaybeUninit<R> = MaybeUninit::uninit();
+        let mut val: MaybeUninit<T::Held<'a>> = MaybeUninit::uninit();
         raw::field_get_value(instance.raw_mut(), self.raw(), val.as_mut_ptr().cast());
         val.assume_init()
     }

@@ -9,8 +9,6 @@ use crate::{
 /// The Rust and C# types must be ABI-compatible and the trait implementation
 /// must be correct
 pub unsafe trait Type: 'static {
-    /// Semantics of the type, either [`Reference`] or [`Value`]
-    type Semantics: semantics::Semantics;
     /// Type of the values held in variables of the type
     type Held<'a>;
 
@@ -26,11 +24,15 @@ pub unsafe trait Type: 'static {
 
     /// Whether the type can be used as a `this` argument for the given
     /// [`MethodInfo`]
-    fn matches_this_argument(method: &MethodInfo) -> bool;
+    fn matches_this_argument(method: &MethodInfo) -> bool {
+        method.class().is_assignable_from(Self::class())
+    }
 
     /// Whether the type can be used as a `this` parameter for the given
     /// [`MethodInfo`]
-    fn matches_this_parameter(method: &MethodInfo) -> bool;
+    fn matches_this_parameter(method: &MethodInfo) -> bool {
+        Self::class().is_assignable_from(method.class())
+    }
 
     /// Whether a reference to the type can be used as an argument of the given
     /// [`Il2CppType`]
@@ -46,44 +48,17 @@ pub unsafe trait Type: 'static {
     /// [`Il2CppType`]
     fn matches_value_parameter(ty: &Il2CppType) -> bool;
 
-    /// Whether a reference to the type can be used as the value of the given
-    /// [`Il2CppType`] returned from a C# method
-    fn matches_reference_returned(ty: &Il2CppType) -> bool;
-    /// Whether a value of the type can be used as the value of the given
-    /// [`Il2CppType`] returned from a C# method
-    fn matches_value_returned(ty: &Il2CppType) -> bool;
+    /// Whether the type can be used as the value of the given  [`Il2CppType`]
+    /// returned from a C# method
+    fn matches_returned(ty: &Il2CppType) -> bool {
+        Self::class().is_assignable_from(ty.class())
+    }
 
-    /// Whether a reference to the type can be used as the return value of the
-    /// given [`Il2CppType`] for a C# method
-    fn matches_reference_return(ty: &Il2CppType) -> bool;
-    /// Whether a value of the type can be used as the return value of the
-    /// given [`Il2CppType`] for a C# method
-    fn matches_value_return(ty: &Il2CppType) -> bool;
-}
-
-/// Marker type used to specify reference semantics
-#[allow(missing_debug_implementations)]
-pub struct Reference;
-impl semantics::Semantics for Reference {}
-impl semantics::ReferenceArgument for Reference {}
-impl semantics::ReferenceParameter for Reference {}
-impl semantics::ReferenceReturned for Reference {}
-impl semantics::ReferenceReturn for Reference {}
-
-/// Marker type used to specify value semantics
-#[allow(missing_debug_implementations)]
-pub struct Value;
-impl semantics::Semantics for Value {}
-impl semantics::ReferenceArgument for Value {}
-impl semantics::ReferenceParameter for Value {}
-
-pub(crate) mod semantics {
-    pub trait Semantics {}
-
-    pub trait ReferenceArgument: Semantics {}
-    pub trait ReferenceParameter: Semantics {}
-    pub trait ReferenceReturned: Semantics {}
-    pub trait ReferenceReturn: Semantics {}
+    /// Whether the type can be used as the return value of the  given
+    /// [`Il2CppType`] for a C# method
+    fn matches_return(ty: &Il2CppType) -> bool {
+        ty.class().is_assignable_from(Self::class())
+    }
 }
 
 /// Implements the [`Type`] trait for a C# reference type
@@ -95,21 +70,10 @@ pub(crate) mod semantics {
 macro_rules! unsafe_impl_reference_type {
     ($type:ty, $namespace:literal, $class:literal) => {
         unsafe impl $crate::Type for $type {
-            type Semantics = $crate::Reference;
-            type Held<'a> = &'a $type;
+            type Held<'a> = ::std::option::Option<&'a mut $type>;
 
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;
-
-            fn matches_this_argument(method: &$crate::MethodInfo) -> bool {
-                method
-                    .class()
-                    .is_assignable_from(<Self as $crate::Type>::class())
-            }
-
-            fn matches_this_parameter(method: &$crate::MethodInfo) -> bool {
-                <Self as $crate::Type>::class().is_assignable_from(method.class())
-            }
 
             fn matches_reference_argument(ty: &$crate::Il2CppType) -> bool {
                 ty.class()
@@ -125,21 +89,6 @@ macro_rules! unsafe_impl_reference_type {
             fn matches_value_parameter(_: &$crate::Il2CppType) -> bool {
                 false
             }
-
-            fn matches_reference_returned(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-            fn matches_value_returned(_: &$crate::Il2CppType) -> bool {
-                false
-            }
-
-            fn matches_reference_return(ty: &$crate::Il2CppType) -> bool {
-                ty.class()
-                    .is_assignable_from(<Self as $crate::Type>::class())
-            }
-            fn matches_value_return(_: &$crate::Il2CppType) -> bool {
-                false
-            }
         }
     };
 }
@@ -153,21 +102,10 @@ macro_rules! unsafe_impl_reference_type {
 macro_rules! unsafe_impl_value_type {
     ($type:ty, $namespace:literal, $class:literal) => {
         unsafe impl $crate::Type for $type {
-            type Semantics = $crate::Value;
             type Held<'a> = $type;
 
             const NAMESPACE: &'static str = $namespace;
             const CLASS_NAME: &'static str = $class;
-
-            fn matches_this_argument(method: &$crate::MethodInfo) -> bool {
-                method
-                    .class()
-                    .is_assignable_from(<Self as $crate::Type>::class())
-            }
-
-            fn matches_this_parameter(method: &$crate::MethodInfo) -> bool {
-                <Self as $crate::Type>::class().is_assignable_from(method.class())
-            }
 
             fn matches_value_argument(ty: &$crate::Il2CppType) -> bool {
                 !ty.is_ref()
@@ -187,21 +125,6 @@ macro_rules! unsafe_impl_value_type {
             }
             fn matches_reference_parameter(ty: &$crate::Il2CppType) -> bool {
                 ty.is_ref() && <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-
-            fn matches_value_returned(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-            fn matches_reference_returned(_: &$crate::Il2CppType) -> bool {
-                false
-            }
-
-            fn matches_value_return(ty: &$crate::Il2CppType) -> bool {
-                ty.class()
-                    .is_assignable_from(<Self as $crate::Type>::class())
-            }
-            fn matches_reference_return(_: &$crate::Il2CppType) -> bool {
-                false
             }
         }
 
@@ -236,7 +159,7 @@ macro_rules! unsafe_impl_value_type {
             type Type = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_value_returned(ty)
+                <Self as $crate::Type>::matches_returned(ty)
             }
 
             fn from_object(object: Option<&mut $crate::Il2CppObject>) -> Self {
@@ -248,7 +171,7 @@ macro_rules! unsafe_impl_value_type {
             type Actual = Self;
 
             fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_value_return(ty)
+                <Self as $crate::Type>::matches_return(ty)
             }
 
             fn into_actual(self) -> Self::Actual {

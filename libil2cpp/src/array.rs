@@ -3,40 +3,43 @@ use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
 use std::{fmt, ptr, slice};
 
-use crate::{raw, Il2CppObject, Type, WrapRaw};
+use crate::{raw, Il2CppClass, Il2CppObject, Type, WrapRaw};
 
 /// An il2cpp array
 #[repr(transparent)]
-pub struct Il2CppArray<T>(raw::Il2CppArray, PhantomData<[T]>);
+pub struct Il2CppArray<T: Type>(raw::Il2CppArray, PhantomData<[T]>);
 
-impl<T> Il2CppArray<T> {
+impl<T: Type> Il2CppArray<T> {
     /// Creates an array from a slice
-    pub fn from_slice(slice: &[T]) -> &Self
+    pub fn from_slice<'a>(slice: &'a [T::Held<'a>]) -> &'a Self
     where
-        T: Clone + Type,
+        T::Held<'a>: Clone,
     {
         let len = slice.len();
-        let arr = unsafe { raw::array_new(T::class().raw(), len) };
-        let data_ptr = ((arr as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T;
+        let arr = unsafe { raw::array_new(T::class().raw(), len) }.unwrap();
+        let data_ptr =
+            ((arr as *mut _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T::Held<'a>;
         for (i, elem) in slice.iter().enumerate() {
             unsafe {
                 let ptr = data_ptr.add(i);
                 ptr::write_unaligned(ptr, elem.clone());
             }
         }
-        unsafe { Self::wrap_ptr_mut(arr) }.unwrap()
+        unsafe { Self::wrap_mut(arr) }
     }
 
     /// Slice of values in the array
-    pub fn as_slice(&self) -> &[T] {
-        let ptr = ((self as *const _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *const T;
+    pub fn as_slice(&self) -> &[T::Held<'_>] {
+        let ptr = ((self as *const _ as isize) + (raw::kIl2CppSizeOfArray as isize))
+            as *const T::Held<'_>;
         let len = self.len();
         unsafe { slice::from_raw_parts(ptr, len) }
     }
 
     /// Mutable slice of values in the array
-    pub fn as_mut_slice(&mut self) -> &mut [T] {
-        let ptr = ((self as *mut _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T;
+    pub fn as_mut_slice(&mut self) -> &mut [T::Held<'_>] {
+        let ptr =
+            ((self as *mut _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T::Held<'_>;
         let len = self.len();
         unsafe { slice::from_raw_parts_mut(ptr, len) }
     }
@@ -57,17 +60,50 @@ impl<T> Il2CppArray<T> {
     }
 }
 
-unsafe impl<T> WrapRaw for Il2CppArray<T> {
+unsafe impl<T: Type> WrapRaw for Il2CppArray<T> {
     type Raw = raw::Il2CppArray;
 }
 
-impl<T: fmt::Debug> fmt::Debug for Il2CppArray<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Il2CppArray").field(&self.as_ref()).finish()
+unsafe impl<T: Type> Type for Il2CppArray<T> {
+    type Held<'a> = Option<&'a mut Self>;
+
+    const NAMESPACE: &'static str = "System";
+    const CLASS_NAME: &'static str = "Array";
+
+    fn class() -> &'static Il2CppClass {
+        let class = unsafe { raw::array_class_get(T::class().raw(), 0, false) };
+        unsafe { Il2CppClass::wrap(class) }
+    }
+
+    fn matches_reference_argument(ty: &crate::Il2CppType) -> bool {
+        ty.class().is_assignable_from(Self::class())
+    }
+
+    fn matches_value_argument(_: &crate::Il2CppType) -> bool {
+        false
+    }
+
+    fn matches_reference_parameter(ty: &crate::Il2CppType) -> bool {
+        Self::class().is_assignable_from(ty.class())
+    }
+
+    fn matches_value_parameter(_: &crate::Il2CppType) -> bool {
+        false
     }
 }
 
-impl<T> Deref for Il2CppArray<T> {
+impl<T: Type> fmt::Debug for Il2CppArray<T>
+where
+    for<'a> T::Held<'a>: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Il2CppArray")
+            .field(&self.as_slice())
+            .finish()
+    }
+}
+
+impl<T: Type> Deref for Il2CppArray<T> {
     type Target = Il2CppObject;
 
     fn deref(&self) -> &Self::Target {
@@ -75,20 +111,8 @@ impl<T> Deref for Il2CppArray<T> {
     }
 }
 
-impl<T> DerefMut for Il2CppArray<T> {
+impl<T: Type> DerefMut for Il2CppArray<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { Il2CppObject::wrap_mut(&mut self.raw_mut().obj) }
-    }
-}
-
-impl<T> AsRef<[T]> for Il2CppArray<T> {
-    fn as_ref(&self) -> &[T] {
-        self.as_slice()
-    }
-}
-
-impl<T> AsMut<[T]> for Il2CppArray<T> {
-    fn as_mut(&mut self) -> &mut [T] {
-        self.as_mut_slice()
     }
 }
