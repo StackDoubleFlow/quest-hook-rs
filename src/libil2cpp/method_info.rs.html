@@ -296,8 +296,8 @@
     <span class="comment">// }</span>
 
     <span class="doccomment">/// [`Il2CppReflectionMethod`] which represents the method</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Il2CppReflectionMethod</span> {
-        <span class="kw">unsafe</span> { <span class="ident">Il2CppReflectionMethod::wrap</span>(<span class="ident">raw::method_get_object</span>(<span class="self">self</span>.<span class="ident">raw</span>(), <span class="prelude-val">None</span>)) }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Il2CppReflectionMethod</span> {
+        <span class="kw">unsafe</span> { <span class="ident">Il2CppReflectionMethod::wrap_mut</span>(<span class="ident">raw::method_get_object</span>(<span class="self">self</span>.<span class="ident">raw</span>(), <span class="prelude-val">None</span>)) }
     }
 
     <span class="doccomment">/// Name of the method</span>

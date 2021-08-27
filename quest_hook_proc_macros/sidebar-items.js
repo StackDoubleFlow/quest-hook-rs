@@ -1,1 +1,1 @@
-initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]]});
+initSidebarItems({"attr":[["hook","Creates an inline hook at a C# method."]],"macro":[["unsafe_impl_reference_type","Implements the `Type` trait for a Rust type that is equivalent to a C# reference type"],["unsafe_impl_value_type","Implements the `Type` trait for a Rust type that is equivalent to a C# value type"]]});
