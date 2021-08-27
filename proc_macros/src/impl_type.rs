@@ -186,7 +186,7 @@ impl Input {
         let reflection_type_ty = self.reflection_type_ty();
         let type_trait = self.type_trait();
         let namespace = &self.namespace;
-        let generic_class = format!("{}_{}", self.class, self.cs_generics.len());
+        let generic_class = format!("{}`{}", self.class, self.cs_generics.len());
         let array_ty = self.array_ty();
         let generics = &self.cs_generics;
 
