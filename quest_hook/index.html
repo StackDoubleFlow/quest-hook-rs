@@ -30,11 +30,6 @@ quest_hook = { git = &quot;https://github.com/StackDoubleFlow/quest-hook-rs.git&
 <span class="kw">use</span> <span class="ident">quest_hook::libil2cpp</span>::{<span class="ident">Il2CppObject</span>, <span class="ident">Il2CppString</span>};
 <span class="kw">use</span> <span class="ident">tracing::debug</span>;
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">setup</span>() {
-    <span class="ident">quest_hook::setup</span>(<span class="string">&quot;hello world&quot;</span>);
-}
-
 <span class="attribute">#[<span class="ident">hook</span>(<span class="string">&quot;UnityEngine.SceneManagement&quot;</span>, <span class="string">&quot;SceneManager&quot;</span>, <span class="string">&quot;SetActiveScene&quot;</span>)]</span>
 <span class="kw">fn</span> <span class="ident">set_active_scene</span>(<span class="ident">scene</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppObject</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">Il2CppString</span> <span class="op">=</span> <span class="ident">scene</span>.<span class="ident">invoke</span>(<span class="string">&quot;get_name&quot;</span>, ()).<span class="ident">unwrap</span>();
@@ -46,6 +41,11 @@ quest_hook = { git = &quot;https://github.com/StackDoubleFlow/quest-hook-rs.git&
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">load</span>() {
     <span class="ident">set_active_scene</span>.<span class="ident">install</span>().<span class="ident">unwrap</span>();
+}
+
+<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">setup</span>() {
+    <span class="ident">quest_hook::setup</span>(<span class="string">&quot;hello world&quot;</span>);
 }</code></pre></div>
 <p>Check out the <a href="./examples/"><code>examples</code></a> directory for more examples.</p>
 <h2 id="cargo-features" class="section-header"><a href="#cargo-features">Cargo features</a></h2>

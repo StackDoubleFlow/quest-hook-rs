@@ -185,6 +185,9 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">paste::paste</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::ffi::CStr</span>;
@@ -205,6 +208,9 @@
 <span class="doccomment">/// An il2cpp type</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Il2CppType</span>(<span class="ident">raw::Il2CppType</span>);
+
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Il2CppType</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Il2CppType</span> {}
 
 <span class="kw">impl</span> <span class="ident">Il2CppType</span> {
     <span class="doccomment">/// Class of the type</span>
@@ -229,7 +235,7 @@
     }
 
     <span class="doccomment">/// [`Il2CppReflectionType`] which represents the type</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Il2CppReflectionType</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppReflectionType</span> {
         <span class="kw">unsafe</span> { <span class="ident">Il2CppReflectionType::wrap_mut</span>(<span class="ident">raw::type_get_object</span>(<span class="self">self</span>.<span class="ident">raw</span>())) }
     }
 }

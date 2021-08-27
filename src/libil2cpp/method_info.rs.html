@@ -213,6 +213,9 @@
 <span id="213">213</span>
 <span id="214">214</span>
 <span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::ffi::CStr</span>;
 <span class="kw">use</span> <span class="ident">std::mem::transmute</span>;
@@ -235,6 +238,9 @@
 <span class="doccomment">/// Information about a C# method</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MethodInfo</span>(<span class="ident">raw::MethodInfo</span>);
+
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">MethodInfo</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">MethodInfo</span> {}
 
 <span class="kw">impl</span> <span class="ident">MethodInfo</span> {
     <span class="doccomment">/// Invoke this method, type checking against its signature with the</span>
@@ -296,7 +302,7 @@
     <span class="comment">// }</span>
 
     <span class="doccomment">/// [`Il2CppReflectionMethod`] which represents the method</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">Il2CppReflectionMethod</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reflection_object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppReflectionMethod</span> {
         <span class="kw">unsafe</span> { <span class="ident">Il2CppReflectionMethod::wrap_mut</span>(<span class="ident">raw::method_get_object</span>(<span class="self">self</span>.<span class="ident">raw</span>(), <span class="prelude-val">None</span>)) }
     }
 

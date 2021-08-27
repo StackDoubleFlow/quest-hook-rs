@@ -113,9 +113,6 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">std::mem::transmute</span>;
 <span class="kw">use</span> <span class="ident">std::ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
@@ -129,18 +126,15 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Type</span><span class="op">&gt;</span> <span class="ident">Il2CppArray</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates an array from a slice</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::Held</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">T::Held</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
-    {
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">len</span>();
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::Held</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">items</span>.<span class="ident">len</span>();
         <span class="kw">let</span> <span class="ident">arr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">raw::array_new</span>(<span class="ident">T::class</span>().<span class="ident">raw</span>(), <span class="ident">len</span>) }.<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span>
             ((<span class="ident">arr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">isize</span>) <span class="op">+</span> (<span class="ident">raw::kIl2CppSizeOfArray</span> <span class="kw">as</span> <span class="ident">isize</span>)) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T::Held</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
-        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">elem</span>) <span class="kw">in</span> <span class="ident">slice</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">elem</span>) <span class="kw">in</span> <span class="ident">items</span>.<span class="ident">into_iter</span>().<span class="ident">enumerate</span>() {
             <span class="kw">unsafe</span> {
                 <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">data_ptr</span>.<span class="ident">add</span>(<span class="ident">i</span>);
-                <span class="ident">ptr::write_unaligned</span>(<span class="ident">ptr</span>, <span class="ident">elem</span>.<span class="ident">clone</span>());
+                <span class="ident">ptr::write_unaligned</span>(<span class="ident">ptr</span>, <span class="ident">elem</span>);
             }
         }
         <span class="kw">unsafe</span> { <span class="ident"><span class="self">Self</span>::wrap_mut</span>(<span class="ident">arr</span>) }
