@@ -10,8 +10,15 @@ use crate::{raw, Il2CppClass, Il2CppObject, Type, WrapRaw};
 pub struct Il2CppArray<T: Type>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T: Type> Il2CppArray<T> {
-    /// Creates an array from a slice
+    /// Creates an array from a [`Vec`]
+    // TODO: Remove this when clippy is fixed
+    #[allow(clippy::needless_lifetimes)]
     pub fn new<'a>(items: Vec<T::Held<'a>>) -> &'a mut Self {
+        Self::from_iterator(items.into_iter())
+    }
+
+    /// Creates an array from an iterator with a known size
+    pub fn from_iterator<'a>(items: impl ExactSizeIterator<Item = T::Held<'a>>) -> &'a mut Self {
         let len = items.len();
         let arr = unsafe { raw::array_new(T::class().raw(), len) }.unwrap();
         let data_ptr =
