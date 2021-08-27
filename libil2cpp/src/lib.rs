@@ -1,9 +1,4 @@
-#![feature(
-    once_cell,
-    generic_associated_types,
-    never_type,
-    associated_type_bounds
-)]
+#![feature(once_cell, generic_associated_types, never_type)]
 #![doc(html_root_url = "https://stackdoubleflow.github.io/quest-hook-rs/libil2cpp")]
 #![warn(
     clippy::all,

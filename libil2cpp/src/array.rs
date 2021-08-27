@@ -11,9 +11,11 @@ pub struct Il2CppArray<T: Type>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T: Type> Il2CppArray<T> {
     /// Creates an array from an iterator
-    pub fn new<'a>(
-        items: impl IntoIterator<Item = T::Held<'a>, IntoIter: ExactSizeIterator>,
-    ) -> &'a mut Self {
+    pub fn new<'a, I>(items: I) -> &'a mut Self
+    where
+        I: IntoIterator<Item = T::Held<'a>>,
+        I::IntoIter: ExactSizeIterator<Item = T::Held<'a>>,
+    {
         let items = items.into_iter();
         let len = items.len();
         let arr = unsafe { raw::array_new(T::class().raw(), len) }.unwrap();
