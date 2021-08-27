@@ -113,7 +113,7 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// The basic syntax follows the pattern `in <libil2cpp path> for <Rust type> =>
 /// <C# type>`.
 ///
-/// ```rust
+/// ```ignore
 /// #![feature(generic_associated_types)]
 ///
 /// use libil2cpp::Il2CppObject;
@@ -129,7 +129,7 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// It's also possible to use this macro with generic types. In this scenario,
 /// the `once_cell` feature must also be enabled.
 ///
-/// ```rust
+/// ```ignore
 /// #![feature(generic_associated_types, once_cell)]
 ///
 /// use libil2cpp::{Il2CppArray, Il2CppObject, Type};
@@ -146,7 +146,7 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// Finally, a class getter can be provided manually.
 ///
-/// ```rust
+/// ```ignore
 /// #![feature(generic_associated_types)]
 ///
 /// use libil2cpp::Il2CppObject;
@@ -187,7 +187,7 @@ pub fn unsafe_impl_reference_type(input: TokenStream) -> TokenStream {
 /// The basic syntax follows the pattern `in <libil2cpp path> for <Rust type> =>
 /// <C# type>`.
 ///
-/// ```rust
+/// ```ignore
 /// #![feature(generic_associated_types)]
 ///
 /// #[repr(C)]
