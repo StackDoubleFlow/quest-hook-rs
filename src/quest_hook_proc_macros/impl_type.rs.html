@@ -529,7 +529,7 @@
         <span class="kw">let</span> <span class="ident">reflection_type_ty</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reflection_type_ty</span>();
         <span class="kw">let</span> <span class="ident">type_trait</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">type_trait</span>();
         <span class="kw">let</span> <span class="ident">namespace</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">namespace</span>;
-        <span class="kw">let</span> <span class="ident">generic_class</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, <span class="self">self</span>.<span class="ident">class</span>, <span class="self">self</span>.<span class="ident">cs_generics</span>.<span class="ident">len</span>());
+        <span class="kw">let</span> <span class="ident">generic_class</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}`{}&quot;</span>, <span class="self">self</span>.<span class="ident">class</span>, <span class="self">self</span>.<span class="ident">cs_generics</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">array_ty</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">array_ty</span>();
         <span class="kw">let</span> <span class="ident">generics</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cs_generics</span>;
 
