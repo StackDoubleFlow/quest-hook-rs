@@ -132,13 +132,13 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```rust
 /// #![feature(generic_associated_types, once_cell)]
 ///
-/// use std::marker::PhantomData;
-/// use libil2cpp::Il2CppObject;
+/// use libil2cpp::{Il2CppArray, Il2CppObject, Type};
 ///
 /// #[repr(C)]
-/// struct List<T> {
+/// struct List<T: Type> {
 ///     object: Il2CppObject,
-///     _phantom: PhantomData<*const T>,
+///     items: *mut Il2CppArray<T>,
+///     size: i32,
 /// }
 ///
 /// unsafe_impl_reference_type!(in libil2cpp for List<T> => System.Collections.Generic.List<T>);
