@@ -22,13 +22,13 @@ the <code>once_cell</code> feature must also be enabled.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>, <span class="ident">once_cell</span>)]</span>
 
-<span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
-<span class="kw">use</span> <span class="ident">libil2cpp::Il2CppObject</span>;
+<span class="kw">use</span> <span class="ident">libil2cpp</span>::{<span class="ident">Il2CppArray</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Type</span>};
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">struct</span> <span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Type</span><span class="op">&gt;</span> {
     <span class="ident">object</span>: <span class="ident">Il2CppObject</span>,
-    <span class="ident">_phantom</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">items</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Il2CppArray</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">size</span>: <span class="ident">i32</span>,
 }
 
 <span class="macro">unsafe_impl_reference_type!</span>(<span class="kw">in</span> <span class="ident">libil2cpp</span> <span class="kw">for</span> <span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">System</span>.<span class="ident">Collections</span>.<span class="ident">Generic</span>.<span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);</code></pre></div>

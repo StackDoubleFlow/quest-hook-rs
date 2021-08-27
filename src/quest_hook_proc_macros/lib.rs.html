@@ -364,13 +364,13 @@
 <span class="doccomment">/// ```rust</span>
 <span class="doccomment">/// #![feature(generic_associated_types, once_cell)]</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// use std::marker::PhantomData;</span>
-<span class="doccomment">/// use libil2cpp::Il2CppObject;</span>
+<span class="doccomment">/// use libil2cpp::{Il2CppArray, Il2CppObject, Type};</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[repr(C)]</span>
-<span class="doccomment">/// struct List&lt;T&gt; {</span>
+<span class="doccomment">/// struct List&lt;T: Type&gt; {</span>
 <span class="doccomment">///     object: Il2CppObject,</span>
-<span class="doccomment">///     _phantom: PhantomData&lt;*const T&gt;,</span>
+<span class="doccomment">///     items: *mut Il2CppArray&lt;T&gt;,</span>
+<span class="doccomment">///     size: i32,</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// unsafe_impl_reference_type!(in libil2cpp for List&lt;T&gt; =&gt; System.Collections.Generic.List&lt;T&gt;);</span>
