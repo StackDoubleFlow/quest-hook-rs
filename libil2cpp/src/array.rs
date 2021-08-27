@@ -11,18 +11,15 @@ pub struct Il2CppArray<T: Type>(raw::Il2CppArray, PhantomData<[T]>);
 
 impl<T: Type> Il2CppArray<T> {
     /// Creates an array from a slice
-    pub fn from_slice<'a>(slice: &'a [T::Held<'a>]) -> &'a Self
-    where
-        T::Held<'a>: Clone,
-    {
-        let len = slice.len();
+    pub fn new<'a>(items: Vec<T::Held<'a>>) -> &'a mut Self {
+        let len = items.len();
         let arr = unsafe { raw::array_new(T::class().raw(), len) }.unwrap();
         let data_ptr =
             ((arr as *mut _ as isize) + (raw::kIl2CppSizeOfArray as isize)) as *mut T::Held<'a>;
-        for (i, elem) in slice.iter().enumerate() {
+        for (i, elem) in items.into_iter().enumerate() {
             unsafe {
                 let ptr = data_ptr.add(i);
-                ptr::write_unaligned(ptr, elem.clone());
+                ptr::write_unaligned(ptr, elem);
             }
         }
         unsafe { Self::wrap_mut(arr) }

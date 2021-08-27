@@ -16,6 +16,9 @@ type FieldInfoSlice<'a> = &'a [&'static FieldInfo];
 #[repr(transparent)]
 pub struct Il2CppClass(raw::Il2CppClass);
 
+unsafe impl Send for Il2CppClass {}
+unsafe impl Sync for Il2CppClass {}
+
 impl Il2CppClass {
     /// Find a class by namespace and name
     #[crate::instrument(level = "debug")]

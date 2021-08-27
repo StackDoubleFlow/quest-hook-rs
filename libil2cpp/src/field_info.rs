@@ -9,6 +9,9 @@ use crate::{raw, Argument, Il2CppClass, Il2CppObject, Il2CppType, Type, WrapRaw}
 #[repr(transparent)]
 pub struct FieldInfo(raw::FieldInfo);
 
+unsafe impl Send for FieldInfo {}
+unsafe impl Sync for FieldInfo {}
+
 impl FieldInfo {
     /// Store a typechecked value into a field
     pub fn store<A>(&self, instance: &mut Il2CppObject, val: A)

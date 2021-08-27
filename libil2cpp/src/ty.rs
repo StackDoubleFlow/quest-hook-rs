@@ -19,6 +19,9 @@ use crate::{Il2CppClass, Il2CppObject, WrapRaw};
 #[repr(transparent)]
 pub struct Il2CppType(raw::Il2CppType);
 
+unsafe impl Send for Il2CppType {}
+unsafe impl Sync for Il2CppType {}
+
 impl Il2CppType {
     /// Class of the type
     pub fn class(&self) -> &Il2CppClass {
@@ -42,7 +45,7 @@ impl Il2CppType {
     }
 
     /// [`Il2CppReflectionType`] which represents the type
-    pub fn reflection_object(&self) -> &'static mut Il2CppReflectionType {
+    pub fn reflection_object(&self) -> &mut Il2CppReflectionType {
         unsafe { Il2CppReflectionType::wrap_mut(raw::type_get_object(self.raw())) }
     }
 }

@@ -8,6 +8,9 @@ use crate::{raw, Il2CppType, WrapRaw};
 #[repr(transparent)]
 pub struct ParameterInfo(raw::ParameterInfo);
 
+unsafe impl Send for ParameterInfo {}
+unsafe impl Sync for ParameterInfo {}
+
 impl ParameterInfo {
     /// Name of the parameter
     pub fn name(&self) -> Cow<'_, str> {

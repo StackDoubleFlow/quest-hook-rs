@@ -21,6 +21,9 @@ type ParameterInfoSlice<'a> = &'a [&'static ParameterInfo];
 #[repr(transparent)]
 pub struct MethodInfo(raw::MethodInfo);
 
+unsafe impl Send for MethodInfo {}
+unsafe impl Sync for MethodInfo {}
+
 impl MethodInfo {
     /// Invoke this method, type checking against its signature with the
     /// provided instance, arguments and return type
@@ -81,7 +84,7 @@ impl MethodInfo {
     // }
 
     /// [`Il2CppReflectionMethod`] which represents the method
-    pub fn reflection_object(&self) -> &'static mut Il2CppReflectionMethod {
+    pub fn reflection_object(&self) -> &mut Il2CppReflectionMethod {
         unsafe { Il2CppReflectionMethod::wrap_mut(raw::method_get_object(self.raw(), None)) }
     }
 
