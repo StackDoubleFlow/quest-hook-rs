@@ -102,6 +102,9 @@ mod string;
 mod ty;
 mod typecheck;
 
+#[doc(inline)]
+pub use quest_hook_proc_macros::{unsafe_impl_reference_type, unsafe_impl_value_type};
+
 pub use array::Il2CppArray;
 pub use class::{FindMethodError, Il2CppClass};
 pub use exception::Il2CppException;

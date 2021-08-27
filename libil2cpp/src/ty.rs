@@ -42,8 +42,8 @@ impl Il2CppType {
     }
 
     /// [`Il2CppReflectionType`] which represents the type
-    pub fn reflection_object(&self) -> &Il2CppReflectionType {
-        unsafe { Il2CppReflectionType::wrap(raw::type_get_object(self.raw())) }
+    pub fn reflection_object(&self) -> &'static mut Il2CppReflectionType {
+        unsafe { Il2CppReflectionType::wrap_mut(raw::type_get_object(self.raw())) }
     }
 }
 

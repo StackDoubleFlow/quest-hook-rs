@@ -16,7 +16,7 @@ pub struct Vector3 {
     y: f32,
     z: f32,
 }
-unsafe_impl_value_type!(Vector3, "UnityEngine", "Vector3");
+unsafe_impl_value_type!(in quest_hook::libil2cpp for Vector3 => UnityEngine.Vector3);
 
 #[hook("UnityEngine", "RigidBody", "set_position")]
 fn set_position(this: &mut Il2CppObject, new_position: Vector3) {

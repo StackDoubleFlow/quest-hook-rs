@@ -61,144 +61,21 @@ pub unsafe trait Type: 'static {
     }
 }
 
-/// Implements the [`Type`] trait for a C# reference type
-///
-/// # Safety
-/// The Rust and C# types must be ABI-compatible and the C# type must be a
-/// reference type
-#[macro_export]
-macro_rules! unsafe_impl_reference_type {
-    ($type:ty, $namespace:literal, $class:literal) => {
-        unsafe impl $crate::Type for $type {
-            type Held<'a> = ::std::option::Option<&'a mut $type>;
+crate::unsafe_impl_value_type!(in crate for u8 => System.Byte);
+crate::unsafe_impl_value_type!(in crate for i8 => System.SByte);
+crate::unsafe_impl_value_type!(in crate for u16 => System.UInt16);
+crate::unsafe_impl_value_type!(in crate for i16 => System.Int16);
+crate::unsafe_impl_value_type!(in crate for u32 => System.UInt32);
+crate::unsafe_impl_value_type!(in crate for i32 => System.Int32);
+crate::unsafe_impl_value_type!(in crate for u64 => System.UInt64);
+crate::unsafe_impl_value_type!(in crate for i64 => System.Int64);
+crate::unsafe_impl_value_type!(in crate for usize => System.UIntPtr);
+crate::unsafe_impl_value_type!(in crate for isize => System.IntPtr);
+crate::unsafe_impl_value_type!(in crate for f32 => System.Single);
+crate::unsafe_impl_value_type!(in crate for f64 => System.Double);
+crate::unsafe_impl_value_type!(in crate for bool => System.Boolean);
 
-            const NAMESPACE: &'static str = $namespace;
-            const CLASS_NAME: &'static str = $class;
-
-            fn matches_reference_argument(ty: &$crate::Il2CppType) -> bool {
-                ty.class()
-                    .is_assignable_from(<Self as $crate::Type>::class())
-            }
-            fn matches_value_argument(_: &$crate::Il2CppType) -> bool {
-                false
-            }
-
-            fn matches_reference_parameter(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-            fn matches_value_parameter(_: &$crate::Il2CppType) -> bool {
-                false
-            }
-        }
-    };
-}
-
-/// Implements the [`Type`] trait for a C# value type
-///
-/// # Safety
-/// The Rust and C# types must be ABI-compatible and the C# type must be a value
-/// type
-#[macro_export]
-macro_rules! unsafe_impl_value_type {
-    ($type:ty, $namespace:literal, $class:literal) => {
-        unsafe impl $crate::Type for $type {
-            type Held<'a> = $type;
-
-            const NAMESPACE: &'static str = $namespace;
-            const CLASS_NAME: &'static str = $class;
-
-            fn matches_value_argument(ty: &$crate::Il2CppType) -> bool {
-                !ty.is_ref()
-                    && ty
-                        .class()
-                        .is_assignable_from(<Self as $crate::Type>::class())
-            }
-            fn matches_reference_argument(ty: &$crate::Il2CppType) -> bool {
-                ty.is_ref()
-                    && ty
-                        .class()
-                        .is_assignable_from(<Self as $crate::Type>::class())
-            }
-
-            fn matches_value_parameter(ty: &$crate::Il2CppType) -> bool {
-                !ty.is_ref() && <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-            fn matches_reference_parameter(ty: &$crate::Il2CppType) -> bool {
-                ty.is_ref() && <Self as $crate::Type>::class().is_assignable_from(ty.class())
-            }
-        }
-
-        unsafe impl $crate::Argument for $type {
-            type Type = Self;
-
-            fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_value_argument(ty)
-            }
-
-            fn invokable(&mut self) -> *mut ::std::ffi::c_void {
-                self as *mut Self as *mut ::std::ffi::c_void
-            }
-        }
-
-        unsafe impl $crate::Parameter for $type {
-            type Actual = Self;
-
-            fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_value_parameter(ty)
-            }
-
-            fn from_actual(actual: Self::Actual) -> Self {
-                actual
-            }
-            fn into_actual(self) -> Self::Actual {
-                self
-            }
-        }
-
-        unsafe impl $crate::Returned for $type {
-            type Type = Self;
-
-            fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_returned(ty)
-            }
-
-            fn from_object(object: Option<&mut $crate::Il2CppObject>) -> Self {
-                unsafe { $crate::raw::unbox($crate::WrapRaw::raw(object.unwrap())) }
-            }
-        }
-
-        unsafe impl $crate::Return for $type {
-            type Actual = Self;
-
-            fn matches(ty: &$crate::Il2CppType) -> bool {
-                <Self as $crate::Type>::matches_return(ty)
-            }
-
-            fn into_actual(self) -> Self::Actual {
-                self
-            }
-            fn from_actual(actual: Self::Actual) -> Self {
-                actual
-            }
-        }
-    };
-}
-
-unsafe_impl_value_type!(u8, "System", "Byte");
-unsafe_impl_value_type!(i8, "System", "SByte");
-unsafe_impl_value_type!(u16, "System", "UInt16");
-unsafe_impl_value_type!(i16, "System", "Int16");
-unsafe_impl_value_type!(u32, "System", "UInt32");
-unsafe_impl_value_type!(i32, "System", "Int32");
-unsafe_impl_value_type!(u64, "System", "UInt64");
-unsafe_impl_value_type!(i64, "System", "Int64");
-unsafe_impl_value_type!(usize, "System", "UIntPtr");
-unsafe_impl_value_type!(isize, "System", "IntPtr");
-unsafe_impl_value_type!(f32, "System", "Single");
-unsafe_impl_value_type!(f64, "System", "Double");
-unsafe_impl_value_type!(bool, "System", "Boolean");
-
-unsafe_impl_reference_type!(Il2CppObject, "System", "Object");
-unsafe_impl_reference_type!(Il2CppString, "System", "String");
-unsafe_impl_reference_type!(Il2CppReflectionType, "System", "RuntimeType");
-unsafe_impl_reference_type!(Il2CppReflectionMethod, "System.Reflection", "MonoMethod");
+crate::unsafe_impl_reference_type!(in crate for Il2CppObject => System.Object);
+crate::unsafe_impl_reference_type!(in crate for Il2CppString => System.String);
+crate::unsafe_impl_reference_type!(in crate for Il2CppReflectionType => System.RuntimeType);
+crate::unsafe_impl_reference_type!(in crate for Il2CppReflectionMethod => System.Reflection.MonoMethod);

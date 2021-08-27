@@ -84,6 +84,8 @@ feature! { #[feature = "util"]
 }
 
 pub use libil2cpp;
+
+#[doc(inline)]
 pub use quest_hook_proc_macros::hook;
 
 #[doc(hidden)]

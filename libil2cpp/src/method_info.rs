@@ -81,8 +81,8 @@ impl MethodInfo {
     // }
 
     /// [`Il2CppReflectionMethod`] which represents the method
-    pub fn reflection_object(&self) -> &Il2CppReflectionMethod {
-        unsafe { Il2CppReflectionMethod::wrap(raw::method_get_object(self.raw(), None)) }
+    pub fn reflection_object(&self) -> &'static mut Il2CppReflectionMethod {
+        unsafe { Il2CppReflectionMethod::wrap_mut(raw::method_get_object(self.raw(), None)) }
     }
 
     /// Name of the method

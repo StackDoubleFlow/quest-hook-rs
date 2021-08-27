@@ -75,6 +75,7 @@
 mod hook;
 mod il2cpp_functions;
 mod impl_arguments_parameters;
+mod impl_type;
 
 use proc_macro::TokenStream;
 use syn::punctuated::Punctuated;
@@ -95,6 +96,113 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
         Ok(ts) => ts,
         Err(err) => err.to_compile_error().into(),
     }
+}
+
+/// Implements the `Type` trait for a Rust type that is equivalent to a C#
+/// reference type
+///
+/// Note that in order to use this macros, the `generic_associated_types`
+/// feature must be enabled.
+///
+/// # Safety
+///
+/// The type must hold the guarantees required by the `Type` trait.
+///
+/// # Examples
+///
+/// The basic syntax follows the pattern `in <libil2cpp path> for <Rust type> =>
+/// <C# type>`.
+///
+/// ```rust
+/// #![feature(generic_associated_types)]
+///
+/// use libil2cpp::Il2CppObject;
+///
+/// #[repr(C)]
+/// struct GameObject {
+///     object: Il2CppObject,
+/// }
+///
+/// unsafe_impl_reference_type!(in libil2cpp for GameObject => UnityEngine.GameObject);
+/// ```
+///
+/// It's also possible to use this macro with generic types. In this scenario,
+/// the `once_cell` feature must also be enabled.
+///
+/// ```rust
+/// #![feature(generic_associated_types, once_cell)]
+///
+/// use std::marker::PhantomData;
+/// use libil2cpp::Il2CppObject;
+///
+/// #[repr(C)]
+/// struct List<T> {
+///     object: Il2CppObject,
+///     _phantom: PhantomData<*const T>,
+/// }
+///
+/// unsafe_impl_reference_type!(in libil2cpp for List<T> => System.Collections.Generic.List<T>);
+/// ```
+///
+/// Finally, a class getter can be provided manually.
+///
+/// ```rust
+/// #![feature(generic_associated_types)]
+///
+/// use libil2cpp::Il2CppObject;
+///
+/// #[repr(C)]
+/// struct MyClass {
+///     object: Il2CppObject,
+/// }
+///
+/// unsafe_impl_reference_type!(in libil2cpp for MyClass => MyNamespace.MyClass {
+///     my_class_getter()
+/// });
+///
+/// # fn my_class_getter() -> &'static libil2cpp::Il2CppClass { unimplemented!() }
+/// ```
+#[proc_macro]
+pub fn unsafe_impl_reference_type(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as impl_type::Input);
+    impl_type::expand(&input, impl_type::Semantics::Reference)
+}
+
+/// Implements the `Type` trait for a Rust type that is equivalent to a C# value
+/// type
+///
+/// Note that in order to use this macros, the `generic_associated_types` and
+/// `once_cell` features must be enabled.
+///
+/// This macro works the same way as [`unsafe_impl_reference_type`], except that
+/// it is meant for value types and implements some extra traits not covered by
+/// blanket impls.
+///
+/// # Safety
+///
+/// The type must hold the guarantees required by the `Type` trait.
+///
+/// # Examples
+///
+/// The basic syntax follows the pattern `in <libil2cpp path> for <Rust type> =>
+/// <C# type>`.
+///
+/// ```rust
+/// #![feature(generic_associated_types)]
+///
+/// #[repr(C)]
+/// struct Vector3 {
+///     x: f32,
+///     y: f32,
+///     z: f32,
+/// }
+///
+/// unsafe_impl_value_type!(in libil2cpp for Vector3 => UnityEngine.Vector3);
+/// ```
+#[proc_macro]
+pub fn unsafe_impl_value_type(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as impl_type::Input);
+    impl_type::expand(&input, impl_type::Semantics::Value)
 }
 
 #[proc_macro]
