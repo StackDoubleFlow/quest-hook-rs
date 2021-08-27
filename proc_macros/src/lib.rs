@@ -174,9 +174,9 @@ pub fn unsafe_impl_reference_type(input: TokenStream) -> TokenStream {
 /// Note that in order to use this macros, the `generic_associated_types` and
 /// `once_cell` features must be enabled.
 ///
-/// This macro works the same way as [`unsafe_impl_reference_type`], except that
-/// it is meant for value types and implements some extra traits not covered by
-/// blanket impls.
+/// This macro works the same way as [`unsafe_impl_reference_type!`], except
+/// that it is meant for value types and implements some extra traits not
+/// covered by blanket impls.
 ///
 /// # Safety
 ///

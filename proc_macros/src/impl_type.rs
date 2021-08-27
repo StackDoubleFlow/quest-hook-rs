@@ -196,7 +196,7 @@ impl Input {
                 CLASS.get_or_init(|| {
                     let reflection_type_class = <#reflection_type_ty as #type_trait>::class();
                     let generic_ty = #class_ty::find(#namespace, #generic_class).unwrap().ty().reflection_object();
-                    let generics = #array_ty::<#reflection_type_ty>::new(vec![#(Some(<#generics as #type_trait>::class().ty().reflection_object())),*]);
+                    let generics = #array_ty::<#reflection_type_ty>::new([#(Some(<#generics as #type_trait>::class().ty().reflection_object())),*]);
                     let reflection_type: &#reflection_type_ty = reflection_type_class.invoke("MakeGenericType", (generic_ty, generics)).unwrap();
                     reflection_type.ty().class()
                 })
