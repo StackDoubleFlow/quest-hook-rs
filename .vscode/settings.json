@@ -1,4 +1,4 @@
 {
   "rust-analyzer.assist.importGranularity": "module",
-  "rust-analyzer.cargo.features": ["unity2019"]
+  "rust-analyzer.cargo.features": ["unity2019", "serde"]
 }

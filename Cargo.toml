@@ -36,11 +36,14 @@ unity2019 = ["libil2cpp/unity2019"]
 unity2018 = ["libil2cpp/unity2018"]
 util = ["tracing", "tracing-error", "tracing-subscriber", "tracing-android"]
 cache = ["libil2cpp/cache"]
+serde = ["libil2cpp/serde"]
 trace = ["libil2cpp/trace"]
 
 [[example]]
 name = "hello_world"
 crate-type = ["cdylib"]
+required-features = ["util"]
 [[example]]
 name = "custom_type"
 crate-type = ["cdylib"]
+required-features = ["util"]

@@ -118,3 +118,90 @@ impl<T: Type> DerefMut for Il2CppArray<T> {
         unsafe { Il2CppObject::wrap_mut(&mut self.raw_mut().obj) }
     }
 }
+
+#[cfg(feature = "serde")]
+mod serde {
+    use super::{fmt, ptr, raw, Il2CppArray, PhantomData, Type, WrapRaw};
+
+    use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
+    use serde::ser::{Serialize, Serializer};
+
+    struct ArrayVisitor<T: Type>(PhantomData<Il2CppArray<T>>);
+
+    impl<'de, T: Type> ArrayVisitor<T>
+    where
+        T::Held<'de>: Deserialize<'de>,
+    {
+        fn visit_self<A>(mut seq: A, len: usize) -> Result<&'de mut Il2CppArray<T>, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let arr = unsafe { raw::array_new(T::class().raw(), len) }.unwrap();
+            let data_ptr = ((arr as *mut _ as isize) + (raw::kIl2CppSizeOfArray as isize))
+                as *mut T::Held<'de>;
+            for i in 0..len {
+                unsafe {
+                    let ptr = data_ptr.add(i);
+                    ptr::write_unaligned(ptr, seq.next_element()?.unwrap());
+                }
+            }
+            Ok(unsafe { Il2CppArray::wrap_mut(arr) })
+        }
+
+        fn visit_vec<A>(mut seq: A) -> Result<Vec<T::Held<'de>>, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut vec = Vec::new();
+            while let Some(elem) = seq.next_element()? {
+                vec.push(elem);
+            }
+            Ok(vec)
+        }
+    }
+
+    impl<'de, T: Type> Visitor<'de> for ArrayVisitor<T>
+    where
+        T::Held<'de>: Deserialize<'de>,
+    {
+        type Value = &'de mut Il2CppArray<T>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+            formatter.write_str("an array of C# compatible values")
+        }
+
+        fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            match seq.size_hint() {
+                Some(len) => Self::visit_self(seq, len),
+                None => Self::visit_vec(seq).map(Il2CppArray::new),
+            }
+        }
+    }
+
+    impl<'de, T: Type> Deserialize<'de> for &'de mut Il2CppArray<T>
+    where
+        T::Held<'de>: Deserialize<'de>,
+    {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_seq(ArrayVisitor(Default::default()))
+        }
+    }
+
+    impl<T: Type> Serialize for Il2CppArray<T>
+    where
+        for<'a> T::Held<'a>: Serialize,
+    {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            <[T::Held<'_>] as Serialize>::serialize(self.as_slice(), serializer)
+        }
+    }
+}

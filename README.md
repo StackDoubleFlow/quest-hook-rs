@@ -1,6 +1,6 @@
 # quest_hook
 
-A library for writing (mostly) memory safe mods for Oculus Quest Unity il2cpp games. Mods using this library may be loaded using [QuestLoader](https://github.com/sc2ad/QuestLoader).
+A library for writing (mostly) memory safe mods for Unity il2cpp games
 
 [![Docs](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Docs?color=blue&label=docs&style=for-the-badge)](https://stackdoubleflow.github.io/quest-hook-rs/quest_hook/) [![Tests](https://img.shields.io/github/workflow/status/StackDoubleFlow/quest-hook-rs/Tests?label=tests&style=for-the-badge)](https://github.com/StackDoubleFlow/quest-hook-rs/actions/workflows/tests.yml)
 
@@ -69,7 +69,8 @@ Check out the [`examples`](./examples/) directory for more examples.
 - `unity2019`, `unity2018` - Unity version the targetted game uses
 - `util` - Adds small utility functions for setting up logging and the like
 - `cache` - Enables class and method caching to greatly improve lookup speed at the cost of slightly higher memory consumption
-- `trace` - Adds `tracing` instrumentation to many internal function
+- `serde` - Implement `Serialize` and `Deserialize` for il2cpp types where it makes sense
+- `trace` - Adds `tracing` instrumentation to many internal functions
 
 ## Contributing
 

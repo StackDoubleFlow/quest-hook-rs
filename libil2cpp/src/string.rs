@@ -119,3 +119,31 @@ impl fmt::Display for Il2CppString {
         fmt::Display::fmt(&self.to_string_lossy(), f)
     }
 }
+
+#[cfg(feature = "serde")]
+mod serde {
+    use super::Il2CppString;
+
+    use serde::de::{Deserialize, Deserializer};
+    use serde::ser::{Serialize, Serializer};
+
+    impl<'de> Deserialize<'de> for &mut Il2CppString {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let s = <&'de str>::deserialize(deserializer)?;
+            Ok(Il2CppString::new(s))
+        }
+    }
+
+    impl Serialize for Il2CppString {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = self.to_string_lossy();
+            <String as Serialize>::serialize(&s, serializer)
+        }
+    }
+}

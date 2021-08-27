@@ -30,13 +30,13 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --workspace --features=${{ matrix.unity }} -- --skip bindgen
+          args: --workspace --features=${{ matrix.unity }},serde -- --skip bindgen
 
       - name: Check for clippy warnings
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --workspace --examples --tests --features=${{ matrix.unity }} -- -D warnings
+          args: --workspace --examples --tests --features=${{ matrix.unity }},serde -- -D warnings
 
       - name: Check formatting
         uses: actions-rs/cargo@v1
@@ -91,7 +91,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: ndk
-          args: --target=${{ matrix.ndk-target }} --platform=24 clippy --workspace --examples --features=${{ matrix.unity }}
+          args: --target=${{ matrix.ndk-target }} --platform=24 clippy --workspace --examples --features=${{ matrix.unity }},serde
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
