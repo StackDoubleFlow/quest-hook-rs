@@ -7,7 +7,7 @@ feature must be enabled.</p>
 <h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
 <p>The basic syntax follows the pattern <code>in &lt;libil2cpp path&gt; for &lt;Rust type&gt; =&gt; &lt;C# type&gt;</code>.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>)]</span>
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">libil2cpp::Il2CppObject</span>;
 
@@ -20,7 +20,7 @@ feature must be enabled.</p>
 <p>It’s also possible to use this macro with generic types. In this scenario,
 the <code>once_cell</code> feature must also be enabled.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>, <span class="ident">once_cell</span>)]</span>
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>, <span class="ident">once_cell</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">libil2cpp</span>::{<span class="ident">Il2CppArray</span>, <span class="ident">Il2CppObject</span>, <span class="ident">Type</span>};
 
@@ -34,7 +34,7 @@ the <code>once_cell</code> feature must also be enabled.</p>
 <span class="macro">unsafe_impl_reference_type!</span>(<span class="kw">in</span> <span class="ident">libil2cpp</span> <span class="kw">for</span> <span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">System</span>.<span class="ident">Collections</span>.<span class="ident">Generic</span>.<span class="ident">List</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);</code></pre></div>
 <p>Finally, a class getter can be provided manually.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>)]</span>
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">generic_associated_types</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">libil2cpp::Il2CppObject</span>;
 
