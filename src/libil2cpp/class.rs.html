@@ -499,13 +499,28 @@
 <span id="499">499</span>
 <span id="500">500</span>
 <span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::ffi</span>::{<span class="ident">CStr</span>, <span class="ident">CString</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">ptr</span>, <span class="ident">slice</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">raw</span>, <span class="ident">Arguments</span>, <span class="ident">FieldInfo</span>, <span class="ident">Il2CppException</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Parameters</span>, <span class="ident">Return</span>,
-    <span class="ident">Returned</span>, <span class="ident">ThisParameter</span>, <span class="ident">WrapRaw</span>,
+    <span class="ident">raw</span>, <span class="ident">Arguments</span>, <span class="ident">FieldInfo</span>, <span class="ident">Generics</span>, <span class="ident">Il2CppException</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Parameters</span>,
+    <span class="ident">Return</span>, <span class="ident">Returned</span>, <span class="ident">ThisParameter</span>, <span class="ident">WrapRaw</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2019&quot;</span>)]</span>
@@ -754,6 +769,21 @@
         }
 
         <span class="prelude-val">None</span>
+    }
+
+    <span class="doccomment">/// Instanciates a generic class template with the provided generic</span>
+    <span class="doccomment">/// arguments</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_generic</span><span class="op">&lt;</span><span class="ident">G</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Il2CppException</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">G</span>: <span class="ident">Generics</span>,
+    {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">ty</span>().<span class="ident">reflection_object</span>().<span class="ident">make_generic</span>::<span class="op">&lt;</span><span class="ident">G</span><span class="op">&gt;</span>() {
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">ty</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw">unsafe</span> {
+                <span class="ident"><span class="self">Self</span>::wrap</span>(<span class="ident">raw::class_from_system_type</span>(<span class="ident">ty</span>.<span class="ident">raw</span>()))
+            })),
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+        }
     }
 
     <span class="doccomment">/// Invokes the `static` method with the given name using the given</span>

@@ -230,6 +230,72 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">box_patterns</span>, <span class="ident">extend_one</span>)]</span>
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://stackdoubleflow.github.io/quest-hook-rs/quest_hook_proc_macros&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
@@ -307,11 +373,20 @@
 <span class="kw">mod</span> <span class="ident">hook</span>;
 <span class="kw">mod</span> <span class="ident">il2cpp_functions</span>;
 <span class="kw">mod</span> <span class="ident">impl_arguments_parameters</span>;
+<span class="kw">mod</span> <span class="ident">impl_generics</span>;
 <span class="kw">mod</span> <span class="ident">impl_type</span>;
 
+<span class="kw">use</span> <span class="ident">std::num::NonZeroUsize</span>;
+<span class="kw">use</span> <span class="ident">std::ops::Range</span>;
+
 <span class="kw">use</span> <span class="ident">proc_macro::TokenStream</span>;
+<span class="kw">use</span> <span class="ident">syn::parse</span>::{<span class="ident">Parse</span>, <span class="ident">ParseStream</span>};
 <span class="kw">use</span> <span class="ident">syn::punctuated::Punctuated</span>;
-<span class="kw">use</span> <span class="ident">syn</span>::{<span class="ident">parse_macro_input</span>, <span class="ident">ExprRange</span>, <span class="ident">ItemFn</span>, <span class="ident">LitStr</span>, <span class="ident">Token</span>};
+<span class="kw">use</span> <span class="ident">syn::spanned::Spanned</span>;
+<span class="kw">use</span> <span class="ident">syn</span>::{
+    <span class="ident">parse_macro_input</span>, <span class="ident">Error</span>, <span class="ident">Expr</span>, <span class="ident">ExprLit</span>, <span class="ident">ExprRange</span>, <span class="ident">ItemFn</span>, <span class="ident">Lit</span>, <span class="ident">LitStr</span>, <span class="ident">RangeLimits</span>, <span class="prelude-ty">Result</span>,
+    <span class="ident">Token</span>,
+};
 
 <span class="doccomment">/// Creates an inline hook at a C# method.</span>
 <span class="doccomment">///</span>
@@ -450,8 +525,18 @@
 <span class="attribute">#[<span class="ident">proc_macro</span>]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">impl_arguments_parameters</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
-    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">ExprRange</span>);
-    <span class="kw">match</span> <span class="ident">impl_arguments_parameters::expand</span>(<span class="ident">range</span>) {
+    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">RangeInput</span>);
+    <span class="kw">match</span> <span class="ident">impl_arguments_parameters::expand</span>(<span class="ident">range</span>.<span class="number">0</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">ts</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ts</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
+    }
+}
+
+<span class="attribute">#[<span class="ident">proc_macro</span>]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">impl_generics</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">RangeInput</span>);
+    <span class="kw">match</span> <span class="ident">impl_generics::expand</span>(<span class="ident">range</span>.<span class="number">0</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">ts</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ts</span>,
         <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
     }
@@ -461,6 +546,53 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>(<span class="kw">_</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
     <span class="ident">input</span>
+}
+
+<span class="kw">struct</span> <span class="ident">RangeInput</span>(<span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">RangeInput</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">range</span>: <span class="ident">ExprRange</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">span</span>();
+
+        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">range</span>
+            .<span class="ident">from</span>
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;tuple length range must have a lower bound&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">parse_range_bound</span>(<span class="kw-2">*</span><span class="ident">start</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">range</span>
+            .<span class="ident">to</span>
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;tuple length range must have an upper bound&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">parse_range_bound</span>(<span class="kw-2">*</span><span class="ident">end</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">range</span>.<span class="ident">limits</span> {
+            <span class="ident">RangeLimits::HalfOpen</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">start</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;tuple length range must be valid&quot;</span>))
+            }
+            <span class="ident">RangeLimits::HalfOpen</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">start</span>..<span class="ident">end</span>,
+
+            <span class="ident">RangeLimits::Closed</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="ident">end</span> <span class="op">&lt;</span> <span class="ident">start</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;tuple length range must be valid&quot;</span>))
+            }
+            <span class="ident">RangeLimits::Closed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">start</span>..(<span class="ident">end</span> <span class="op">+</span> <span class="number">1</span>),
+        };
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">range</span>))
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">parse_range_bound</span>(<span class="ident">bound</span>: <span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">bound</span>: <span class="ident">NonZeroUsize</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">bound</span> {
+        <span class="ident">Expr::Lit</span>(<span class="ident">ExprLit</span> {
+            <span class="ident">lit</span>: <span class="ident">Lit::Int</span>(<span class="ident">n</span>), ..
+        }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>.<span class="ident">base10_parse</span>()<span class="question-mark">?</span>,
+        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
+                <span class="ident">bound</span>.<span class="ident">span</span>(),
+                <span class="string">&quot;tuple length bound must be an integer&quot;</span>,
+            ))
+        }
+    };
+    <span class="prelude-val">Ok</span>(<span class="ident">bound</span>.<span class="ident">get</span>())
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="quest_hook_proc_macros" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
