@@ -3,8 +3,8 @@ use std::ffi::{CStr, CString};
 use std::{fmt, ptr, slice};
 
 use crate::{
-    raw, Arguments, FieldInfo, Il2CppException, Il2CppType, MethodInfo, Parameters, Return,
-    Returned, ThisParameter, WrapRaw,
+    raw, Arguments, FieldInfo, Generics, Il2CppException, Il2CppType, MethodInfo, Parameters,
+    Return, Returned, ThisParameter, WrapRaw,
 };
 
 #[cfg(feature = "unity2019")]
@@ -253,6 +253,21 @@ impl Il2CppClass {
         }
 
         None
+    }
+
+    /// Instanciates a generic class template with the provided generic
+    /// arguments
+    pub fn make_generic<G>(&self) -> Result<Option<&'static Self>, &mut Il2CppException>
+    where
+        G: Generics,
+    {
+        match self.ty().reflection_object().make_generic::<G>() {
+            Ok(Some(ty)) => Ok(Some(unsafe {
+                Self::wrap(raw::class_from_system_type(ty.raw()))
+            })),
+            Ok(None) => Ok(None),
+            Err(e) => Err(e),
+        }
     }
 
     /// Invokes the `static` method with the given name using the given

@@ -1,11 +1,12 @@
 use paste::paste;
 use std::borrow::Cow;
-use std::ffi::CStr;
+use std::ffi::{c_void, CStr};
 use std::fmt;
 use std::ops::{Deref, DerefMut};
+use std::ptr::null_mut;
 
 use crate::raw::{
-    self, Il2CppTypeEnum_IL2CPP_TYPE_BOOLEAN, Il2CppTypeEnum_IL2CPP_TYPE_CHAR,
+    Il2CppTypeEnum_IL2CPP_TYPE_BOOLEAN, Il2CppTypeEnum_IL2CPP_TYPE_CHAR,
     Il2CppTypeEnum_IL2CPP_TYPE_I1, Il2CppTypeEnum_IL2CPP_TYPE_I2, Il2CppTypeEnum_IL2CPP_TYPE_I4,
     Il2CppTypeEnum_IL2CPP_TYPE_I8, Il2CppTypeEnum_IL2CPP_TYPE_OBJECT,
     Il2CppTypeEnum_IL2CPP_TYPE_R4, Il2CppTypeEnum_IL2CPP_TYPE_R8,
@@ -13,7 +14,7 @@ use crate::raw::{
     Il2CppTypeEnum_IL2CPP_TYPE_U2, Il2CppTypeEnum_IL2CPP_TYPE_U4, Il2CppTypeEnum_IL2CPP_TYPE_U8,
     Il2CppTypeEnum_IL2CPP_TYPE_VOID,
 };
-use crate::{Il2CppClass, Il2CppObject, WrapRaw};
+use crate::{raw, Generics, Il2CppArray, Il2CppClass, Il2CppException, Il2CppObject, WrapRaw};
 
 /// An il2cpp type
 #[repr(transparent)]
@@ -45,7 +46,7 @@ impl Il2CppType {
     }
 
     /// [`Il2CppReflectionType`] which represents the type
-    pub fn reflection_object(&self) -> &mut Il2CppReflectionType {
+    pub fn reflection_object(&self) -> &Il2CppReflectionType {
         unsafe { Il2CppReflectionType::wrap_mut(raw::type_get_object(self.raw())) }
     }
 }
@@ -164,6 +165,36 @@ impl Il2CppReflectionType {
     /// [`Il2CppType`] which this object represents
     pub fn ty(&self) -> &Il2CppType {
         unsafe { Il2CppType::wrap(&*self.raw().type_) }
+    }
+
+    /// Instanciates a generic type template with the provided generic
+    /// arguments
+    pub fn make_generic<G>(&self) -> Result<Option<&Self>, &mut Il2CppException>
+    where
+        G: Generics,
+    {
+        let generics = G::type_array();
+        let make_generic = self
+            .class()
+            .find_static_method::<(&mut Self, &mut Il2CppArray<Self>), &mut Self, 2>("MakeGeneric")
+            .unwrap();
+        let ret = unsafe {
+            make_generic.invoke_raw(
+                null_mut(),
+                [
+                    self as *const Self as *mut c_void,
+                    (generics as *mut raw::Il2CppArray).cast(),
+                ]
+                .as_mut(),
+            )
+        };
+        let obj = match ret {
+            Ok(Some(obj)) => obj,
+            Ok(None) => return Ok(None),
+            Err(e) => return Err(unsafe { Il2CppException::wrap_mut(e) }),
+        };
+        let ty = unsafe { &mut *(obj as *mut raw::Il2CppObject).cast() };
+        Ok(Some(ty))
     }
 }
 

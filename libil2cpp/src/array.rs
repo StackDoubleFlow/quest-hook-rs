@@ -73,7 +73,7 @@ unsafe impl<T: Type> Type for Il2CppArray<T> {
     const CLASS_NAME: &'static str = "Array";
 
     fn class() -> &'static Il2CppClass {
-        let class = unsafe { raw::array_class_get(T::class().raw(), 0, false) };
+        let class = unsafe { raw::array_class_get(T::class().raw(), 1) };
         unsafe { Il2CppClass::wrap(class) }
     }
 

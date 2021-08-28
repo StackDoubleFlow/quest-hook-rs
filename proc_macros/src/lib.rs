@@ -75,11 +75,20 @@
 mod hook;
 mod il2cpp_functions;
 mod impl_arguments_parameters;
+mod impl_generics;
 mod impl_type;
 
+use std::num::NonZeroUsize;
+use std::ops::Range;
+
 use proc_macro::TokenStream;
+use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, ExprRange, ItemFn, LitStr, Token};
+use syn::spanned::Spanned;
+use syn::{
+    parse_macro_input, Error, Expr, ExprLit, ExprRange, ItemFn, Lit, LitStr, RangeLimits, Result,
+    Token,
+};
 
 /// Creates an inline hook at a C# method.
 ///
@@ -218,8 +227,18 @@ pub fn il2cpp_functions(input: TokenStream) -> TokenStream {
 #[proc_macro]
 #[doc(hidden)]
 pub fn impl_arguments_parameters(input: TokenStream) -> TokenStream {
-    let range = parse_macro_input!(input as ExprRange);
-    match impl_arguments_parameters::expand(range) {
+    let range = parse_macro_input!(input as RangeInput);
+    match impl_arguments_parameters::expand(range.0) {
+        Ok(ts) => ts,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+#[proc_macro]
+#[doc(hidden)]
+pub fn impl_generics(input: TokenStream) -> TokenStream {
+    let range = parse_macro_input!(input as RangeInput);
+    match impl_generics::expand(range.0) {
         Ok(ts) => ts,
         Err(err) => err.to_compile_error().into(),
     }
@@ -229,4 +248,51 @@ pub fn impl_arguments_parameters(input: TokenStream) -> TokenStream {
 #[doc(hidden)]
 pub fn identity(_: TokenStream, input: TokenStream) -> TokenStream {
     input
+}
+
+struct RangeInput(Range<usize>);
+
+impl Parse for RangeInput {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let range: ExprRange = input.parse()?;
+        let span = range.span();
+
+        let start = range
+            .from
+            .ok_or_else(|| Error::new(span, "tuple length range must have a lower bound"))?;
+        let start = parse_range_bound(*start)?;
+
+        let end = range
+            .to
+            .ok_or_else(|| Error::new(span, "tuple length range must have an upper bound"))?;
+        let end = parse_range_bound(*end)?;
+
+        let range = match range.limits {
+            RangeLimits::HalfOpen(_) if end <= start => {
+                return Err(Error::new(span, "tuple length range must be valid"))
+            }
+            RangeLimits::HalfOpen(_) => start..end,
+
+            RangeLimits::Closed(_) if end < start => {
+                return Err(Error::new(span, "tuple length range must be valid"))
+            }
+            RangeLimits::Closed(_) => start..(end + 1),
+        };
+        Ok(Self(range))
+    }
+}
+
+fn parse_range_bound(bound: Expr) -> Result<usize> {
+    let bound: NonZeroUsize = match bound {
+        Expr::Lit(ExprLit {
+            lit: Lit::Int(n), ..
+        }) => n.base10_parse()?,
+        _ => {
+            return Err(Error::new(
+                bound.span(),
+                "tuple length bound must be an integer",
+            ))
+        }
+    };
+    Ok(bound.get())
 }

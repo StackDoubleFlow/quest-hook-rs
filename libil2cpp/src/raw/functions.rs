@@ -18,6 +18,7 @@ il2cpp_functions! {
     pub fn assembly_get_image(assembly: &Il2CppAssembly) -> Option<&'static Il2CppImage>;
     pub fn class_from_name(image: &Il2CppImage, namespace: *const c_char, name: *const c_char) -> Option<&'static Il2CppClass>;
     pub fn class_from_il2cpp_type(ty: &Il2CppType) -> &'static Il2CppClass;
+    pub fn class_from_system_type(ty: &Il2CppReflectionType) -> &'static Il2CppClass;
     pub fn class_is_assignable_from(class: &Il2CppClass, other_class: &Il2CppClass) -> bool;
     pub fn class_get_method_from_name(class: &Il2CppClass, name: *const c_char, args_count: u32) -> Option<&'static MethodInfo>;
     pub fn class_get_type(class: &Il2CppClass) -> &'static Il2CppType;
@@ -27,7 +28,7 @@ il2cpp_functions! {
     pub fn method_get_from_reflection(method: &Il2CppReflectionMethod) -> &'static MethodInfo;
     pub fn method_is_generic(method: &MethodInfo) -> bool;
     pub fn array_new(element_class: &Il2CppClass, length: usize) -> Option<&'static mut Il2CppArray>;
-    pub fn array_class_get(element_class: &Il2CppClass, rank: u32, bounded: bool) -> &'static Il2CppClass;
+    pub fn array_class_get(element_class: &Il2CppClass, rank: u32) -> &'static Il2CppClass;
     pub fn type_get_name(ty: &Il2CppType) -> *const c_char;
     pub fn type_get_object(ty: &Il2CppType) -> &'static mut Il2CppReflectionType;
     pub fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&mut Il2CppException>) -> Option<&'static mut Il2CppObject>;

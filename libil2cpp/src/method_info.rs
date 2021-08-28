@@ -1,15 +1,13 @@
 use std::borrow::Cow;
-use std::ffi::CStr;
+use std::ffi::{c_void, CStr};
 use std::mem::transmute;
 use std::ops::{Deref, DerefMut};
 use std::{fmt, slice};
 
-use crate::raw::{
-    self, METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL,
-};
+use crate::raw::{METHOD_ATTRIBUTE_ABSTRACT, METHOD_ATTRIBUTE_STATIC, METHOD_ATTRIBUTE_VIRTUAL};
 use crate::{
-    Arguments, Il2CppClass, Il2CppException, Il2CppObject, Il2CppType, ParameterInfo, Returned,
-    ThisArgument, WrapRaw,
+    raw, Arguments, Il2CppClass, Il2CppException, Il2CppObject, Il2CppType, ParameterInfo,
+    Returned, ThisArgument, WrapRaw,
 };
 
 #[cfg(feature = "unity2019")]
@@ -59,32 +57,33 @@ impl MethodInfo {
         A: Arguments<N>,
         R: Returned,
     {
-        let mut exception = None;
-        let r = raw::runtime_invoke(
-            self.raw(),
-            this.invokable(),
-            args.invokable().as_mut_ptr(),
-            &mut exception,
-        );
-        let r = transmute::<Option<&mut raw::Il2CppObject>, Option<&mut Il2CppObject>>(r);
-        match exception {
-            None => Ok(R::from_object(r)),
-            Some(e) => Err(Il2CppException::wrap_mut(e)),
+        match self.invoke_raw(this.invokable(), args.invokable().as_mut()) {
+            Ok(r) => Ok(R::from_object(transmute(r))),
+            Err(e) => Err(Il2CppException::wrap_mut(e)),
         }
     }
 
-    // pub fn make_generic(&self, types: Vec<&Il2CppClass>) -> &'static MethodInfo {
-    //     assert!(self.is_generic());
-    //     let types = types.iter().map(|class| class.t )
-    //     let types_ptrs = unsafe { transmute::<_, &[*mut
-    // Il2CppClass]>(types.as_slice()) };     let method_obj =
-    // self.reflection_object();     let generic_obj =
-    // method_obj.object().invoke("MakeGenericMethod", types_arr).unwrap();
-
-    // }
+    /// Invokes this method with the given raw instance and arguments, without
+    /// performing any checks
+    ///
+    /// # Safety
+    /// To be safe, the provided instance and arguments have to match the method
+    /// signature
+    pub unsafe fn invoke_raw<'ok, 'err>(
+        &self,
+        this: *mut c_void,
+        args: &mut [*mut c_void],
+    ) -> Result<Option<&'ok mut raw::Il2CppObject>, &'err mut raw::Il2CppException> {
+        let mut exception = None;
+        let r = raw::runtime_invoke(self.raw(), this, args.as_mut_ptr(), &mut exception);
+        match exception {
+            None => Ok(r),
+            Some(e) => Err(e),
+        }
+    }
 
     /// [`Il2CppReflectionMethod`] which represents the method
-    pub fn reflection_object(&self) -> &mut Il2CppReflectionMethod {
+    pub fn reflection_object(&self) -> &Il2CppReflectionMethod {
         unsafe { Il2CppReflectionMethod::wrap_mut(raw::method_get_object(self.raw(), None)) }
     }
 

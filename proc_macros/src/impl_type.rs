@@ -144,16 +144,6 @@ impl Input {
         quote!(#path :: Il2CppType)
     }
 
-    fn reflection_type_ty(&self) -> TokenStream2 {
-        let path = &self.path;
-        quote!(#path :: Il2CppReflectionType)
-    }
-
-    fn array_ty(&self) -> TokenStream2 {
-        let path = &self.path;
-        quote!(#path :: Il2CppArray)
-    }
-
     fn impl_header(&self) -> TokenStream2 {
         let type_trait = self.type_trait();
         let ty = &self.ty;
@@ -183,22 +173,18 @@ impl Input {
             return None;
         }
 
-        let reflection_type_ty = self.reflection_type_ty();
-        let type_trait = self.type_trait();
         let namespace = &self.namespace;
         let generic_class = format!("{}`{}", self.class, self.cs_generics.len());
-        let array_ty = self.array_ty();
         let generics = &self.cs_generics;
 
         Some(quote! {
             fn class() -> &'static #class_ty {
                 static CLASS: ::std::lazy::SyncOnceCell<&'static #class_ty> = ::std::lazy::SyncOnceCell::new();
                 CLASS.get_or_init(|| {
-                    let reflection_type_class = <#reflection_type_ty as #type_trait>::class();
-                    let generic_ty = #class_ty::find(#namespace, #generic_class).unwrap().ty().reflection_object();
-                    let generics = #array_ty::<#reflection_type_ty>::new([#(Some(<#generics as #type_trait>::class().ty().reflection_object())),*]);
-                    let reflection_type: &#reflection_type_ty = reflection_type_class.invoke("MakeGenericType", (generic_ty, generics)).unwrap();
-                    reflection_type.ty().class()
+                    #class_ty::find(#namespace, #generic_class).unwrap()
+                        .make_generic::<(#(#generics),*)>()
+                        .unwrap()
+                        .unwrap()
                 })
             }
         })

@@ -1,35 +1,10 @@
-use std::num::NonZeroUsize;
+use std::ops::Range;
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::spanned::Spanned;
-use syn::{Error, Expr, ExprLit, ExprRange, Index, Lit, RangeLimits};
+use syn::{Index, Result};
 
-pub fn expand(range: ExprRange) -> Result<TokenStream, Error> {
-    let span = range.span();
-
-    let start = range
-        .from
-        .ok_or_else(|| Error::new(span, "Tuple length range must have a lower bound"))?;
-    let start = parse_range_bound(*start)?;
-
-    let end = range
-        .to
-        .ok_or_else(|| Error::new(span, "Tuple length range must have an upper bound"))?;
-    let end = parse_range_bound(*end)?;
-
-    let range = match range.limits {
-        RangeLimits::HalfOpen(_) if end <= start => {
-            return Err(Error::new(span, "Tuple length range must be valid"))
-        }
-        RangeLimits::HalfOpen(_) => start..end,
-
-        RangeLimits::Closed(_) if end < start => {
-            return Err(Error::new(span, "Tuple length range must be valid"))
-        }
-        RangeLimits::Closed(_) => start..(end + 1),
-    };
-
+pub fn expand(range: Range<usize>) -> Result<TokenStream> {
     let mut ts = TokenStream::new();
     for n in range {
         let generic_params_argument = (1..=n).map(|n| format_ident!("A{}", n));
@@ -85,19 +60,4 @@ pub fn expand(range: ExprRange) -> Result<TokenStream, Error> {
     }
 
     Ok(ts)
-}
-
-fn parse_range_bound(bound: Expr) -> Result<usize, Error> {
-    let bound: NonZeroUsize = match bound {
-        syn::Expr::Lit(ExprLit {
-            lit: Lit::Int(n), ..
-        }) => n.base10_parse()?,
-        _ => {
-            return Err(Error::new(
-                bound.span(),
-                "Tuple length bound must be an integer",
-            ))
-        }
-    };
-    Ok(bound.get())
 }
