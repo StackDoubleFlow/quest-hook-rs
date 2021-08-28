@@ -26,6 +26,8 @@ pub fn expand(range: Range<usize>) -> Result<TokenStream> {
             where
                 #(#generics_where: Type),*
             {
+                const COUNT: usize = #n;
+
                 fn type_array() -> &'static mut raw::Il2CppArray {
                     let arr = unsafe { raw::array_new(Il2CppReflectionType::class().raw(), #n) }.unwrap();
                     unsafe {

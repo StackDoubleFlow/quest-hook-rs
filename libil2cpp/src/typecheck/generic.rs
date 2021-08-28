@@ -3,11 +3,16 @@ use crate::{raw, Il2CppReflectionType, Type, WrapRaw};
 /// Trait implemented for Rust types which can represent a list of C# generic
 /// arguments
 pub trait Generics {
+    /// Number of generic arguments
+    const COUNT: usize;
+
     /// Returns an array of `System.RuntimeType`s matching the generic arguments
     fn type_array() -> &'static mut raw::Il2CppArray;
 }
 
 impl<T: Type> Generics for T {
+    const COUNT: usize = 1;
+
     fn type_array() -> &'static mut raw::Il2CppArray {
         let arr = unsafe { raw::array_new(Il2CppReflectionType::class().raw(), 1) }.unwrap();
         unsafe {

@@ -71,6 +71,16 @@ impl Il2CppClass {
         None
     }
 
+    /// Finds a generic method by namespace, name and generic parameters
+    pub fn find_generic<G>(name: &str, namespace: &str) -> Option<&'static Self>
+    where
+        G: Generics,
+    {
+        Self::find(namespace, &format!("{}`{}", name, G::COUNT))?
+            .make_generic::<G>()
+            .unwrap()
+    }
+
     /// Find a method belonging to the class or its parents by name with type
     /// checking
     #[crate::instrument(level = "debug")]
