@@ -39,13 +39,13 @@ quest_hook = { git = &quot;https://github.com/StackDoubleFlow/quest-hook-rs.git&
 }
 
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">load</span>() {
-    <span class="ident">set_active_scene</span>.<span class="ident">install</span>().<span class="ident">unwrap</span>();
+<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">setup</span>() {
+    <span class="ident">quest_hook::setup</span>(<span class="string">&quot;hello world&quot;</span>);
 }
 
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">setup</span>() {
-    <span class="ident">quest_hook::setup</span>(<span class="string">&quot;hello world&quot;</span>);
+<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">load</span>() {
+    <span class="ident">set_active_scene</span>.<span class="ident">install</span>().<span class="ident">unwrap</span>();
 }</code></pre></div>
 <p>Check out the <a href="./examples/"><code>examples</code></a> directory for more examples.</p>
 <h2 id="cargo-features" class="section-header"><a href="#cargo-features">Cargo features</a></h2>

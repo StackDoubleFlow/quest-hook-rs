@@ -296,6 +296,25 @@
 <span id="296">296</span>
 <span id="297">297</span>
 <span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">box_patterns</span>, <span class="ident">extend_one</span>)]</span>
 <span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://stackdoubleflow.github.io/quest-hook-rs/quest_hook_proc_macros&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
@@ -451,7 +470,7 @@
 <span class="doccomment">/// unsafe_impl_reference_type!(in libil2cpp for List&lt;T&gt; =&gt; System.Collections.Generic.List&lt;T&gt;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Finally, a class getter can be provided manually.</span>
+<span class="doccomment">/// A class getter can be provided manually.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```ignore</span>
 <span class="doccomment">/// #![feature(generic_associated_types)]</span>
@@ -468,6 +487,25 @@
 <span class="doccomment">/// });</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # fn my_class_getter() -&gt; &amp;&#39;static libil2cpp::Il2CppClass { unimplemented!() }</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Finally, the namespace and class name can be provided as string literals. In</span>
+<span class="doccomment">/// this case, the macro will no change them in any way regardless of generic</span>
+<span class="doccomment">/// parameters.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```ignore</span>
+<span class="doccomment">/// #![feature(generic_associated_types, once_cell)]</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// use libil2cpp::{Il2CppArray, Il2CppObject, Type};</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// #[repr(C)]</span>
+<span class="doccomment">/// struct List&lt;T: Type&gt; {</span>
+<span class="doccomment">///     object: Il2CppObject,</span>
+<span class="doccomment">///     items: *mut Il2CppArray&lt;T&gt;,</span>
+<span class="doccomment">///     size: i32,</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// unsafe_impl_reference_type!(in libil2cpp for List&lt;T&gt; =&gt; &quot;System.Collections.Generic&quot;.&quot;List`1&quot;&lt;T&gt;);</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">proc_macro</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unsafe_impl_reference_type</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
