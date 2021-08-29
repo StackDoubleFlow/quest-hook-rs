@@ -72,7 +72,7 @@ impl Il2CppClass {
     }
 
     /// Finds a generic method by namespace, name and generic parameters
-    pub fn find_generic<G>(name: &str, namespace: &str) -> Option<&'static Self>
+    pub fn find_generic<G>(namespace: &str, name: &str) -> Option<&'static Self>
     where
         G: Generics,
     {

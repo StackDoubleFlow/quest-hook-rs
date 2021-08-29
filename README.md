@@ -52,13 +52,13 @@ fn set_active_scene(scene: &mut Il2CppObject) -> bool {
 }
 
 #[no_mangle]
-pub extern "C" fn load() {
-    set_active_scene.install().unwrap();
+pub extern "C" fn setup() {
+    quest_hook::setup("hello world");
 }
 
 #[no_mangle]
-pub extern "C" fn setup() {
-    quest_hook::setup("hello world");
+pub extern "C" fn load() {
+    set_active_scene.install().unwrap();
 }
 ```
 

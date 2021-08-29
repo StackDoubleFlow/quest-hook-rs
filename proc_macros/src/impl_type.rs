@@ -5,8 +5,8 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::token::Brace;
 use syn::{
-    AngleBracketedGenericArguments, Block, Error, GenericArgument, Ident, Path, PathArguments,
-    Result, Token, Type, TypeGroup, TypeParen, TypePath,
+    AngleBracketedGenericArguments, Block, Error, GenericArgument, Ident, LitStr, Path,
+    PathArguments, Result, Token, Type, TypeGroup, TypeParen, TypePath,
 };
 
 pub struct Input {
@@ -19,6 +19,11 @@ pub struct Input {
     class_getter: Option<Block>,
 }
 
+enum NamespaceAndClass {
+    Ident(Punctuated<Ident, Token![.]>),
+    Literal { namespace: LitStr, class: LitStr },
+}
+
 impl Parse for Input {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         input.parse::<Token![in]>()?;
@@ -29,8 +34,15 @@ impl Parse for Input {
 
         input.parse::<Token![=>]>()?;
 
-        let namespace_and_class: Punctuated<Ident, Token![.]> =
-            Punctuated::parse_separated_nonempty(input)?;
+        let namespace_and_class = if input.peek(Ident) {
+            NamespaceAndClass::Ident(Punctuated::parse_separated_nonempty(input)?)
+        } else {
+            let namespace = input.parse()?;
+            input.parse::<Token![.]>()?;
+            let class = input.parse()?;
+            NamespaceAndClass::Literal { namespace, class }
+        };
+
         let generics: Option<AngleBracketedGenericArguments> = if input.peek(Token![<]) {
             Some(input.parse()?)
         } else {
@@ -42,17 +54,6 @@ impl Parse for Input {
         } else {
             None
         };
-
-        let namespace_and_class: Vec<Ident> = namespace_and_class.into_iter().collect();
-        let (class, namespace) = namespace_and_class
-            .split_last()
-            .ok_or_else(|| Error::new(Span::call_site(), "no C# class specified"))?;
-        let namespace = namespace
-            .iter()
-            .map(Ident::to_string)
-            .collect::<Vec<_>>()
-            .join(".");
-        let class = class.to_string();
 
         let rust_generics = extract_generics(&mut ty)
             .map(collect_generics)
@@ -73,6 +74,26 @@ impl Parse for Input {
         if let Some(g) = cs_generics.iter().find(|g| !rust_generics.contains(g)) {
             return Err(Error::new_spanned(g, "mismatched Rust and C# generics"));
         }
+
+        let (namespace, class) = match namespace_and_class {
+            NamespaceAndClass::Ident(punctuated) => {
+                let namespace_and_class: Vec<Ident> = punctuated.into_iter().collect();
+                let (class, namespace) = namespace_and_class
+                    .split_last()
+                    .ok_or_else(|| Error::new(Span::call_site(), "no C# class specified"))?;
+                let namespace = namespace
+                    .iter()
+                    .map(Ident::to_string)
+                    .collect::<Vec<_>>()
+                    .join(".");
+                let class = match cs_generics.len() {
+                    0 => class.to_string(),
+                    n => format!("{}`{}", class, n),
+                };
+                (namespace, class)
+            }
+            NamespaceAndClass::Literal { namespace, class } => (namespace.value(), class.value()),
+        };
 
         Ok(Self {
             path,
@@ -174,14 +195,14 @@ impl Input {
         }
 
         let namespace = &self.namespace;
-        let generic_class = format!("{}`{}", self.class, self.cs_generics.len());
+        let class = &self.class;
         let generics = &self.cs_generics;
 
         Some(quote! {
             fn class() -> &'static #class_ty {
                 static CLASS: ::std::lazy::SyncOnceCell<&'static #class_ty> = ::std::lazy::SyncOnceCell::new();
                 CLASS.get_or_init(|| {
-                    #class_ty::find(#namespace, #generic_class).unwrap()
+                    #class_ty::find(#namespace, #class).unwrap()
                         .make_generic::<(#(#generics),*)>()
                         .unwrap()
                         .unwrap()

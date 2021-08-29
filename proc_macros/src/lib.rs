@@ -153,7 +153,7 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// unsafe_impl_reference_type!(in libil2cpp for List<T> => System.Collections.Generic.List<T>);
 /// ```
 ///
-/// Finally, a class getter can be provided manually.
+/// A class getter can be provided manually.
 ///
 /// ```ignore
 /// #![feature(generic_associated_types)]
@@ -170,6 +170,25 @@ pub fn hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// });
 ///
 /// # fn my_class_getter() -> &'static libil2cpp::Il2CppClass { unimplemented!() }
+/// ```
+///
+/// Finally, the namespace and class name can be provided as string literals. In
+/// this case, the macro will no change them in any way regardless of generic
+/// parameters.
+///
+/// ```ignore
+/// #![feature(generic_associated_types, once_cell)]
+///
+/// use libil2cpp::{Il2CppArray, Il2CppObject, Type};
+///
+/// #[repr(C)]
+/// struct List<T: Type> {
+///     object: Il2CppObject,
+///     items: *mut Il2CppArray<T>,
+///     size: i32,
+/// }
+///
+/// unsafe_impl_reference_type!(in libil2cpp for List<T> => "System.Collections.Generic"."List`1"<T>);
 /// ```
 #[proc_macro]
 pub fn unsafe_impl_reference_type(input: TokenStream) -> TokenStream {
