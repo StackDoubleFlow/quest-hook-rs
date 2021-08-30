@@ -11,4 +11,4 @@ use crate::{
 };
 
 quest_hook_proc_macros::impl_arguments_parameters!(1..=16);
-quest_hook_proc_macros::impl_generics!(1..=8);
+quest_hook_proc_macros::impl_generics!(1..=16);
