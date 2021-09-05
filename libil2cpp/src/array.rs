@@ -68,6 +68,7 @@ unsafe impl<T: Type> WrapRaw for Il2CppArray<T> {
 
 unsafe impl<T: Type> Type for Il2CppArray<T> {
     type Held<'a> = Option<&'a mut Self>;
+    type HeldRaw = *mut Self;
 
     const NAMESPACE: &'static str = "System";
     const CLASS_NAME: &'static str = "Array";

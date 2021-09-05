@@ -119,9 +119,11 @@ pub fn expand(input: &Input, semantics: Semantics) -> TokenStream {
     let held = match semantics {
         Semantics::Reference => quote! {
             type Held<'a> = ::std::option::Option<&'a mut Self>;
+            type HeldRaw = *mut Self;
         },
         Semantics::Value => quote! {
             type Held<'a> = Self;
+            type HeldRaw = Self;
         },
     };
 

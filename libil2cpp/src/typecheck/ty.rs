@@ -11,6 +11,8 @@ use crate::{
 pub unsafe trait Type: 'static {
     /// Type of the values held in variables of the type
     type Held<'a>;
+    /// Non-generic version of [`Held`].
+    type HeldRaw;
 
     /// Namespace containingthe class the type represents
     const NAMESPACE: &'static str;
