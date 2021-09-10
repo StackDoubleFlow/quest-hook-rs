@@ -14,4 +14,3 @@ detour = "0.8"
 
 [build-dependencies]
 cc = "1"
-cfg-if = "1"
