@@ -14,7 +14,7 @@ use crate::raw::{
     Il2CppTypeEnum_IL2CPP_TYPE_U2, Il2CppTypeEnum_IL2CPP_TYPE_U4, Il2CppTypeEnum_IL2CPP_TYPE_U8,
     Il2CppTypeEnum_IL2CPP_TYPE_VOID,
 };
-use crate::{raw, Generics, Il2CppArray, Il2CppClass, Il2CppException, Il2CppObject, WrapRaw};
+use crate::{raw, Generics, Il2CppClass, Il2CppException, Il2CppObject, WrapRaw};
 
 /// An il2cpp type
 #[repr(transparent)]
@@ -176,9 +176,7 @@ impl Il2CppReflectionType {
         let generics = G::type_array();
         let make_generic = self
             .class()
-            .find_static_method::<(&mut Self, &mut Il2CppArray<Self>), &mut Self, 2>(
-                "MakeGenericType",
-            )
+            .find_method_unchecked("MakeGenericType", 2)
             .unwrap();
         let ret = unsafe {
             make_generic.invoke_raw(
