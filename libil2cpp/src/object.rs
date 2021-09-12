@@ -1,4 +1,5 @@
 use std::fmt;
+use std::ops::DerefMut;
 
 use crate::{raw, Argument, Arguments, Il2CppClass, Il2CppException, Returned, Type, WrapRaw};
 
@@ -88,4 +89,27 @@ impl fmt::Debug for Il2CppObject {
             .field("class", self.class())
             .finish()
     }
+}
+
+/// Helper trait for reference types which can be dereferenced to an object
+#[rustfmt::skip]
+pub trait ObjectExt:
+    for<'a> Type<Held<'a> = Option<&'a mut Self>> + DerefMut<Target = Il2CppObject> + Sized
+{
+    /// Creates a new object using the constructor taking the given arguments
+    fn new<A, const N: usize>(args: A) -> &'static mut Self
+    where
+        A: Arguments<N>,
+    {
+        let object: &mut Self = Self::class().instanciate();
+        object.invoke_void(".ctor", args).unwrap();
+        object
+    }
+}
+#[rustfmt::skip]
+impl<T> ObjectExt for T
+where
+    for<'a> T: Type<Held<'a> = Option<&'a mut Self>>,
+    T: DerefMut<Target = Il2CppObject>,
+{
 }

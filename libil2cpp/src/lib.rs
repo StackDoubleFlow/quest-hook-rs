@@ -110,7 +110,7 @@ pub use class::{FindMethodError, Il2CppClass};
 pub use exception::Il2CppException;
 pub use field_info::FieldInfo;
 pub use method_info::{Il2CppReflectionMethod, MethodInfo};
-pub use object::Il2CppObject;
+pub use object::{Il2CppObject, ObjectExt};
 pub use parameter_info::ParameterInfo;
 pub use raw::{unbox, WrapRaw};
 pub use string::Il2CppString;

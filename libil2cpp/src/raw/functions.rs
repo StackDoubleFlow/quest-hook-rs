@@ -35,4 +35,5 @@ il2cpp_functions! {
     pub fn string_new_len(s: *const c_char, len: u32) -> &'static mut Il2CppString;
     pub fn raise_exception(exc: &Il2CppException) -> !;
     pub fn resolve_icall(name: *const c_char) -> Il2CppMethodPointer;
+    pub fn object_new(class: &Il2CppClass) -> &'static mut Il2CppObject;
 }

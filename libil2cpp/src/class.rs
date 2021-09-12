@@ -1,10 +1,11 @@
 use std::borrow::Cow;
 use std::ffi::{CStr, CString};
+use std::mem::transmute;
 use std::{fmt, ptr, slice};
 
 use crate::{
     raw, Arguments, FieldInfo, Generics, Il2CppException, Il2CppType, MethodInfo, Parameters,
-    Return, Returned, ThisParameter, WrapRaw,
+    Return, Returned, ThisParameter, Type, WrapRaw,
 };
 
 #[cfg(feature = "unity2019")]
@@ -277,6 +278,19 @@ impl Il2CppClass {
             })),
             Ok(None) => Ok(None),
             Err(e) => Err(e),
+        }
+    }
+
+    /// Instanciates an object of the class
+    #[rustfmt::skip]
+    pub fn instanciate<T>(&self) -> &'static mut T
+    where
+        for<'a> T: Type<Held<'a> = Option<&'a mut T>>,
+    {
+        assert!(T::class() == self);
+        unsafe {
+            let object = raw::object_new(self.raw());
+            transmute(object)
         }
     }
 
