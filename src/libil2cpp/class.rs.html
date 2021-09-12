@@ -524,13 +524,28 @@
 <span id="524">524</span>
 <span id="525">525</span>
 <span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::ffi</span>::{<span class="ident">CStr</span>, <span class="ident">CString</span>};
+<span class="kw">use</span> <span class="ident">std::mem::transmute</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">ptr</span>, <span class="ident">slice</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">raw</span>, <span class="ident">Arguments</span>, <span class="ident">FieldInfo</span>, <span class="ident">Generics</span>, <span class="ident">Il2CppException</span>, <span class="ident">Il2CppType</span>, <span class="ident">MethodInfo</span>, <span class="ident">Parameters</span>,
-    <span class="ident">Return</span>, <span class="ident">Returned</span>, <span class="ident">ThisParameter</span>, <span class="ident">WrapRaw</span>,
+    <span class="ident">Return</span>, <span class="ident">Returned</span>, <span class="ident">ThisParameter</span>, <span class="ident">Type</span>, <span class="ident">WrapRaw</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unity2019&quot;</span>)]</span>
@@ -803,6 +818,19 @@
             })),
             <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+        }
+    }
+
+    <span class="doccomment">/// Instanciates an object of the class</span>
+    <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">instanciate</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> <span class="ident">T</span>
+    <span class="kw">where</span>
+        <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">T</span>: <span class="ident">Type</span><span class="op">&lt;</span><span class="ident">Held</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    {
+        <span class="macro">assert!</span>(<span class="ident">T::class</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>);
+        <span class="kw">unsafe</span> {
+            <span class="kw">let</span> <span class="ident">object</span> <span class="op">=</span> <span class="ident">raw::object_new</span>(<span class="self">self</span>.<span class="ident">raw</span>());
+            <span class="ident">transmute</span>(<span class="ident">object</span>)
         }
     }
 
