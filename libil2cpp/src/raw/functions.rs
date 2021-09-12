@@ -8,8 +8,8 @@ use std::os::raw::c_char;
 
 use super::{
     FieldInfo, Il2CppArray, Il2CppAssembly, Il2CppClass, Il2CppDomain, Il2CppException,
-    Il2CppImage, Il2CppObject, Il2CppReflectionMethod, Il2CppReflectionType, Il2CppString,
-    Il2CppType, MethodInfo,
+    Il2CppImage, Il2CppMethodPointer, Il2CppObject, Il2CppReflectionMethod, Il2CppReflectionType,
+    Il2CppString, Il2CppType, MethodInfo,
 };
 
 il2cpp_functions! {
@@ -32,6 +32,7 @@ il2cpp_functions! {
     pub fn type_get_name(ty: &Il2CppType) -> *const c_char;
     pub fn type_get_object(ty: &Il2CppType) -> &'static mut Il2CppReflectionType;
     pub fn runtime_invoke(method: &MethodInfo, instance: *mut c_void, params: *mut *mut c_void, exception: &mut Option<&mut Il2CppException>) -> Option<&'static mut Il2CppObject>;
-    pub fn string_new_len(s: *const char, len: u32) -> &'static mut Il2CppString;
+    pub fn string_new_len(s: *const c_char, len: u32) -> &'static mut Il2CppString;
     pub fn raise_exception(exc: &Il2CppException) -> !;
+    pub fn resolve_icall(name: *const c_char) -> Il2CppMethodPointer;
 }
