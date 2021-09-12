@@ -176,7 +176,9 @@ impl Il2CppReflectionType {
         let generics = G::type_array();
         let make_generic = self
             .class()
-            .find_static_method::<(&mut Self, &mut Il2CppArray<Self>), &mut Self, 2>("MakeGeneric")
+            .find_static_method::<(&mut Self, &mut Il2CppArray<Self>), &mut Self, 2>(
+                "MakeGenericType",
+            )
             .unwrap();
         let ret = unsafe {
             make_generic.invoke_raw(
