@@ -7,6 +7,7 @@ fn main() {
     } else if target == "armv7-linux-androideabi" {
         cc::Build::new()
             .file("beatsaber-hook/src/inline-hook/inlineHook.c")
+            .include("beatsaber-hook/shared/inline-hook")
             .compile("inline_hook");
     }
 }
