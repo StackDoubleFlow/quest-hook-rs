@@ -28,7 +28,11 @@ tracing-android = { git = "https://github.com/raftario/tracing-android", optiona
 thiserror = "1"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-tracing-subscriber = { version = "0.2", optional = true }
+tracing-subscriber = { version = "0.2", features = [
+    "fmt",
+    "env-filter",
+    "smallvec",
+], default-features = false, optional = true }
 
 [features]
 default = ["util", "cache"]
