@@ -283,7 +283,7 @@ impl Il2CppClass {
 
     /// Instanciates an object of the class
     #[rustfmt::skip]
-    pub fn instanciate<T>(&self) -> &'static mut T
+    pub fn instantiate<T>(&self) -> &'static mut T
     where
         for<'a> T: Type<Held<'a> = Option<&'a mut T>>,
     {

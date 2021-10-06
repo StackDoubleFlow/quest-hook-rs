@@ -101,7 +101,7 @@ pub trait ObjectExt:
     where
         A: Arguments<N>,
     {
-        let object: &mut Self = Self::class().instanciate();
+        let object: &mut Self = Self::class().instantiate();
         object.invoke_void(".ctor", args).unwrap();
         object
     }
