@@ -1,5 +1,3 @@
-cargo-features = ["edition2021"]
-
 [package]
 name = "quest_hook_proc_macros"
 version = "0.1.0"
