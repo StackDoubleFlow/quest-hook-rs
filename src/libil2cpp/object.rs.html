@@ -216,7 +216,7 @@
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">Arguments</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">object</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::class</span>().<span class="ident">instanciate</span>();
+        <span class="kw">let</span> <span class="ident">object</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::class</span>().<span class="ident">instantiate</span>();
         <span class="ident">object</span>.<span class="ident">invoke_void</span>(<span class="string">&quot;.ctor&quot;</span>, <span class="ident">args</span>).<span class="ident">unwrap</span>();
         <span class="ident">object</span>
     }
