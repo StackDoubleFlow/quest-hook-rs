@@ -20,13 +20,13 @@ cfg-if = "1"
 tracing = { version = "0.1", features = [
     "std",
 ], default-features = false, optional = true }
-tracing-subscriber = { version = "0.2", default-features = false, optional = true }
+tracing-subscriber = { version = "0.3", default-features = false, optional = true }
 tracing-error = { version = "0.1", default-features = false, optional = true }
-tracing-android = { git = "https://github.com/raftario/tracing-android", optional = true }
+paranoid-android = { version = "0.1.2", optional = true }
 thiserror = "1"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-tracing-subscriber = { version = "0.2", features = [
+tracing-subscriber = { version = "0.3", features = [
     "fmt",
     "env-filter",
     "smallvec",
@@ -36,7 +36,7 @@ tracing-subscriber = { version = "0.2", features = [
 default = ["util", "cache"]
 unity2019 = ["libil2cpp/unity2019"]
 unity2018 = ["libil2cpp/unity2018"]
-util = ["tracing", "tracing-error", "tracing-subscriber", "tracing-android"]
+util = ["tracing", "tracing-error", "tracing-subscriber", "paranoid-android"]
 cache = ["libil2cpp/cache"]
 serde = ["libil2cpp/serde"]
 trace = ["libil2cpp/trace"]
