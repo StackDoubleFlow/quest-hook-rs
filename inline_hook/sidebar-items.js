@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Hook","A function hook that works across most platforms"]]});
+window.SIDEBAR_ITEMS = {"struct":[["Hook","A function hook that works across most platforms"]]};
