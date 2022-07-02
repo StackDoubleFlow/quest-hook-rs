@@ -3,7 +3,7 @@
 use libloading::{Library, Symbol};
 use quest_hook_proc_macros::il2cpp_functions;
 use std::ffi::c_void;
-use std::lazy::{SyncLazy, SyncOnceCell};
+use std::sync::{LazyLock, OnceLock};
 use std::os::raw::c_char;
 
 use super::{

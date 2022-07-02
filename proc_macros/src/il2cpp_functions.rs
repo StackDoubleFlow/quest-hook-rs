@@ -17,8 +17,8 @@ impl Parse for Input {
 
 pub fn expand(input: &Input) -> Result<TokenStream, Error> {
     let mut ts = quote! {
-        static LIBIL2CPP: SyncLazy<Library> =
-            SyncLazy::new(|| unsafe { Library::new("libil2cpp.so") }.unwrap());
+        static LIBIL2CPP: LazyLock<Library> =
+            LazyLock::new(|| unsafe { Library::new("libil2cpp.so") }.unwrap());
     };
 
     for ForeignItemFn {
@@ -53,8 +53,8 @@ pub fn expand(input: &Input) -> Result<TokenStream, Error> {
         let wrapper = quote! {
             #(#attrs) *
             #vis unsafe fn #ident(#(#inputs),*) #output {
-                static FN: SyncOnceCell<Symbol<'static, unsafe extern "C" fn(#(#input_tys),*) #output>> =
-                    SyncOnceCell::new();
+                static FN: OnceLock<Symbol<'static, unsafe extern "C" fn(#(#input_tys),*) #output>> =
+                    OnceLock::new();
                 let fun = FN.get_or_init(|| unsafe { LIBIL2CPP.get(#name) }.unwrap());
                 (**fun)(#(#input_pats),*)
             }

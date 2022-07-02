@@ -1,18 +1,18 @@
-use std::lazy::SyncOnceCell;
+use std::sync::OnceLock;
 
 use detour::RawDetour;
 
 /// A function hook that works across most platforms
 #[derive(Debug)]
 pub struct Hook {
-    detour: SyncOnceCell<RawDetour>,
+    detour: OnceLock<RawDetour>,
 }
 
 impl Hook {
     /// Creates a new, unitialized hook
     pub const fn new() -> Self {
         Self {
-            detour: SyncOnceCell::new(),
+            detour: OnceLock::new(),
         }
     }
 

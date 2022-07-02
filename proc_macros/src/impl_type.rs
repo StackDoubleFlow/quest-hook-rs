@@ -202,7 +202,7 @@ impl Input {
 
         Some(quote! {
             fn class() -> &'static #class_ty {
-                static CLASS: ::std::lazy::SyncOnceCell<&'static #class_ty> = ::std::lazy::SyncOnceCell::new();
+                static CLASS: ::std::sync::OnceLock<&'static #class_ty> = ::std::sync::OnceLock::new();
                 CLASS.get_or_init(|| {
                     #class_ty::find(#namespace, #class).unwrap()
                         .make_generic::<(#(#generics),*)>()
