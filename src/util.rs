@@ -12,7 +12,7 @@ use tracing_error::SpanTrace;
 pub fn setup(tag: impl ToString) {
     cfg_if! {
         if #[cfg(target_os = "android")] {
-            tracing_android::init(tag);
+            paranoid_android::init(tag);
         } else {
             let env = format!("LOG_{}", tag.to_string().to_ascii_uppercase());
             let filter = tracing_subscriber::filter::EnvFilter::from_env(env);
